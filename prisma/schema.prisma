@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// TODO: Add models later
+// model Game {
+//   id        String   @id @default(cuid())
+//   name      String
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+// model Session {
+//   id        String   @id @default(cuid())
+//   gameId    String
+//   startTime DateTime
+//   endTime   DateTime?
+//   duration  Int?     // in minutes
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+// model Limit {
+//   id        String   @id @default(cuid())
+//   gameId    String
+//   dailyLimit Int     // in minutes
+//   weeklyLimit Int?   // in minutes
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
+

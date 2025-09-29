@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Build outputs
+dist/
+build/
+out/
+
+# Electron
+app/
+release/
+*.dmg
+*.exe
+*.deb
+*.rpm
+*.AppImage
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
