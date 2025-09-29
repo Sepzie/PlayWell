@@ -11,13 +11,14 @@ import Settings from './pages/Settings.jsx';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/limits" element={<Limits />} />
-        <Route path="/stats" element={<Stats />} />
-        <Route path="/history" element={<History />} />
-        <Route path="/settings" element={<Settings />} />
+        <Route path="/" element={<App />}>
+          <Route index element={<Home />} />
+          <Route path="limits" element={<Limits />} />
+          <Route path="stats" element={<Stats />} />
+          <Route path="history" element={<History />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

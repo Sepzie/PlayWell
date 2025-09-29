@@ -19,15 +19,28 @@ function createWindow() {
   });
 
   // Load the app
-  const isDev = process.env.NODE_ENV === 'development';
+  const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+  console.log('isDev:', isDev, 'NODE_ENV:', process.env.NODE_ENV, 'isPackaged:', app.isPackaged);
+  
   if (isDev) {
     // In development, load from Vite dev server
+    console.log('Loading from Vite dev server: http://localhost:5173');
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
   } else {
     // In production, load the built files
+    console.log('Loading from built files');
     mainWindow.loadFile(path.join(__dirname, 'dist/index.html'));
   }
+
+  // Handle page load events
+  mainWindow.webContents.on('did-finish-load', () => {
+    console.log('Page finished loading');
+  });
+
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    console.log('Failed to load page:', errorCode, errorDescription, validatedURL);
+  });
 
   // Emitted when the window is closed
   mainWindow.on('closed', () => {

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Outlet } from 'react-router-dom';
 import Nav from './components/Nav.jsx';
 
 function App() {
@@ -6,7 +7,7 @@ function App() {
     <div className="app">
       <Nav />
       <main className="main-content">
-        {/* Routes will be rendered here */}
+        <Outlet />
       </main>
     </div>
   );
