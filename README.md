@@ -44,7 +44,7 @@ cd PlayWell
 npm install
 ```
 
-### 2. Database Setup
+### 2. Database Setup (CAN BE SKIPPED FOR NOW)
 1. Install and start PostgreSQL
 2. Create a database for the project
 3. Copy environment file:
@@ -56,7 +56,7 @@ npm install
    DATABASE_URL="postgresql://username:password@localhost:5432/playwell"
    ```
 
-### 3. Initialize Database
+### 3. Initialize Database (CAN BE SKIPPED FOR NOW)
 ```bash
 # Generate Prisma client
 npm run prisma:generate
