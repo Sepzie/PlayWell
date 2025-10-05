@@ -1,0 +1,102 @@
+body { 
+    font-family: sans-serif; 
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.main-container {
+    width: 350px;
+    height: 450px;
+    margin: 0; 
+    background-color: white; 
+    border-radius: 20px;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    justify-items: center;
+    align-items: center;
+    place-items: center;
+}
+
+.title {
+    text-align: center;
+    padding: 20px;
+    user-select: none; 
+    grid-area: 1 / 2 / 2 / 8; 
+}
+
+.text {
+    margin: auto;
+    color: #9E9E9E;
+}
+
+footer {
+    position: fixed;
+    height: 25px;
+    background-color: #2E7D32;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    margin-bottom: 0px;  
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.timer-button-container {
+    text-align: center;
+    grid-area: 5 / 2 / 9 / 8;
+}
+
+.timer-button {
+    color: white;
+    font-weight: bold;
+    width: 125px;
+    background-color: #2E7D32;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    cursor: pointer;  
+}
+
+.circle-timer-container {
+  position: relative;
+  width: 200px; 
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  grid-area: 2 / 2 / 5 / 8; 
+}
+
+.circle-timer-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.circle-timer-background {
+  fill: none;
+  stroke: #e0e0e0; 
+  stroke-width: 8px;
+}
+
+.circle-timer-progress {
+  fill: none;
+  stroke: #2E7D32; 
+  stroke-width: 8px;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear; 
+}
+
+.circle-timer-text {
+  position: relative;
+  font-size: 2em;
+  font-weight: lighter;
+  color: #2E7D32;
+  user-select: none; 
+}

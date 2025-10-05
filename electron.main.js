@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { startBackground } = require('./background/index.js');
+const TrayManager = require('./electron.tray.js'); 
 
 // Keep a global reference of the window object
 let mainWindow;
@@ -51,7 +52,11 @@ function createWindow() {
 // This method will be called when Electron has finished initialization
 app.whenReady().then(() => {
   createWindow();
-  
+
+  // Initialize TrayManager and make the tray
+  trayManager = new TrayManager('icon.jpg'); //TODO need tray icon
+  trayManager.createTray();
+
   // Start background process
   startBackground();
 
@@ -79,5 +84,3 @@ ipcMain.handle('app-version', () => {
 //   openAtLogin: true,
 //   openAsHidden: true
 // });
-
-
