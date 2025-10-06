@@ -1,0 +1,56 @@
+#logo {
+    width: 100%;
+    height: auto;
+}
+
+.nav {
+    background-color: #2E7D32;
+    height: 100%;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+
+li {
+    height: 30%;
+    display: flex;
+    justify-content: center;
+}
+
+.nav-link {
+    text-align: center;
+    padding-top: 5%;
+    padding-bottom: 5%;
+    font-size: 1.5rem;
+    text-decoration: none;
+    color: #E8F5E9;
+    font-family: 'system-ui';
+    width: 80%;
+    height: 100%;
+    transition: background-color 0.25s ease-in-out;
+    border-radius: 5px;
+}
+
+.nav-link:hover {
+    background-color: #549a57;
+}
+
+.nav-link:active {
+    background-color: #81C784;
+}
+
+#current-location {
+    background-color: #81C784;
+}
+
+#current-location:hover {
+    background-color: #549a57;
+}
+
+#current-location:active {
+    background-color: #81C784;
+}
