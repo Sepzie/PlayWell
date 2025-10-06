@@ -2,6 +2,7 @@ import React from 'react';
 import "/src/css/Home.css";
 import { Chart as ChartJS } from "chart.js/auto"
 import { Bar } from "react-chartjs-2"
+import Top3GamesBarChart from '/src/components/Top3GamesBarChart';
 
 function Home() {
   return (
@@ -12,25 +13,7 @@ function Home() {
         <h2>13 Hours</h2>
         <p>today</p>
       </div>
-      <div className="bar-chart">
-        <Bar
-          data={{
-            labels: ["Game 1", "Game 2", "Game 3"],
-            datasets: [
-              {
-                label: "Time Played (Minutes)",
-                data: [400, 300, 80],
-                borderRadius: 5,
-                barThickness: 30,
-              },
-            ],
-            
-          }}
-          options={{
-            indexAxis: 'y',
-          }}
-        />
-      </div>
+      <Top3GamesBarChart />
     </div>
   );
 }
