@@ -7,13 +7,24 @@ p {
     text-align: center;
     font-family: 'system-ui';
     margin: 0;
-    font-size: 2.25rem;
+    font-size: 1.5rem;
 }
 
 h2 {
     text-align: center;
     font-family: 'system-ui';
-    font-size: 8rem;
+    font-size: 4rem;
     font-weight: 500;
     margin: 0;
+}
+
+.hours-played {
+    height: 25vh;
+}
+
+.bar-chart {
+    padding-top: 3%;
+    height: 50vh;
+    justify-content: center;
+    display: flex;
 }
