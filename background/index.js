@@ -6,6 +6,8 @@ const { execFile } = require('node:child_process');
 
 
 function startBackground() {
+  connectDb();
+
   console.log('Starting background process...');
   var interval_seconds = 3;
   setInterval(() => {
@@ -24,7 +26,7 @@ function stopBackground() {
   
   // TODO: Implement proper cleanup
   // stopTracking();
-  // disconnectDb();
+  disconnectDb();
   
   console.log('Background process stopped (placeholder)');
 }

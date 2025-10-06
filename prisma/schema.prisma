@@ -10,6 +10,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+model User {
+  id Int @id @default(autoincrement())
+  username String
+}
 // TODO: Add models later
 // model Game {
 //   id        String   @id @default(cuid())

@@ -1,12 +1,22 @@
 const { getPrisma } = require('./prismaClient.js');
+const { PrismaClient } = require('@prisma/client');
 
-function connectDb() {
-  // TODO: Implement database connection logic
-  console.log('Database connection started (placeholder)');
+async function connectDb() {
+  console.log('Database connection started');
   
   // Example of how this will be implemented:
-  // const prisma = getPrisma();
-  // return prisma.$connect();
+  const prisma = await new PrismaClient();
+  await prisma.$connect();
+
+  // const user = await prisma.user.create({
+  //   data: {
+  //     username: 'Elsa Prisma',
+  //   },
+  // })
+
+  // TODO: Add async/await success/fail/error handling or the ES6 equivalent with await
+  res = await prisma.user.findMany();
+  console.log("RESULTS: ", res);
 }
 
 function disconnectDb() {
