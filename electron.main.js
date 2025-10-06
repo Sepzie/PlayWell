@@ -1,7 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const { startBackground } = require('./background/index.js');
 const TrayManager = require('./electron.tray.js'); 
+const { startBackground, stopBackground } = require('./background/index.js');
 
 // Keep a global reference of the window object
 let mainWindow;
@@ -70,6 +70,7 @@ app.whenReady().then(() => {
 // Quit when all windows are closed
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
+    stopBackground();
     app.quit();
   }
 });

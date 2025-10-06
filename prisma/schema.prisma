@@ -8,33 +8,72 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // relationMode = "prisma"
 }
 
-// TODO: Add models later
-// model Game {
-//   id        String   @id @default(cuid())
-//   name      String
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
 
-// model Session {
-//   id        String   @id @default(cuid())
-//   gameId    String
-//   startTime DateTime
-//   endTime   DateTime?
-//   duration  Int?     // in minutes
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
+model User {
+  id Int @id @default(autoincrement()) 
+  username String    @unique
+  ownedGames Game[]  @relation("OwnedGames") // fk
+  doneSessions GamingSession[] @relation("SessionsDone") // fk
+  limits     Limit[] @relation("Limits")
+}
 
-// model Limit {
-//   id        String   @id @default(cuid())
-//   gameId    String
-//   dailyLimit Int     // in minutes
-//   weeklyLimit Int?   // in minutes
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
+model Game {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  
+  // FK
+  owner     User     @relation("OwnedGames", fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  
+  location  String
+  platform  String
+  category  Genre
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  partOfSessions GamingSession[] @relation("PartOfSessions") // fk
+  limits    Limit[]  @relation("GameLimits") // fk
+}
+
+enum Genre {
+  ROGUELIKE
+  SHOOTER
+  DECKBUILDER
+  PLATFORMER
+}
+
+// GamingSession of User
+model GamingSession {
+  id        String   @id @default(cuid())
+  
+  // FK
+  sessionOwner User  @relation("SessionsDone", fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  
+  // FK
+  gamePlayed Game @relation("PartOfSessions", fields: [gameId], references: [id], onDelete: Cascade)  
+  gameId    String
+
+  startTime DateTime @default(now())
+  endTime   DateTime @updatedAt
+  durationMinutes  Int?
+}
+
+model Limit {
+  id        Int      @id @default(autoincrement())
+
+  // FK
+  owner     User     @relation("Limits", fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  
+  // FK
+  game      Game     @relation("GameLimits", fields: [gameId], references: [id], onDelete: Cascade)
+  gameId    String
+  
+  type      String   @default("daily") // could be enum
+  limitMinutes  Int  @default(1)
+}
 
