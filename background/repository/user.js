@@ -1,6 +1,6 @@
 const { getPrisma } = require('../prismaClient.js');
 const { debug_colors } = require('../../src/theme/colors.js');
-const {repo, reset, err} = debug_colors;
+const { repo, reset, err } = debug_colors;
 
 let u;
 
@@ -19,6 +19,14 @@ const UserRepository = {
         }
         console.info(`${repo}[UserRepository]${reset} All users: `, res);
         return res;
+    },
+    /**
+     * Returns the currently loaded User, or null if no User has been loaded using loadNewOrReturningUser.
+     * 
+     * @returns null or the currently loaded User JSON object formatted as "{id: int, username: string}"
+     */
+    getCurrentUser: () => {
+        return u;
     },
     /**
      * Loads a User for any subsequent calls to this repository.
@@ -56,6 +64,24 @@ const UserRepository = {
         u = res;
         console.info(`${repo}[UserRepository]${reset} Created new user: `, res);
         return;
+    },
+
+    // FUNCTIONS UNDER HERE REQUIRES A USER TO BE LOADED
+
+    /**
+     * Unloads the current User if there is a User that is currently loaded.
+     * 
+     * @returns null or the unloaded User JSON object formatted as "{id: int, username: string}"
+     */
+    unloadUser: () => {
+        if (!u) {
+            return null;
+        }
+
+        tmp = u;
+        u = null;
+        console.info(`${repo}[UserRepository]${reset} Unloaded user`, tmp);
+        return tmp;
     }
 }
 

@@ -1,7 +1,7 @@
 const { getPrisma } = require('./prismaClient.js');
 const { UserRepository } = require('./repository/user.js');
 const { debug_colors } = require('../src/theme/colors.js');
-const {repo, reset, err} = debug_colors;
+const { repo, reset, err } = debug_colors;
 
 
 async function connectDb() {
@@ -14,12 +14,6 @@ async function connectDb() {
     return;
   }
   console.info(`${repo}[DBService]${reset} Connected to DB!`);
-  await UserRepository.getAllUsers();
-  await UserRepository.loadNewOrReturningUser("Rapunzel Prisma");
-  await UserRepository.getAllUsers();
-  await UserRepository.loadNewOrReturningUser("Rapunzel Prisma");
-  await UserRepository.getAllUsers();
-  // UserRepository.loadNewOrReturningUser(1);
 }
 
 function disconnectDb() {
