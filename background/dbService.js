@@ -14,7 +14,12 @@ async function connectDb() {
     return;
   }
   console.info(`${repo}[DBService]${reset} Connected to DB!`);
-  UserRepository.tmp();
+  await UserRepository.getAllUsers();
+  await UserRepository.loadNewOrReturningUser("Rapunzel Prisma");
+  await UserRepository.getAllUsers();
+  await UserRepository.loadNewOrReturningUser("Rapunzel Prisma");
+  await UserRepository.getAllUsers();
+  // UserRepository.loadNewOrReturningUser(1);
 }
 
 function disconnectDb() {
