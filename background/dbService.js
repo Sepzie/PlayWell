@@ -1,57 +1,20 @@
 const { getPrisma } = require('./prismaClient.js');
-const { PrismaClient } = require('@prisma/client');
+const { UserRepository } = require('./repository/user.js');
+const { debug_colors } = require('../src/theme/colors.js');
+const {repo, reset, err} = debug_colors;
+
 
 async function connectDb() {
-  console.log('Database connection started');
+  console.log(`${repo}[DBService]${reset} Database connection started...`);
   
-  // Example of how this will be implemented:
-  const prisma = await new PrismaClient();
-  await prisma.$connect();
-
-  // await prisma.user.delete({
-  //   where: {id: 2}
-  // })
-
-  // await prisma.user.create({
-  //   data: {
-  //     id:  2,
-  //     username: 'Elsa Prisma',
-  //   },
-  // })
-  // await prisma.game.create({
-  //   data: {
-  //     id: "codmw3",
-  //     name: 'Call of Duty MW3',
-  //     userId: 2,
-  //     location: 'MyGames',
-  //     platform: 'Steam',
-  //     category: 'SHOOTER'
-  //   }
-  // });
-  // await prisma.gamingSession.create({
-  //     data: {
-  //       durationMinutes: 64,
-  //       userId: 2,
-  //       gameId: 'codmw3'
-  //     }
-  // })
-  // await prisma.limit.create({
-  //     data: {
-  //       limitMinutes: 90,
-  //       userId: 2,
-  //       gameId: 'codmw3'
-  //     }
-  // })
-
-  // TODO: Add async/await success/fail/error handling or the ES6 equivalent with await
-  res = await prisma.user.findMany();
-  console.log("Users: ", res);
-  res = await prisma.game.findMany();
-  console.log("Games: ", res);
-  res = await prisma.gamingSession.findMany();
-  console.log("Gaming Sessions: ", res);
-  res = await prisma.limit.findMany();
-  console.log("Limits: ", res);
+  try {
+    await getPrisma().$connect();
+  } catch (error) {
+    console.error(`${repo}[DBService]${err} ${error}${reset}`);
+    return;
+  }
+  console.info(`${repo}[DBService]${reset} Connected to DB!`);
+  UserRepository.tmp();
 }
 
 function disconnectDb() {

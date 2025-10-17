@@ -11,7 +11,9 @@ const colors = {
 
 const debug_colors = {
   reset: '\x1b[0m',
-  info: '\x1b[36m' // cyan
+  err: '\x1b[31m',
+  proctracker: '\x1b[36m', // cyan, for background processes
+  repo: '\x1b[35m', // purple, for database connected modules
 };
 
 module.exports = {colors, debug_colors};

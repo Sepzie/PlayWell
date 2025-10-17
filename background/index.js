@@ -11,7 +11,7 @@ function startBackground() {
   console.log('Starting background process...');
   var interval_seconds = 3;
   setInterval(() => {
-    console.info(`${debug_colors.info}[ProcTracker]${debug_colors.reset} Running process tracking routine!`);
+    console.info(`${debug_colors.proctracker}[ProcTracker]${debug_colors.reset} Running process tracking routine!`);
     processes = getGameProcesses();
     // Processes is a JSON Array. Do stuff here:
 
@@ -38,17 +38,17 @@ function getGameProcesses() {
   get = 'name,processid,parentprocessid,executablepath,creationdate,installdate,terminationdate,status,sessionid,usermodetime,kernelmodetime'
   execFile('wmic', ['process', 'where', where, 'get', get, '/format:csv'], (err, stdout, stderr) => {
     if (err) { 
-      console.error(`${debug_colors.info}[ProcTracker]${debug_colors.reset} `, err);
+      console.error(`${debug_colors.proctracker}[ProcTracker]${debug_colors.reset} `, err);
       return; 
     }
     if (stderr) {
-      console.error(`${debug_colors.info}[ProcTracker]${debug_colors.reset} `, stderr);
+      console.error(`${debug_colors.proctracker}[ProcTracker]${debug_colors.reset} `, stderr);
       return;
     }
 
     csv().fromString(stdout.trim())
     .then((json) => {
-      console.log(`${debug_colors.info}[ProcTracker]${debug_colors.reset} Found games:\n`, json)
+      console.log(`${debug_colors.proctracker}[ProcTracker]${debug_colors.reset} Found games:\n`, json)
     })
   })
 }
