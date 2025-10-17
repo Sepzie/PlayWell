@@ -6,39 +6,49 @@ const { server, proctracker, reset, err } = debug_colors;
 const csv = require('csvtojson');
 const { execFile } = require('node:child_process');
 
+let background_pid;
 
 async function startBackground() {
   connectDb();
 
-  console.log('Starting background process...');
+  console.info(`${server}[index.js]${reset} Starting background process...`);
   var interval_seconds = 3;
-  setInterval(() => {
+  background_pid = setInterval(() => {
     console.info(`${proctracker}[ProcTracker]${reset} Running process tracking routine!`);
     processes = getGameProcesses();
     // Processes is a JSON Array. Do stuff here:
 
   }, 1000 * interval_seconds)
-  console.log('Background process started (placeholder)');
 
-  console.info(`${server}[index.js]${reset} Current user: `, UserRepository.getCurrentUser());
-  await UserRepository.getAllUsers();
-  await UserRepository.loadNewOrReturningUser("Eugene Prisma");
-  console.info(`${server}[index.js]${reset} Current user: `, UserRepository.getCurrentUser());
-  await UserRepository.loadNewOrReturningUser("Flint Prisma");
-  console.info(`${server}[index.js]${reset} Current user: `, UserRepository.getCurrentUser());
-  UserRepository.unloadUser();
-  console.info(`${server}[index.js]${reset} Current user: `, UserRepository.getCurrentUser());
-  await UserRepository.getAllUsers();
+  console.info(`${server}[index.js]${reset} Background processes started`);
+
+  // TEST UserRepository from index.js
+  // console.info(`${server}[index.js]${reset} Current user: `, UserRepository.getCurrentUser());
+  // await UserRepository.getAllUsers();
+  // await UserRepository.loadNewOrReturningUser("Eugene Prisma");
+  // console.info(`${server}[index.js]${reset} Current user: `, UserRepository.getCurrentUser());
+  // await UserRepository.loadNewOrReturningUser("Flint Prisma");
+  // console.info(`${server}[index.js]${reset} Current user: `, UserRepository.getCurrentUser());
+  // await UserRepository.getAllUsers();
+
+  // TEST stopBackground
+  // setTimeout(stopBackground, 1000 * 4);
 }
 
 function stopBackground() {
-  console.log('Stopping background process...');
+  console.info(`${server}[index.js]${reset} Stopping background processes...`);
   
-  // TODO: Implement proper cleanup
-  // stopTracking();
-  disconnectDb();
-  
-  console.log('Background process stopped (placeholder)');
+  clearInterval(background_pid);
+  let disconnectPromise = disconnectDb()
+
+  // Add promises here to sync after all asynchronous calls
+  Promise.all([disconnectPromise])    
+    .then(() => {
+        console.info(`${server}[index.js]${reset} Background process stopped`);
+    })
+    .catch((error) => {
+        console.error(`${server}[index.js]${err} ${error}${reset}`)
+    });
 }
 
 function getGameProcesses() {

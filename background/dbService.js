@@ -16,13 +16,10 @@ async function connectDb() {
   console.info(`${repo}[DBService]${reset} Connected to DB!`);
 }
 
-function disconnectDb() {
-  // TODO: Implement database disconnection logic
-  console.log('Database disconnection started (placeholder)');
-  
-  // Example of how this will be implemented:
-  // const prisma = getPrisma();
-  // return prisma.$disconnect();
+async function disconnectDb() {
+  UserRepository.unloadUser();
+  await getPrisma().$disconnect();
+  console.info(`${repo}[DBService]${reset} Disconnected from DB!`);
 }
 
 function saveGameSession(sessionData) {
