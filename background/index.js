@@ -2,11 +2,8 @@ const { connectDb, disconnectDb } = require('./dbService.js');
 const { GameTracker } = require('./gameTracker.js');
 const { UserRepository } = require('./repository/user.js');
 const { debug_colors } = require('../src/theme/colors.js');
-const { server, proctracker, reset, err } = debug_colors;
-const csv = require('csvtojson');
-const { execFile } = require('node:child_process');
+const { server, reset, err } = debug_colors;
 
-let background_pid;
 
 async function startBackground() {
   connectDb();

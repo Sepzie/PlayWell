@@ -5,6 +5,10 @@ const { proctracker, reset, err } = debug_colors;
 const util = require('node:util');
 const execFile = util.promisify(require('node:child_process').execFile);
 
+const INTERVAL_SECONDS = 3;
+let background_pid;
+let snapshot= []; // found games for current time slice
+
 async function getGameProcessesSteam () {
   // It is a game when it is under Steamapps common directory and is not the UnityCrashHandler
   where = 'executablepath like "%steamapps%common%" and not name like "%UnityCrashHandler%"'
@@ -15,31 +19,35 @@ async function getGameProcessesSteam () {
     const { stdout, stderr } = await execFile('wmic', ['process', 'where', where, 'get', get, '/format:csv']);
     if (stderr) {
       console.error(`${proctracker}[GameTracker]${err}`, stderr, `${reset}`);
-      return {};
+      return [];
     }
     const json = await csv().fromString(stdout.trim())
     return json;
   } catch (error) {
     if (error) { 
         console.error(`${proctracker}[GameTracker]${err}`, error, `${reset}`);
-        return {}; 
+        return []; 
     }
   }
 }
 
-let background_pid;
-
 const GameTracker = {
   startTracking: () => {
-      var interval_seconds = 3;
       background_pid = setInterval(() => {
         console.info(`${proctracker}[GameTracker]${reset} Running process tracking routine!`);
-        getGameProcessesSteam()
-        .then((games) => {
-          console.log(`${proctracker}[GameTracker]${reset} Found games:\n`, games)
-          // Processes is a JSON Array. Do stuff here:
+        // Add different methods of finding games here
+        steamGames = getGameProcessesSteam();
+
+        Promise.all([steamGames]) // Then, add the Promise inside the array
+        .then((values) => {
+          snapshot = [].concat(...values)
+          console.log(`${proctracker}[GameTracker]${reset} Found games:\n`, snapshot)
+          // Add INTERVAL_SECONDS to already existing games
+          // Set to INTERVAL_SECONDS to newly existing games
+          // Save cur_time to formerly exisiting games
+          // See FigJam for the diagram...
         });
-      }, 1000 * interval_seconds)
+      }, 1000 * INTERVAL_SECONDS)
   },
   stopTracking: () => {
     clearInterval(background_pid);
