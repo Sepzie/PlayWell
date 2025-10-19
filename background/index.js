@@ -1,5 +1,5 @@
-const { startTracking, stopTracking } = require('./gameTracker.js');
 const { connectDb, disconnectDb } = require('./dbService.js');
+const { GameTracker } = require('./gameTracker.js');
 const { UserRepository } = require('./repository/user.js');
 const { debug_colors } = require('../src/theme/colors.js');
 const { server, proctracker, reset, err } = debug_colors;
@@ -12,13 +12,8 @@ async function startBackground() {
   connectDb();
 
   console.info(`${server}[index.js]${reset} Starting background process...`);
-  var interval_seconds = 3;
-  background_pid = setInterval(() => {
-    console.info(`${proctracker}[ProcTracker]${reset} Running process tracking routine!`);
-    processes = getGameProcesses();
-    // Processes is a JSON Array. Do stuff here:
 
-  }, 1000 * interval_seconds)
+  GameTracker.startTracking();
 
   console.info(`${server}[index.js]${reset} Background processes started`);
 
@@ -38,7 +33,7 @@ async function startBackground() {
 function stopBackground() {
   console.info(`${server}[index.js]${reset} Stopping background processes...`);
   
-  clearInterval(background_pid);
+  GameTracker.stopTracking();
   let disconnectPromise = disconnectDb()
 
   // Add promises here to sync after all asynchronous calls
@@ -49,28 +44,6 @@ function stopBackground() {
     .catch((error) => {
         console.error(`${server}[index.js]${err} ${error}${reset}`)
     });
-}
-
-function getGameProcesses() {
-  // It is a game when it is under Steamapps common directory and is not the UnityCrashHandler
-  where = 'executablepath like "%steamapps%common%" and not name like "%UnityCrashHandler%"'
-  // There are a lot more fields so you can set it to whatever else you want
-  get = 'name,processid,parentprocessid,executablepath,creationdate,installdate,terminationdate,status,sessionid,usermodetime,kernelmodetime'
-  execFile('wmic', ['process', 'where', where, 'get', get, '/format:csv'], (err, stdout, stderr) => {
-    if (err) { 
-      console.error(`${proctracker}[ProcTracker]${reset} `, err);
-      return; 
-    }
-    if (stderr) {
-      console.error(`${proctracker}[ProcTracker]${reset} `, stderr);
-      return;
-    }
-
-    csv().fromString(stdout.trim())
-    .then((json) => {
-      console.log(`${proctracker}[ProcTracker]${reset} Found games:\n`, json)
-    })
-  })
 }
 
 module.exports = { startBackground, stopBackground };
