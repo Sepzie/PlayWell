@@ -71,15 +71,5 @@ const GameTracker = {
   }
 };
 
-function isGameRunning() {
-  // TODO: Implement game detection logic
-  return false;
-}
-
-function getCurrentGame() {
-  // TODO: Implement current game detection
-  return null;
-}
-
 module.exports = {GameTracker};
 

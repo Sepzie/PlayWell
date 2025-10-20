@@ -47,7 +47,7 @@ const UserRepository = {
         
         // Return res if User is found
         if (res) {
-            console.info(`${repo}[UserRepository]${reset} Found user: `, res);
+            console.info(`${repo}[UserRepository]${reset} Loaded existing user: `, res);
             u = res;
             return;
         }
