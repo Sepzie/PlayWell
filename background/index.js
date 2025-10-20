@@ -15,7 +15,7 @@ async function startBackground() {
 
   console.info(`${server}[index.js]${reset} Background processes started`);
 
-  const games = await GameRepository.getAllGames();
+  const games = await GameRepository.getGameByName("l");
   console.info(`${server}[index.js]${reset} All games: `, games);
   // TEST UserRepository from index.js
   // console.info(`${server}[index.js]${reset} Current user: `, UserRepository.getCurrentUser());

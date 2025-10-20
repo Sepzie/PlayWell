@@ -13,7 +13,7 @@ const UserRepository = {
     getAllUsers: async () => {
         try {
             res = await getPrisma().user.findMany();
-        } catch (err) {
+        } catch (error) {
             console.error(`${repo}[UserRepository]${err} ${error}${reset}`);
             return null;
         }

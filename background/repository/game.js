@@ -12,7 +12,7 @@ const GameRepository = {
 GameRepository.getAllGames = async () => {
     try {
         res = await getPrisma().game.findMany();
-    } catch (err) {
+    } catch (error) {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return [];
     }
@@ -24,10 +24,10 @@ GameRepository.getGameByName = async (gname) => {
     try {
         res = await getPrisma().game.findUnique({
             where: {
-                name: gname
+                nadme: gname
             }
         })
-    } catch (err) {
+    } catch (error) {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return {};
     }
