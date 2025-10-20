@@ -1,0 +1,13 @@
+#history-bar-chart-container {
+    padding-top: 3%;
+    height: 70vh;
+    width: 100%;
+    justify-content: center;
+}
+
+#history-bar-chart {
+    height: 100%;
+    justify-self: center;
+    display: flex;
+    width: 90%;
+}

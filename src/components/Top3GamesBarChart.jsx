@@ -2,7 +2,7 @@ import { Chart as ChartJS } from "chart.js/auto"
 import { Bar } from "react-chartjs-2"
 
 function Top3GamesBarChart() {
-  
+
     const data = {
         labels: ["Game 1", "Game 2", "Game 3"],
             datasets: [
@@ -17,10 +17,11 @@ function Top3GamesBarChart() {
 
     const options = {
         indexAxis: 'y',
+        maintainAspectRatio: false
     }
-    
+
     return (
-      <div className="bar-chart">
+      <div id="home-bar-chart">
         <Bar
           data={data}
           options={options}
