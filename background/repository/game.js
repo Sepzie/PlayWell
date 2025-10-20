@@ -6,11 +6,12 @@ const { repo, reset, err } = debug_colors;
 const GameRepository = {
     getAllGames: async () => {return []},
     getGameByName: async (gname) => {return {}},
+    deleteGames: async (gnames) => {return {}},
+    deleteAllGames: async () => {return {}},
 
     // FUNCTIONS UNDER HERE REQUIRE A USER TO BE LOADED. See UserRepository.loadNewOrReturningUser
     createGame: async (name, location, platform, genre) => {return {}},
-    upsertGame: async (game) => {return {}},
-    deleteGames: async (gnames) => {return {}}
+    upsertGame: async (gname, game) => {return {}}
 };
 
 GameRepository.getAllGames = async () => {
@@ -66,6 +67,40 @@ GameRepository.deleteGames = async (gnames) => {
                 name: {in: gnames}
             }
         })
+    } catch (error) {
+        console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
+        return {};
+    }
+    console.info(`${repo}[GameRepository]${reset} Deleted games: `, res);
+    return res;
+}
+
+GameRepository.upsertGame = async (name, location, platform, genre) => {
+    let data = {
+        location: location,
+        platform: platform,
+        category: genre,
+    }
+    try {
+        res = await getPrisma().game.upsert({
+            where: {name: name},
+            update: data,
+            create: {
+                name: name,
+                userId: UserRepository.getCurrentUser().id,
+                ...data},
+        })
+    } catch (error) {
+        console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
+        return {};
+    }
+    console.info(`${repo}[GameRepository]${reset} Upserted game: `, res);
+    return res;
+}
+
+GameRepository.deleteAllGames = async () => {
+    try {
+        res = await getPrisma().game.deleteMany({})
     } catch (error) {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return {};
