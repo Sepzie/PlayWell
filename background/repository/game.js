@@ -11,7 +11,7 @@ const GameRepository = {
 
     // FUNCTIONS UNDER HERE REQUIRE A USER TO BE LOADED. See UserRepository.loadNewOrReturningUser
     createGame: async (name, location, platform, genre) => {return {}},
-    upsertGame: async (gname, game) => {return {}}
+    upsertGame: async (name, location, platform, genre) => {return {}}
 };
 
 GameRepository.getAllGames = async () => {
@@ -21,7 +21,7 @@ GameRepository.getAllGames = async () => {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return [];
     }
-    // console.info(`${repo}[GameRepository]${reset} All games: `, res);
+    console.info(`${repo}[GameRepository]${reset} All games: `, res);
     return res;
 }
 
@@ -36,7 +36,7 @@ GameRepository.getGameByName = async (gname) => {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return {};
     }
-    // console.info(`${repo}[GameRepository]${reset} Found game: `, res);
+    console.info(`${repo}[GameRepository]${reset} Found game: `, res);
     return res;
 }
 

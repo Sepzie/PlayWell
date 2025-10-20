@@ -1,9 +1,10 @@
 const csv = require('csvtojson');
-// const { execFile } = require('node:child_process');
 const { debug_colors } = require('../src/theme/colors.js');
 const { proctracker, reset, err } = debug_colors;
 const util = require('node:util');
 const execFile = util.promisify(require('node:child_process').execFile);
+const { GameRepository } = require('./repository/game.js');
+const { Genre } = require('@prisma/client');
 
 const INTERVAL_SECONDS = 3;
 let background_pid;
@@ -31,6 +32,14 @@ async function getGameProcessesSteam () {
   }
 }
 
+function recordGameSessions() {
+  console.info(`${proctracker}[GameTracker]${reset} Recording game sessions...`);
+  // Add INTERVAL_SECONDS to already existing games
+  // Set to INTERVAL_SECONDS to newly existing games
+  // Save cur_time to formerly exisiting games
+  // See FigJam for the diagram...
+}
+
 const GameTracker = {
   startTracking: () => {
       background_pid = setInterval(() => {
@@ -42,10 +51,18 @@ const GameTracker = {
         .then((values) => {
           snapshot = [].concat(...values)
           console.log(`${proctracker}[GameTracker]${reset} Found games:\n`, snapshot)
-          // Add INTERVAL_SECONDS to already existing games
-          // Set to INTERVAL_SECONDS to newly existing games
-          // Save cur_time to formerly exisiting games
-          // See FigJam for the diagram...
+          
+          let upserts = [];
+          for (const s of snapshot) {
+            // Upsert to account for newly detected games.
+            upserts.push(GameRepository.upsertGame(
+              s["Name"],
+              s["ExecutablePath"],
+              "Steam (PC)", // everything is this for now
+              Genre.DECKBUILDER // everything is this for now
+            ));
+          }
+          Promise.all(upserts).then(() => {recordGameSessions();});
         });
       }, 1000 * INTERVAL_SECONDS)
   },

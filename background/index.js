@@ -4,23 +4,26 @@ const { UserRepository } = require('./repository/user.js');
 const { GameRepository } = require('./repository/game.js');
 const { debug_colors } = require('../src/theme/colors.js');
 const { server, reset, err } = debug_colors;
-const { Genre } = require('@prisma/client');
+
 
 
 async function startBackground() {
   connectDb();
   await UserRepository.loadNewOrReturningUser("Elsa Prisma");
 
-  // TEST GameRepository from index.js
-  const tmp1 = GameRepository.createGame("Mario Kart World", "C:\\Program Files (x86)\\BowserOS", "Nintendo Switch 2", Genre.SHOOTER);
-  const tmp2 = GameRepository.createGame("Inscryption", "C:\\Program Files (x86)\\SteamDeck", "Steam Deck", Genre.DECKBUILDER);
-  const tmp3 = GameRepository.createGame("This War of Mine", "C:\\Program Files (x86)\\Steam\\steamapps\\common\\This War of Mine\\x64\\This War of Mine.exe", "Steam", Genre.ROGUELIKE);
-  await Promise.all([tmp1, tmp2, tmp3]);
+  g = await GameRepository.getAllGames();
 
-  await GameRepository.upsertGame("Inscryption", "C:\\Program Files (x86)\\SteamDeck", "Steam Deck", Genre.ROGUELIKE);
-  await GameRepository.upsertGame("Mario Kart World", "C:\\Program Files (x86)\\WiiU", "Nintendo Wii U", Genre.PLATFORMER);
-  await GameRepository.upsertGame("Dave the Diver", "C:\\Program Files (x86)\\SteamDeck", "Steam Deck", Genre.PLATFORMER);
-  GameRepository.deleteAllGames();
+
+  // TEST GameRepository from index.js
+  // const tmp1 = GameRepository.createGame("Mario Kart World", "C:\\Program Files (x86)\\BowserOS", "Nintendo Switch 2", Genre.SHOOTER);
+  // const tmp2 = GameRepository.createGame("Inscryption", "C:\\Program Files (x86)\\SteamDeck", "Steam Deck", Genre.DECKBUILDER);
+  // const tmp3 = GameRepository.createGame("This War of Mine", "C:\\Program Files (x86)\\Steam\\steamapps\\common\\This War of Mine\\x64\\This War of Mine.exe", "Steam", Genre.ROGUELIKE);
+  // await Promise.all([tmp1, tmp2, tmp3]);
+
+  // await GameRepository.upsertGame("Inscryption", "C:\\Program Files (x86)\\SteamDeck", "Steam Deck", Genre.ROGUELIKE);
+  // await GameRepository.upsertGame("Mario Kart World", "C:\\Program Files (x86)\\WiiU", "Nintendo Wii U", Genre.PLATFORMER);
+  // await GameRepository.upsertGame("Dave the Diver", "C:\\Program Files (x86)\\SteamDeck", "Steam Deck", Genre.PLATFORMER);
+  // GameRepository.deleteAllGames();
   // end of TEST
 
   console.info(`${server}[index.js]${reset} Starting background process...`);
