@@ -4,9 +4,35 @@ const { repo, reset, err } = debug_colors;
 
 const GameRepository = {
     getAllGames: async () => {return []},
-    getGameByName: async (name) => {return {}},
+    getGameByName: async (gname) => {return {}},
     createGame: async (game) => {return {}},
     upsertGame: async (game) => {return {}},
 };
+
+GameRepository.getAllGames = async () => {
+    try {
+        res = await getPrisma().game.findMany();
+    } catch (err) {
+        console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
+        return [];
+    }
+    // console.info(`${repo}[GameRepository]${reset} All games: `, res);
+    return res;
+}
+
+GameRepository.getGameByName = async (gname) => {
+    try {
+        res = await getPrisma().game.findUnique({
+            where: {
+                name: gname
+            }
+        })
+    } catch (err) {
+        console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
+        return {};
+    }
+    // console.info(`${repo}[GameRepository]${reset} Found game: `, res);
+    return res;
+}
 
 module.exports = {GameRepository}

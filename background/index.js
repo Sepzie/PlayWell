@@ -1,6 +1,7 @@
 const { connectDb, disconnectDb } = require('./dbService.js');
 const { GameTracker } = require('./gameTracker.js');
 const { UserRepository } = require('./repository/user.js');
+const { GameRepository } = require('./repository/game.js');
 const { debug_colors } = require('../src/theme/colors.js');
 const { server, reset, err } = debug_colors;
 
@@ -14,6 +15,8 @@ async function startBackground() {
 
   console.info(`${server}[index.js]${reset} Background processes started`);
 
+  const games = await GameRepository.getAllGames();
+  console.info(`${server}[index.js]${reset} All games: `, games);
   // TEST UserRepository from index.js
   // console.info(`${server}[index.js]${reset} Current user: `, UserRepository.getCurrentUser());
   // await UserRepository.getAllUsers();
