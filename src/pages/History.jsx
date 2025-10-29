@@ -6,8 +6,7 @@ function History() {
   return (
     <div className="page">
       <h1>History</h1>
-      <p>View your gaming session history</p>
-      <div id="history-bar-chart-container">
+      <div id="history-bar-chart-root">
         <HistoryBarChart/>
       </div>
     </div>

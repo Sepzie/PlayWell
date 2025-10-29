@@ -1,12 +1,59 @@
-#history-bar-chart-container {
+#history-bar-chart-root {
     padding-top: 3%;
-    height: 70vh;
+    height: 75vh;
     width: 100%;
     justify-content: center;
 }
 
-#history-bar-chart {
+#history-bar-chart-components {
     height: 100%;
+}
+
+#buttons-holder {
+    justify-self: center;
+    justify-content: space-between;
+    display: flex;
+    width: 60%;
+}
+
+button {
+    font-family: 'system-ui';
+    font-weight: 500;
+    font-size: 4vw;
+    border: 0;
+    background-color: transparent;
+    transition: background-color 0.15s ease-in-out;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #cdcdcd;
+}
+
+button:active {
+    background-color: #9E9E9E;
+}
+
+#date-input {
+    width: 0px;
+    height: 0px;
+    visibility: hidden;
+}
+
+#year-input {
+    width: 10vw;
+    height: 0px;
+    position: absolute;
+    font-size: 2vw;
+    margin-top: 5vw;
+    font-family: 'system-ui';
+    visibility: collapse;
+    text-align: center;
+}
+
+#history-bar-chart {
+    height: 80%;
+    padding-top: 2%;
     justify-self: center;
     display: flex;
     width: 90%;
