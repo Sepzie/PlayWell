@@ -4,24 +4,30 @@ import { useEffect } from "react";
 import { Bar } from "react-chartjs-2"
 
 function HistoryBarChart(){
-  // Setup current date
+    // Store names of months
     const monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
   ];
+
+    // Setup current date
     let currentDate = new Date();
     let currentMonth = currentDate.getMonth();
     let currentYear = currentDate.getFullYear();
+
+    // To store inputs & date button
     let currentDateButton;
-    let currentDateInput;
+    let currentMonthYearInput;
     let currentYearInput;
 
+    // To be toggled to show playtime breakdowns by year or by month
     let yearBreakdown = true;
 
-    // Setup data for bar chart
-    const playTimeList = {months: [], timePlayed: []};
-    populateList(playTimeList);
+    // Setup data for bar chart by year
+    const playTimeList = {dates: [], timePlayed: []};
+    populateList(playTimeList, yearBreakdown);
+
     const data = {
-        labels: playTimeList.months,
+        labels: playTimeList.dates,
             datasets: [
               {
                 label: "Time Played (Minutes)",
@@ -31,21 +37,24 @@ function HistoryBarChart(){
               },
             ],
     }
-
+    
+    // Add options for bar chart
     const options = {
         maintainAspectRatio: false
     }
 
+    // Bar chart configuration when it is created
     const config = {
       type: 'bar',
       data: data,
       options: options
     }
 
-    // Get canvas & create new bar chart on page load
-    let barChart;
-    let useEffectExecuted = false;
+    let barChart; // Store bar chart here
+    let useEffectExecuted = false; // Some functions need to be executed once only
     useEffect(() => {
+      // Get canvas & create bar chart in it
+      // Destroy any existing bar charts
       let ctx = document.getElementById('bar-chart').getContext('2d');
       if (barChart) {
         barChart.destroy();
@@ -56,33 +65,68 @@ function HistoryBarChart(){
       currentDateButton = document.getElementById('current-date-button');
       currentDateButton.textContent = `${currentYear}`;
 
-      currentDateInput = document.getElementById('date-input');
+      // Store date inputs
+      currentMonthYearInput = document.getElementById('month-input');
       currentYearInput = document.getElementById('year-input');
-      currentDateInput.value = currentDate.getFullYear(currentYearInput);
+      currentMonthYearInput.value = currentDate.getFullYear(currentYearInput);
+      currentYearInput.value = currentYear;
+
+      // Add years dynamically to input
       if (!useEffectExecuted) {
         addYearsInput(currentYearInput, currentDate);
       }
+
+      // Stop above function from executing twice
       useEffectExecuted = true;
     }, [])
 
-    // Update list on button click
+    // Update list depending on the current breakdown
     const updateList = () => {
-      populateList(playTimeList);
+      populateList(playTimeList, yearBreakdown);
+      barChart.data.labels = playTimeList.dates;
       barChart.update();
     }
 
+    // Toggle yearly or monthly breakdown
+    const toggleBreakdown = (breakdownBool) => {
+      // Do nothing if the breakdown doesn't change
+      // ex. yearBreakdown is true and Yearly button is pressed
+      if (yearBreakdown == breakdownBool) {
+        return
+      }
+
+      // Set current date if breakdown changes
+      currentDate = new Date();
+      currentMonth = currentDate.getMonth();
+      currentYear = currentDate.getFullYear();
+      
+      // Set breakdown
+      yearBreakdown = breakdownBool
+      
+      // Update text depending on the breakdown
+      if (yearBreakdown) {
+        currentDateButton.textContent = `${currentYear}`
+      }
+      else {
+        currentDateButton.textContent = `${monthNames[currentMonth]} ${currentYear}`
+      }
+
+      // Update list afterwards
+      updateList();
+    }
+
     // Performed on clicking on the current date
+    // Shows options to the user
     const showDatePicker = () => {
       if (yearBreakdown) {
         currentYearInput.showPicker();
       }
       else {
-        currentDateInput.showPicker();
+        currentMonthYearInput.showPicker();
       }
     }
 
     // Updates the date with the chosen date in the date input value
-    // Date is offset by one month, so nextDate() is called
     const updateDate = () => {
       if (yearBreakdown) {
         currentYear = currentYearInput.value;
@@ -91,14 +135,14 @@ function HistoryBarChart(){
       }
 
       else {
-        currentDate = new Date(currentDateInput.value);
+        currentDate = new Date(currentMonthYearInput.value);
         currentMonth = currentDate.getMonth();
         currentYear = currentDate.getFullYear();
-        nextDate();
+        nextDate(); // Date is offset by one month, so nextDate() is called
       }
     }
 
-    // Goes to the previous month & updates the current date text & bar chart
+    // Goes to the previous year / month & updates the current date text & bar chart
     const previousDate = () => {
       if (yearBreakdown) {
         currentYear--;
@@ -119,7 +163,7 @@ function HistoryBarChart(){
       
     }
 
-    // Goes to the next month & updates the current date text & bar chart
+    // Goes to the next year / month & updates the current date text & bar chart
     const nextDate = () => {
       if (yearBreakdown) {
         currentYear++;
@@ -141,10 +185,14 @@ function HistoryBarChart(){
 
     return (
       <div id="history-bar-chart-components">
-        <div id="buttons-holder">
+        <div id="breakdown-toggle-buttons-container">
+          <button id="year-breakdown-button" onClick ={() => toggleBreakdown(true)}>Yearly</button>
+          <button id="month-breakdown-button" onClick={() => toggleBreakdown(false)}>Monthly</button>
+        </div>
+        <div id="date-buttons-container">
           <button id="back-button" onClick={() => previousDate()}>&lt;</button>
           <div>
-            <input type="month" id="date-input" onChange={() => updateDate()}></input>
+            <input type="month" id="month-input" onChange={() => updateDate()}></input>
 
             <select id="year-input" min="2025" max="2075" onChange={() => updateDate()}>
 
@@ -162,16 +210,30 @@ function HistoryBarChart(){
   );
 }
 
-function populateList(playTimeList) {
+function populateList(playTimeList, yearBreakdown) {
     // Add randomized data to list for bar chart
-    playTimeList.months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    // Year breakdown has all 12 months
+    if (yearBreakdown) {
+      playTimeList.dates = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    for (let i = 0; i < 12; i++) {
-        playTimeList.timePlayed[i] = Math.round(Math.random() * 400);
+      for (let i = 0; i < 12; i++) {
+          playTimeList.timePlayed[i] = Math.round(Math.random() * 400);
+      }
     }
+
+    // Month breakdown currently has 4 weeks
+    else {
+      playTimeList.dates = ["Week 1", "Week 2", "Week 3", "Week 4"]
+      for (let i = 0; i < 4; i++) {
+        playTimeList.timePlayed[i] = Math.round(Math.random() * 400);
+      }
+    }
+    
 }
 
+
 function addYearsInput(currentYearInput, currentDate) {
+  // Add years to yearInput depending on the min & max year
   let minimumYear = 2025;
   let maximumYear = 2075;
   for (let i = minimumYear; i <= maximumYear; i++) {
