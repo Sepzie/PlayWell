@@ -4,6 +4,7 @@ const { proctracker, reset, err } = debug_colors;
 const util = require('node:util');
 const execFile = util.promisify(require('node:child_process').execFile);
 const { GameRepository } = require('./repository/game.js');
+const { GamingSessionRepository } = require('./repository/gamingSession.js');
 const { Genre } = require('@prisma/client');
 
 const INTERVAL_SECONDS = 3;
@@ -50,6 +51,7 @@ async function getGameProcessesSteam () {
 function recordGameSessions(snapshot) {
   console.info(`${proctracker}[GameTracker]${reset} Recording game sessions...`);
   console.info(`${proctracker}[GameTracker]${reset} snapshot= `, snapshot);
+
   return;
   thisSnapshot = {}; // {game_id: {session_id, user_id, game_id, durationMinutes}}
 
