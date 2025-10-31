@@ -8,8 +8,23 @@ const { Genre } = require('@prisma/client');
 
 const INTERVAL_SECONDS = 3;
 let background_pid;
-let snapshot= []; // found games for current time slice
+let latestSnapshot = {}; // public Snapshot as an object {game_id: game_session}
 
+// Structure of game processes
+// {
+//     Node: string,
+//     CreationDate: string formatted as date,
+//     ExecutablePath: string like path 'C:\\path\\to\\Steam\\steamapps\\common\\GAME_NAME\\something\\else\\GAME_NAME.exe',
+//     InstallDate: string formatted as date,
+//     KernelModeTime: string as big int (eg '17187500'),
+//     Name: string,
+//     ParentProcessId: string as int that is process id,
+//     ProcessId: string as int that is process id,
+//     SessionId: string as int as session id,
+//     Status: string,
+//     TerminationDate: string formatted as date,
+//     UserModeTime: string as big int
+// }
 async function getGameProcessesSteam () {
   // It is a game when it is under Steamapps common directory and is not the UnityCrashHandler
   where = 'executablepath like "%steamapps%common%" and not name like "%UnityCrashHandler%"'
@@ -32,12 +47,54 @@ async function getGameProcessesSteam () {
   }
 }
 
-function recordGameSessions() {
+function recordGameSessions(snapshot) {
   console.info(`${proctracker}[GameTracker]${reset} Recording game sessions...`);
-  // Add INTERVAL_SECONDS to already existing games
-  // Set to INTERVAL_SECONDS to newly existing games
-  // Save cur_time to formerly exisiting games
-  // See FigJam for the diagram...
+  console.info(`${proctracker}[GameTracker]${reset} snapshot= `, snapshot);
+  return;
+  thisSnapshot = {}; // {game_id: {session_id, user_id, game_id, durationMinutes}}
+
+  // 1
+
+  snapshot.forEach((game) => {
+    if (!(game.id in thisSnapshot)) {
+      // This game just started
+      let new_session = {gameId: game.id, durationMinutes: INTERVAL_SECONDS / 60};
+      console.info(`${proctracker}[GameTracker]${reset} ${game.Name} has started...`);
+      thisSnapshot[game.id] = new_session;
+    }
+  })
+
+  return;
+  thisSnapshot = {};
+  latestSnapshot.forEach((game) => {
+    if (game in snapshot) {
+      // This game is continuing
+      // ... Add INTERVAL_SECONDS to already existing games
+      console.info(`${proctracker}[GameTracker]${reset} ${game.Name} is continuing...`);
+      thisSnapshot.add(game);
+    } else {
+      // This game has stopped
+      // ... Save cur_time to formerly exisiting games
+      console.info(`${proctracker}[GameTracker]${reset} ${game.Name} has ended...`);
+    }
+  })
+
+  snapshot.forEach((game) => {
+    if (!(game in thisSnapshot)) {
+      // This game just started
+      // ... Set INTERVAL_SECONDS to new games
+      console.info(`${proctracker}[GameTracker]${reset} ${game.Name} has started...`);
+      thisSnapshot.add(game);
+    }
+  })
+
+  latestSnapshot = thisSnapshot;
+  snapshot = [];
+
+  console.info(`${proctracker}[GameTracker]${reset} LatestSnapshot=`);
+  latestSnapshot.forEach((g) => {
+    console.log(g);
+  })
 }
 
 const GameTracker = {
@@ -49,7 +106,7 @@ const GameTracker = {
 
         Promise.all([steamGames]) // Then, add the Promise inside the array
         .then((values) => {
-          snapshot = [].concat(...values)
+          let snapshot = [].concat(...values)
           console.log(`${proctracker}[GameTracker]${reset} Found games:\n`, snapshot)
           
           let upserts = [];
@@ -62,7 +119,7 @@ const GameTracker = {
               Genre.DECKBUILDER // everything is this for now
             ));
           }
-          Promise.all(upserts).then(() => {recordGameSessions();});
+          Promise.all(upserts).then((t) => {recordGameSessions(t);});
         });
       }, 1000 * INTERVAL_SECONDS)
   },

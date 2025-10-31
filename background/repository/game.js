@@ -131,7 +131,7 @@ GameRepository.upsertGame = async (name, location, platform, genre) => {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return {};
     }
-    console.info(`${repo}[GameRepository]${reset} Upserted game: `, res);
+    // console.info(`${repo}[GameRepository]${reset} Upserted game: `, res);
     return res;
 }
 
