@@ -11,7 +11,7 @@ const INTERVAL_SECONDS = 3;
 let background_pid;
 let activeGamingSessions = {}; // public Snapshot as an object {game_id: game_session}
 
-// Structure of game processes
+// Structure of game processes from Steam
 // {
 //     Node: string,
 //     CreationDate: string formatted as date,
@@ -48,6 +48,12 @@ async function getGameProcessesSteam () {
   }
 }
 
+/**
+ * Handles GameSession tracking controls.
+ * A GameSession can be of 3 states: continuing, starting, or ending. 
+ * 
+ * @param {Array[Object]} snapshot an array of Game objects detected by the GameTracker at this current time step 
+ */
 function recordGameSessions(snapshot) {
   console.info(`${proctracker}[GameTracker]${reset} Recording game sessions...`);
 
