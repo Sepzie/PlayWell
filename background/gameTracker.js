@@ -118,6 +118,16 @@ const GameTracker = {
   stopTracking: () => {
     clearInterval(background_pid);
     recordGameSessions([]); // end all GamingSessions when stopping tracking
+  },
+  /**
+   * Returns a read-only copy of activeGamingSessions.
+   * This addresses the need to reference active Gaming Sessions that GameTracker manages, as the records in
+   * the database won't update until a GameSession has ended.
+   * 
+   * @returns a JSON object where the key is the Game id and the value is a GamingSession object
+   */
+  getActiveGamingSessions: () => {
+    return JSON.parse(JSON.stringify(activeGamingSessions));
   }
 };
 
