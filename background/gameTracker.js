@@ -9,7 +9,7 @@ const { Genre } = require('@prisma/client');
 
 const INTERVAL_SECONDS = 3;
 let background_pid;
-let latestSnapshot = {}; // public Snapshot as an object {game_id: game_session}
+let activeGamingSessions = {}; // public Snapshot as an object {game_id: game_session}
 
 // Structure of game processes
 // {
@@ -51,56 +51,46 @@ async function getGameProcessesSteam () {
 function recordGameSessions(snapshot) {
   console.info(`${proctracker}[GameTracker]${reset} Recording game sessions...`);
   console.info(`${proctracker}[GameTracker]${reset} snapshot= `, snapshot);
+  let promises = [];
+  // gameIds = new Set(snapshot.map((s) => s.id));
+  nextActiveGamingSessions = {}; // {game_id: {session_id, user_id, game_id, durationMinutes}}
 
-  return;
-  thisSnapshot = {}; // {game_id: {session_id, user_id, game_id, durationMinutes}}
-
-  // 1
-
-  snapshot.forEach((game) => {
-    if (!(game.id in thisSnapshot)) {
-      // This game just started
-      let new_session = {gameId: game.id, durationMinutes: INTERVAL_SECONDS / 60};
-      console.info(`${proctracker}[GameTracker]${reset} ${game.Name} has started...`);
-      thisSnapshot[game.id] = new_session;
-    }
-  })
-
-  return;
-  thisSnapshot = {};
-  latestSnapshot.forEach((game) => {
-    if (game in snapshot) {
+  for (const game of snapshot) {
+    if (Object.hasOwn(activeGamingSessions, game.id)) {
       // This game is continuing
-      // ... Add INTERVAL_SECONDS to already existing games
-      console.info(`${proctracker}[GameTracker]${reset} ${game.Name} is continuing...`);
-      thisSnapshot.add(game);
-    } else {
-      // This game has stopped
-      // ... Save cur_time to formerly exisiting games
-      console.info(`${proctracker}[GameTracker]${reset} ${game.Name} has ended...`);
+      nextActiveGamingSessions[game.id] = activeGamingSessions[game.id];
+      nextActiveGamingSessions[game.id].durationMinutes += INTERVAL_SECONDS / 60;
+      // console.info(`${proctracker}[GameTracker]${reset} ${game.name} is continuing...`);
     }
-  })
-
-  snapshot.forEach((game) => {
-    if (!(game in thisSnapshot)) {
+    else {
       // This game just started
-      // ... Set INTERVAL_SECONDS to new games
-      console.info(`${proctracker}[GameTracker]${reset} ${game.Name} has started...`);
-      thisSnapshot.add(game);
+      let startP = GamingSessionRepository.startGamingSession(game.id, 0).then((gs) => {
+        nextActiveGamingSessions[game.id] = gs;
+      });
+      promises.push(startP);
+      // console.info(`${proctracker}[GameTracker]${reset} ${game.name} has started...`);
     }
-  })
+  }
 
-  latestSnapshot = thisSnapshot;
-  snapshot = [];
+  for (const [gid, gs] of Object.entries(activeGamingSessions)) {
+    if (!Object.hasOwn(nextActiveGamingSessions, gid)) {
+      let endP = GamingSessionRepository.endGamingSession(gs.id, gs.durationMinutes);
+      promises.push(endP);
+      // console.info(`${proctracker}[GameTracker]${reset} ${game.name} has started...`);
+    }
+  }
 
-  console.info(`${proctracker}[GameTracker]${reset} LatestSnapshot=`);
-  latestSnapshot.forEach((g) => {
-    console.log(g);
-  })
+  Promise.all(promises).then(() => {
+    activeGamingSessions = nextActiveGamingSessions;
+    console.info(`${proctracker}[GameTracker]${reset} Active Gaming Sessions =`, activeGamingSessions);
+  });
 }
 
 const GameTracker = {
   startTracking: () => {
+    // GamingSessionRepository.getAllGamingSessions();
+      // GamingSessionRepository.deleteAllGamingSessions();
+
       background_pid = setInterval(() => {
         console.info(`${proctracker}[GameTracker]${reset} Running process tracking routine!`);
         // Add different methods of finding games here
@@ -109,7 +99,7 @@ const GameTracker = {
         Promise.all([steamGames]) // Then, add the Promise inside the array
         .then((values) => {
           let snapshot = [].concat(...values)
-          console.log(`${proctracker}[GameTracker]${reset} Found games:\n`, snapshot)
+          // console.log(`${proctracker}[GameTracker]${reset} Found games:\n`, snapshot)
           
           let upserts = [];
           for (const s of snapshot) {
@@ -127,6 +117,7 @@ const GameTracker = {
   },
   stopTracking: () => {
     clearInterval(background_pid);
+    recordGameSessions([]); // end all GamingSessions when stopping tracking
   }
 };
 
