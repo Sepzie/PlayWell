@@ -39,6 +39,8 @@ model Game {
 }
 
 enum Genre {
+  NOGENRE
+  SURVIVAL
   ROGUELIKE
   SHOOTER
   DECKBUILDER

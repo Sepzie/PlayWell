@@ -50,9 +50,8 @@ async function getGameProcessesSteam () {
 
 function recordGameSessions(snapshot) {
   console.info(`${proctracker}[GameTracker]${reset} Recording game sessions...`);
-  console.info(`${proctracker}[GameTracker]${reset} snapshot= `, snapshot);
+
   let promises = [];
-  // gameIds = new Set(snapshot.map((s) => s.id));
   nextActiveGamingSessions = {}; // {game_id: {session_id, user_id, game_id, durationMinutes}}
 
   for (const game of snapshot) {
@@ -60,7 +59,6 @@ function recordGameSessions(snapshot) {
       // This game is continuing
       nextActiveGamingSessions[game.id] = activeGamingSessions[game.id];
       nextActiveGamingSessions[game.id].durationMinutes += INTERVAL_SECONDS / 60;
-      // console.info(`${proctracker}[GameTracker]${reset} ${game.name} is continuing...`);
     }
     else {
       // This game just started
@@ -68,15 +66,14 @@ function recordGameSessions(snapshot) {
         nextActiveGamingSessions[game.id] = gs;
       });
       promises.push(startP);
-      // console.info(`${proctracker}[GameTracker]${reset} ${game.name} has started...`);
     }
   }
 
   for (const [gid, gs] of Object.entries(activeGamingSessions)) {
     if (!Object.hasOwn(nextActiveGamingSessions, gid)) {
+      // This game has ended
       let endP = GamingSessionRepository.endGamingSession(gs.id, gs.durationMinutes);
       promises.push(endP);
-      // console.info(`${proctracker}[GameTracker]${reset} ${game.name} has started...`);
     }
   }
 
@@ -88,9 +85,6 @@ function recordGameSessions(snapshot) {
 
 const GameTracker = {
   startTracking: () => {
-    // GamingSessionRepository.getAllGamingSessions();
-      // GamingSessionRepository.deleteAllGamingSessions();
-
       background_pid = setInterval(() => {
         console.info(`${proctracker}[GameTracker]${reset} Running process tracking routine!`);
         // Add different methods of finding games here
