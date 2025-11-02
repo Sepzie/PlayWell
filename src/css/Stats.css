@@ -1,0 +1,30 @@
+.stats-data, .stats-header {
+    border: 1px solid;
+    border-collapse: collapse;
+    padding: 0.5vw;
+}
+
+.stats-header {
+    font-size: 2vw;
+    background-color: #81C784;
+}
+
+.stats-data {
+    font-size: 1em;
+}
+
+.stats-row:nth-child(odd){
+    background-color: #efefef;
+}
+
+.stats-row:hover {
+    background-color: #d5d5d5;
+}
+
+#stats-table-container {
+    width: 90%;
+    justify-content: center;
+    justify-self: center;
+    display: flex;
+    font-family: 'system-ui';
+}
