@@ -11,10 +11,14 @@ function TrayMenu() {
         </div>
         
     <CircleTimer durationInSeconds={100} resetKey={resetKey} /> {/* Timer is hard coded as placeholder */}
-
-    <div className="timer-button-container">
-      <button className="timer-button" onClick={() => setResetKey(k => k + 1)}>Placeholder</button>
-    </div>
+            <div className="timer-button-container">
+                <button
+                  className="timer-button"
+                  onClick={() => {
+                    window.electronAPI.openLimits();
+                  }}
+                >Open Limits</button>
+            </div>
         <footer>
         </footer>
     </div>

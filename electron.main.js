@@ -54,7 +54,7 @@ app.whenReady().then(() => {
   createWindow();
 
   // Initialize TrayManager and make the tray
-  trayManager = new TrayManager('src/public/icon.png'); //TODO need tray icon
+  trayManager = new TrayManager('src/public/icon.png', OpenMainWindow);
   trayManager.createTray();
 
   // Start background process
@@ -79,6 +79,51 @@ app.on('window-all-closed', () => {
 ipcMain.handle('app-version', () => {
   return app.getVersion();
 });
+
+// Open/focus main window and navigate to a limits page upon request from tray menu
+ipcMain.on('open-limits', () => {
+  try {
+    OpenMainWindow();
+
+    const sendNavigate = () => {
+      try {
+        if (mainWindow && mainWindow.webContents) {
+          mainWindow.webContents.send('navigate', '/limits');
+        }
+      } catch (err) {
+        console.error('Failed to send navigate message:', err);
+      }
+    };
+
+    // If the window is still loading, wait for it to finish first
+    if (mainWindow && mainWindow.webContents && mainWindow.webContents.isLoading()) {
+      mainWindow.webContents.once('did-finish-load', sendNavigate);
+    } else {
+      sendNavigate();
+    }
+  } catch (err) {
+    console.error('Error handling open-limits:', err);
+  }
+});
+
+// Handler to open/focus the main window on demand
+ipcMain.on('open-main-window', () => {
+  OpenMainWindow();
+});
+
+function OpenMainWindow() {
+  try {
+    if (!mainWindow) {
+      createWindow();
+    }
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  } catch (err) {
+    console.error('Error handling open-main-window:', err);
+  }
+}
 
 // TODO: Add auto-start at login functionality
 // app.setLoginItemSettings({
