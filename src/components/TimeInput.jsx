@@ -1,22 +1,34 @@
 import React, { useState } from 'react';
 import '/src/css/TimeInput.css';
 
-function TimeInput() {
-  const [hours, setHours] = useState('');
-  const [minutes, setMinutes] = useState('');
+function TimeInput({ hours: propHours = 0, minutes: propMinutes = 0, onChange }) {
+  const [hours, setHours] = useState(Number(propHours) || 0);
+  const [minutes, setMinutes] = useState(Number(propMinutes) || 0);
+
+  // Sync props -> local state
+  React.useEffect(() => {
+    if (typeof propHours !== 'undefined') setHours(Number(propHours) || 0);
+  }, [propHours]);
+  React.useEffect(() => {
+    if (typeof propMinutes !== 'undefined') setMinutes(Number(propMinutes) || 0);
+  }, [propMinutes]);
 
   const handleHoursChange = (event) => {
-    const value = event.target.value;
-    if (value === '' || (parseInt(value) >= 0 && parseInt(value) <= 23)) {
-      setHours(value);
-    }
+    let value = event.target.value;
+    if (value === '') value = 0;
+    let num = parseInt(value) || 0;
+    num = Math.max(0, Math.min(23, num));
+    setHours(num);
+    onChange && onChange({ hours: num, minutes });
   };
 
   const handleMinutesChange = (event) => {
-    const value = event.target.value;
-    if (value === '' || (parseInt(value) >= 0 && parseInt(value) <= 59)) {
-      setMinutes(value);
-    }
+    let value = event.target.value;
+    if (value === '') value = 0;
+    let num = parseInt(value) || 0;
+    num = Math.max(0, Math.min(59, num));
+    setMinutes(num);
+    onChange && onChange({ hours, minutes: num });
   };
 
   return (
@@ -33,14 +45,16 @@ function TimeInput() {
           />
           <span className="unit">h</span>
           <div className="spinner">
-            <button type="button" className="spin up" onClick={() => setHours(prev => {
-              const next = Math.min(24, (prev === '' ? 0 : Number(prev)) + 1);
-              return String(next);
-            })} aria-label="Increase hours">▲</button>
-            <button type="button" className="spin down" onClick={() => setHours(prev => {
-              const next = Math.max(0, (prev === '' ? 0 : Number(prev)) - 1);
-              return String(next);
-            })} aria-label="Decrease hours">▼</button>
+            <button type="button" className="spin up" onClick={() => {
+              const next = Math.min(23, Number(hours) + 1);
+              setHours(next);
+              onChange && onChange({ hours: next, minutes });
+            }} aria-label="Increase hours">▲</button>
+            <button type="button" className="spin down" onClick={() => {
+              const next = Math.max(0, Number(hours) - 1);
+              setHours(next);
+              onChange && onChange({ hours: next, minutes });
+            }} aria-label="Decrease hours">▼</button>
           </div>
         </div>
       </label>
@@ -56,19 +70,20 @@ function TimeInput() {
           />
           <span className="unit">m</span>
           <div className="spinner">
-            <button type="button" className="spin up" onClick={() => setMinutes(prev => {
-              const next = Math.min(59, (prev === '' ? 0 : Number(prev)) + 1);
-              return String(next);
-            })} aria-label="Increase minutes">▲</button>
-            <button type="button" className="spin down" onClick={() => setMinutes(prev => {
-              const next = Math.max(0, (prev === '' ? 0 : Number(prev)) - 1);
-              return String(next);
-            })} aria-label="Decrease minutes">▼</button>
+            <button type="button" className="spin up" onClick={() => {
+              const next = Math.min(59, Number(minutes) + 1);
+              setMinutes(next);
+              onChange && onChange({ hours, minutes: next });
+            }} aria-label="Increase minutes">▲</button>
+            <button type="button" className="spin down" onClick={() => {
+              const next = Math.max(0, Number(minutes) - 1);
+              setMinutes(next);
+              onChange && onChange({ hours, minutes: next });
+            }} aria-label="Decrease minutes">▼</button>
           </div>
         </div>
       </label>
       <p>Daily Limit</p>
-      {/* <p>Selected Time: {hours.padStart(2, '0')}:{minutes.padStart(2, '0')}</p> */}
     </div>
   );
 }

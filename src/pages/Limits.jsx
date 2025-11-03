@@ -7,6 +7,8 @@ import TimeInput from '/src/components/TimeInput.jsx';
 function Limits() {
   const [duration, setDuration] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [tempHours, setTempHours] = useState(0);
+  const [tempMinutes, setTempMinutes] = useState(0);
 
   useEffect(() => {
     // initialize and subscribe to main timer
@@ -30,8 +32,8 @@ function Limits() {
         <h1>Daily Playtime Limits</h1>
       </div>
       <p className="text">Your current gaming time limit</p>
-      <CircleTimer durationInSeconds={duration} timeLeft={timeLeft} />
-      <TimeInput />
+  <CircleTimer durationInSeconds={duration} timeLeft={timeLeft} />
+  <TimeInput hours={tempHours} minutes={tempMinutes} onChange={({hours, minutes}) => { setTempHours(hours); setTempMinutes(minutes); }} />
       <div className="limits-row">
         <Checkbox label="Sun" />
         <Checkbox label="Mon" />
@@ -45,10 +47,10 @@ function Limits() {
         <button
           className="timer-button"
           onClick={() => {
-            window.electronAPI.startTimer(100);
-            /* Temporaray hard coded timer start */
+            const totalTime = Math.max(0, Math.min(24 * 3600, (tempHours * 3600) + (tempMinutes * 60)));
+            window.electronAPI.startTimer(totalTime);
           }}
-        >Save</button>
+        >Apply</button>
       </div>
     </div>
   );
