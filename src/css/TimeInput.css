@@ -1,0 +1,71 @@
+.time-input-container {
+    text-align: center;
+    grid-area: 5 / 1 / 6 / 9;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: auto;
+    align-items: center;
+    font-weight: 500;
+}
+
+.time-input-container input {
+    width: 45px;
+    height: 25px;
+    padding: 10px;
+    font-size: 1.1em;
+    border: 2px solid #9E9E9E;
+    border-radius: 10px;
+}
+
+.input-with-unit {
+    position: relative;
+    display: inline-block;
+    left: -12.5%;
+}
+
+.input-with-unit input {
+    padding-right: 10px;
+}
+
+.input-with-unit .unit {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #616161;
+    font-weight: 600;
+}
+
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.input-with-unit .spinner {
+    position: absolute;
+    right: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.input-with-unit .spin {
+    background: transparent;
+    border: 1px solid #cfcfcf;
+    width: 28px;
+    height: 18px;
+    padding: 0;
+    line-height: 12px;
+    font-size: 10px;
+    color: #424242;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.input-with-unit .spin:active {
+    background: #f0f0f0;
+}

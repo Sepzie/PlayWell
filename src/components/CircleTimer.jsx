@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import '/src/css/CircleTimer.css';
 
 const CircleTimer = ({ durationInSeconds, resetKey }) => {
     const [timeLeft, setTimeLeft] = useState(durationInSeconds);

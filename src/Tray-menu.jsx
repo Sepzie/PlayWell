@@ -6,21 +6,21 @@ function TrayMenu() {
 
   return (
     <div className="main-container">
-        <div className="title">
-            <p className="text">Your current gaming time limit</p>
-        </div>
-        
-    <CircleTimer durationInSeconds={100} resetKey={resetKey} /> {/* Timer is hard coded as placeholder */}
-            <div className="timer-button-container">
-                <button
-                  className="timer-button"
-                  onClick={() => {
-                    window.electronAPI.openLimits();
-                  }}
-                >Open Limits</button>
-            </div>
-        <footer>
-        </footer>
+      <div className="title">
+        <p className="text">Your current gaming time limit</p>
+      </div>
+
+      <CircleTimer durationInSeconds={100} resetKey={resetKey} /> {/* Timer is hard coded as placeholder */}
+      <div className="timer-button-container">
+        <button
+          className="timer-button"
+          onClick={() => {
+            window.electronAPI.openLimits();
+          }}
+        >Open Limits</button>
+      </div>
+      <footer>
+      </footer>
     </div>
   );
 }
