@@ -15,12 +15,13 @@
     "prisma:studio": "prisma studio"
   },
   "dependencies": {
-    "framer-motion": "^12.23.22",
-    "chart.js": "^4.5.0",
     "@prisma/client": "^6.16.3",
+    "@tanstack/react-table": "^8.21.3",
+    "chart.js": "^4.5.0",
     "child-process": "^1.0.2",
     "csvtojson": "^2.0.10",
     "electron": "^28.0.0",
+    "framer-motion": "^12.23.22",
     "node-wmi": "^0.0.5",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.3.0",

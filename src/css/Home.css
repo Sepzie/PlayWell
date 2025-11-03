@@ -22,9 +22,10 @@ h2 {
     height: 25vh;
 }
 
-.bar-chart {
+#home-bar-chart {
     padding-top: 3%;
     height: 50vh;
+    width: 100%;
     justify-content: center;
     display: flex;
 }

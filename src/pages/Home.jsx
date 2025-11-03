@@ -13,7 +13,7 @@ function Home() {
         <h2>13 Hours</h2>
         <p>today</p>
       </div>
-      <Top3GamesBarChart />
+      <Top3GamesBarChart id="home-bar-chart" />
     </div>
   );
 }
