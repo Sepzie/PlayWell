@@ -1,7 +1,8 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const TrayManager = require('./electron.tray.js'); 
+const TrayManager = require('./electron.tray.js');
 const { startBackground, stopBackground } = require('./background/index.js');
+const timer = require('./background/timerController.js');
 
 // Keep a global reference of the window object
 let mainWindow;
@@ -22,7 +23,7 @@ function createWindow() {
   // Load the app
   const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
   console.log('isDev:', isDev, 'NODE_ENV:', process.env.NODE_ENV, 'isPackaged:', app.isPackaged);
-  
+
   if (isDev) {
     // In development, load from Vite dev server
     console.log('Loading from Vite dev server: http://localhost:5173');
@@ -54,7 +55,7 @@ app.whenReady().then(() => {
   createWindow();
 
   // Initialize TrayManager and make the tray
-  trayManager = new TrayManager('src/public/icon.png'); //TODO need tray icon
+  trayManager = new TrayManager('src/public/icon.png', OpenMainWindow);
   trayManager.createTray();
 
   // Start background process
@@ -79,6 +80,62 @@ app.on('window-all-closed', () => {
 ipcMain.handle('app-version', () => {
   return app.getVersion();
 });
+
+// Broadcast timer updates from controller to all renderer windows
+timer.on('update', (state) => {
+  const windows = BrowserWindow.getAllWindows();
+  windows.forEach(w => {
+    try { w.webContents.send('timer-update', state); } catch (e) { }
+  });
+});
+
+// Timer control IPC handlers
+ipcMain.on('timer-start', (ev, durationSeconds) => timer.setup(durationSeconds));
+ipcMain.on('timer-pause', () => timer.pause());
+ipcMain.on('timer-reset', () => timer.reset());
+ipcMain.handle('timer-get-state', () => timer.getState());
+ipcMain.on('timer-resume', () => timer.resume());
+
+// Open/focus main window and navigate to a limits page upon request from tray menu
+ipcMain.on('open-limits', () => {
+  try {
+    OpenMainWindow();
+
+    const sendNavigate = () => {
+      try {
+        if (mainWindow && mainWindow.webContents) {
+          mainWindow.webContents.send('navigate', '/limits');
+        }
+      } catch (err) {
+        console.error('Failed to send navigate message:', err);
+      }
+    };
+
+    // If the window is still loading, wait for it to finish first
+    if (mainWindow && mainWindow.webContents && mainWindow.webContents.isLoading()) {
+      mainWindow.webContents.once('did-finish-load', sendNavigate);
+    } else {
+      sendNavigate();
+    }
+  } catch (err) {
+    console.error('Error handling open-limits:', err);
+  }
+});
+
+// Handler to open/focus the main window on demand
+ipcMain.on('open-main-window', () => {
+  OpenMainWindow();
+});
+
+function OpenMainWindow() {
+  if (!mainWindow) {
+    createWindow();
+  }
+  if (mainWindow) {
+    mainWindow.show();
+    mainWindow.focus();
+  }
+}
 
 // TODO: Add auto-start at login functionality
 // app.setLoginItemSettings({

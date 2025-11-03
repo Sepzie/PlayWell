@@ -1,0 +1,21 @@
+.checkbox-container {
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    justify-items: center;
+    align-items: center;
+    place-items: center;
+}
+
+.checkbox-container input {
+    accent-color: #2E7D32;
+}
+
+.current-limit {
+    color: #9E9E9E;
+    font-size: 14px;
+}
+
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+}

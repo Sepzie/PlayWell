@@ -3,10 +3,11 @@ const path = require('path');
 const isDev = !!process.env.VITE_DEV_SERVER_URL;
 
 class TrayManager {
-  constructor(iconPath) {
+  constructor(iconPath, openMainCallback) {
     this.iconPath = iconPath;
     this.tray = null;
     this.trayWindow = null;
+    this.openMainCallback = openMainCallback;
   }
 
   createTray() {
@@ -16,7 +17,7 @@ class TrayManager {
 
     // Create context menu
     const contextMenu = Menu.buildFromTemplate([
-      { label: 'Open App', click: () => { } }, // TODO: Implement opening main window
+      { label: 'Open App', click: () => { if (this.openMainCallback) this.openMainCallback(); } },
       { label: 'Quit', click: () => app.quit() }
     ]);
     this.tray.setContextMenu(contextMenu);
@@ -48,8 +49,9 @@ class TrayManager {
       resizable: false,
       transparent: true,
       webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false,
+        nodeIntegration: false,
+        contextIsolation: true,
+        preload: path.join(__dirname, 'preload.js')
       }
     });
 

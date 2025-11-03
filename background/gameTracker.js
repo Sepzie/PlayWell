@@ -25,7 +25,8 @@ let activeGamingSessions = {}; // public Snapshot as an object {game_id: game_se
 //     Status: string,
 //     TerminationDate: string formatted as date,
 //     UserModeTime: string as big int
-// }
+// }const timer = require('./timerController.js');
+
 async function getGameProcessesSteam () {
   // It is a game when it is under Steamapps common directory and is not the UnityCrashHandler
   where = 'executablepath like "%steamapps%common%" and not name like "%UnityCrashHandler%"'
@@ -111,7 +112,19 @@ const GameTracker = {
               Genre.DECKBUILDER // everything is this for now
             ));
           }
-          Promise.all(upserts).then((t) => {recordGameSessions(t);});
+          Promise.all(upserts).then((t) => {
+            recordGameSessions(t);
+            // If we found any games in this snapshot, resume the timer; otherwise pause it
+            try {
+              if (snapshot && snapshot.length > 0) {
+                timer.resume();
+              } else {
+                timer.pause();
+              }
+            } catch (e) {
+              console.error(`${proctracker}[GameTracker] timer control error ${err}`, e, `${reset}`);
+            }
+          });
         });
       }, 1000 * INTERVAL_SECONDS)
   },
