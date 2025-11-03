@@ -1,6 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const TrayManager = require('./electron.tray.js'); 
+const TrayManager = require('./electron.tray.js');
 const { startBackground, stopBackground } = require('./background/index.js');
 
 // Keep a global reference of the window object
@@ -22,7 +22,7 @@ function createWindow() {
   // Load the app
   const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
   console.log('isDev:', isDev, 'NODE_ENV:', process.env.NODE_ENV, 'isPackaged:', app.isPackaged);
-  
+
   if (isDev) {
     // In development, load from Vite dev server
     console.log('Loading from Vite dev server: http://localhost:5173');
@@ -80,6 +80,55 @@ ipcMain.handle('app-version', () => {
   return app.getVersion();
 });
 
+// Central timer state managed in main so multiple renderers stay in sync
+let timerState = { duration: 0, timeLeft: 0, running: false };
+let timerInterval = null;
+
+function broadcastTimerState() {
+  const windows = BrowserWindow.getAllWindows();
+  windows.forEach(w => {
+    try { w.webContents.send('timer-update', timerState); } catch (e) { }
+  });
+}
+
+function startTimer(durationSeconds) {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  timerState.duration = Math.max(0, Math.min(24 * 3600, Number(durationSeconds) || 0));
+  timerState.timeLeft = timerState.duration;
+  timerState.running = timerState.duration > 0;
+  broadcastTimerState();
+
+  timerInterval = setInterval(() => {
+    if (timerState.running) {
+      timerState.timeLeft = Math.max(0, timerState.timeLeft - 1);
+    }
+    if (timerState.timeLeft <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerState.running = false;
+    }
+    broadcastTimerState();
+  }, 1000);
+}
+
+function togglePauseTimer() {
+  timerState.running = !timerState.running;
+  broadcastTimerState();
+}
+
+function resetTimer() {
+  timerState.timeLeft = timerState.duration;
+  broadcastTimerState();
+}
+
+ipcMain.on('timer-start', (ev, durationSeconds) => startTimer(durationSeconds));
+ipcMain.on('timer-toggle-pause', () => togglePauseTimer());
+ipcMain.on('timer-reset', () => resetTimer());
+ipcMain.handle('timer-get-state', () => ({ ...timerState }));
+
 // Open/focus main window and navigate to a limits page upon request from tray menu
 ipcMain.on('open-limits', () => {
   try {
@@ -112,16 +161,12 @@ ipcMain.on('open-main-window', () => {
 });
 
 function OpenMainWindow() {
-  try {
-    if (!mainWindow) {
-      createWindow();
-    }
-    if (mainWindow) {
-      mainWindow.show();
-      mainWindow.focus();
-    }
-  } catch (err) {
-    console.error('Error handling open-main-window:', err);
+  if (!mainWindow) {
+    createWindow();
+  }
+  if (mainWindow) {
+    mainWindow.show();
+    mainWindow.focus();
   }
 }
 

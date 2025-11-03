@@ -18,6 +18,18 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Request the main process to open/focus the main application window
   openMain: () => ipcRenderer.send('open-main-window')
 
+  ,
+  // Timer APIs
+  onTimerUpdate: (callback) => {
+    const listener = (event, state) => callback(state);
+    ipcRenderer.on('timer-update', listener);
+    return () => ipcRenderer.removeListener('timer-update', listener);
+  },
+  startTimer: (durationSeconds) => ipcRenderer.send('timer-start', durationSeconds),
+  togglePauseTimer: () => ipcRenderer.send('timer-toggle-pause'),
+  resetTimer: () => ipcRenderer.send('timer-reset'),
+  getTimerState: () => ipcRenderer.invoke('timer-get-state')
+
   // TODO: Add more IPC methods as needed
   // Example:
   // getGameSessions: () => ipcRenderer.invoke('get-game-sessions'),

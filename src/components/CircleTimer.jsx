@@ -1,31 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import '/src/css/CircleTimer.css';
 
-const CircleTimer = ({ durationInSeconds, resetKey }) => {
-    const [timeLeft, setTimeLeft] = useState(durationInSeconds);
+// Display-only CircleTimer. Receives current duration and timeLeft from main process.
+const CircleTimer = ({ durationInSeconds = 0, timeLeft = 0 }) => {
     const radius = 45;
     const circumference = 2 * Math.PI * radius;
-
-    // Reset when duration or resetKey changes
-    useEffect(() => {
-        setTimeLeft(durationInSeconds);
-    }, [durationInSeconds, resetKey]);
-
-    // Single interval that decrements and stops at 0
-    useEffect(() => {
-        if (!durationInSeconds || durationInSeconds <= 0) return;
-        let id = setInterval(() => {
-            setTimeLeft(prev => {
-                if (prev <= 1) {
-                    clearInterval(id);
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-
-        return () => clearInterval(id);
-    }, [durationInSeconds]);
 
     // Guard against division by zero
     const progress = durationInSeconds > 0 ? (timeLeft / durationInSeconds) * circumference : 0;
