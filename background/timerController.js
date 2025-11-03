@@ -1,5 +1,4 @@
 const { EventEmitter } = require('events');
-const { i } = require('framer-motion/client');
 
 const MAX_SECONDS = 24 * 3600;
 
@@ -11,21 +10,21 @@ class TimerController extends EventEmitter {
     }
 
     _broadcast() {
-        // Emit a clone to avoid external mutation
         this.emit('update', { ...this.state });
     }
 
-    start(durationSeconds) {
+    setup(durationSeconds) {
         try {
+            // Setup timer with new duration
             this.clearInterval();
             this.state.duration = Math.max(0, Math.min(MAX_SECONDS, Number(durationSeconds) || 0));
             this.state.timeLeft = this.state.duration;
-            this.state.running = this.state.duration > 0;
             this._broadcast();
 
-            if (this.state.running) this._startInterval();
+            // Start interval, not necessarily running
+            this._startInterval();
         } catch (err) {
-            console.error('TimerController.start error', err);
+            console.error('TimerController.setup error', err);
         }
     }
 
@@ -51,17 +50,18 @@ class TimerController extends EventEmitter {
     _startInterval() {
         if (this._interval) return;
         this._interval = setInterval(() => {
-            try {
-                if (this.state.running) {
-                    this.state.timeLeft = Math.max(0, this.state.timeLeft - 1);
-                    if (this.state.timeLeft <= 0) {
-                        this.clearInterval();
-                        this.state.running = false;
-                    }
+            // Decrement time left if running
+            if (this.state.running) {
+                this.state.timeLeft = Math.max(0, this.state.timeLeft - 1);
+
+                // Stop timer if time's up
+                if (this.state.timeLeft <= 0) {
+                    this.clearInterval();
+                    this.state.running = false;
                 }
+                
+                // Broadcast updated state
                 this._broadcast();
-            } catch (e) {
-                console.error('Timer tick error', e);
             }
         }, 1000);
     }

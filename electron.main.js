@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const TrayManager = require('./electron.tray.js');
 const { startBackground, stopBackground } = require('./background/index.js');
+const timer = require('./background/timerController.js');
 
 // Keep a global reference of the window object
 let mainWindow;
@@ -79,8 +80,6 @@ app.on('window-all-closed', () => {
 ipcMain.handle('app-version', () => {
   return app.getVersion();
 });
-// Timer controller (centralized) so all renderers stay in sync
-const timer = require(path.join(__dirname, 'background', 'timerController.js'));
 
 // Broadcast timer updates from controller to all renderer windows
 timer.on('update', (state) => {
@@ -90,7 +89,8 @@ timer.on('update', (state) => {
   });
 });
 
-ipcMain.on('timer-start', (ev, durationSeconds) => timer.start(durationSeconds));
+// Timer control IPC handlers
+ipcMain.on('timer-start', (ev, durationSeconds) => timer.setup(durationSeconds));
 ipcMain.on('timer-pause', () => timer.pause());
 ipcMain.on('timer-reset', () => timer.reset());
 ipcMain.handle('timer-get-state', () => timer.getState());

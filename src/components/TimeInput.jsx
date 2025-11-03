@@ -29,7 +29,7 @@ function TimeInput() {
             onChange={handleHoursChange}
             min="0"
             max="23"
-            placeholder="HH"
+            placeholder="0"
           />
           <span className="unit">h</span>
           <div className="spinner">
@@ -52,7 +52,7 @@ function TimeInput() {
             onChange={handleMinutesChange}
             min="0"
             max="59"
-            placeholder="MM"
+            placeholder="0"
           />
           <span className="unit">m</span>
           <div className="spinner">

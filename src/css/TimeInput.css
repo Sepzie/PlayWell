@@ -20,11 +20,11 @@
 .input-with-unit {
     position: relative;
     display: inline-block;
-    left: -12.5%;
+    left: -11%;
 }
 
 .input-with-unit input {
-    padding-right: 10px;
+    padding-right: 5px;
 }
 
 .input-with-unit .unit {
