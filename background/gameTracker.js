@@ -9,6 +9,7 @@ const { Genre } = require('@prisma/client');
 const INTERVAL_SECONDS = 3;
 let background_pid;
 let snapshot= []; // found games for current time slice
+const timer = require('./timerController.js');
 
 async function getGameProcessesSteam () {
   // It is a game when it is under Steamapps common directory and is not the UnityCrashHandler
@@ -62,7 +63,18 @@ const GameTracker = {
               Genre.DECKBUILDER // everything is this for now
             ));
           }
-          Promise.all(upserts).then(() => {recordGameSessions();});
+          Promise.all(upserts).then(() => {recordGameSessions();
+            // If we found any games in this snapshot, resume the timer; otherwise pause it
+            try {
+              if (snapshot && snapshot.length > 0) {
+                timer.resume();
+              } else {
+                timer.pause();
+              }
+            } catch (e) {
+              console.error(`${proctracker}[GameTracker] timer control error ${err}`, e, `${reset}`);
+            }
+          });
         });
       }, 1000 * INTERVAL_SECONDS)
   },

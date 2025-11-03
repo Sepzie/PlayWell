@@ -79,55 +79,22 @@ app.on('window-all-closed', () => {
 ipcMain.handle('app-version', () => {
   return app.getVersion();
 });
+// Timer controller (centralized) so all renderers stay in sync
+const timer = require(path.join(__dirname, 'background', 'timerController.js'));
 
-// Central timer state managed in main so multiple renderers stay in sync
-let timerState = { duration: 0, timeLeft: 0, running: false };
-let timerInterval = null;
-
-function broadcastTimerState() {
+// Broadcast timer updates from controller to all renderer windows
+timer.on('update', (state) => {
   const windows = BrowserWindow.getAllWindows();
   windows.forEach(w => {
-    try { w.webContents.send('timer-update', timerState); } catch (e) { }
+    try { w.webContents.send('timer-update', state); } catch (e) { }
   });
-}
+});
 
-function startTimer(durationSeconds) {
-  if (timerInterval) {
-    clearInterval(timerInterval);
-    timerInterval = null;
-  }
-  timerState.duration = Math.max(0, Math.min(24 * 3600, Number(durationSeconds) || 0));
-  timerState.timeLeft = timerState.duration;
-  timerState.running = timerState.duration > 0;
-  broadcastTimerState();
-
-  timerInterval = setInterval(() => {
-    if (timerState.running) {
-      timerState.timeLeft = Math.max(0, timerState.timeLeft - 1);
-    }
-    if (timerState.timeLeft <= 0) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-      timerState.running = false;
-    }
-    broadcastTimerState();
-  }, 1000);
-}
-
-function togglePauseTimer() {
-  timerState.running = !timerState.running;
-  broadcastTimerState();
-}
-
-function resetTimer() {
-  timerState.timeLeft = timerState.duration;
-  broadcastTimerState();
-}
-
-ipcMain.on('timer-start', (ev, durationSeconds) => startTimer(durationSeconds));
-ipcMain.on('timer-toggle-pause', () => togglePauseTimer());
-ipcMain.on('timer-reset', () => resetTimer());
-ipcMain.handle('timer-get-state', () => ({ ...timerState }));
+ipcMain.on('timer-start', (ev, durationSeconds) => timer.start(durationSeconds));
+ipcMain.on('timer-pause', () => timer.pause());
+ipcMain.on('timer-reset', () => timer.reset());
+ipcMain.handle('timer-get-state', () => timer.getState());
+ipcMain.on('timer-resume', () => timer.resume());
 
 // Open/focus main window and navigate to a limits page upon request from tray menu
 ipcMain.on('open-limits', () => {

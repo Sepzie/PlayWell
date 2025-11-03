@@ -26,7 +26,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () => ipcRenderer.removeListener('timer-update', listener);
   },
   startTimer: (durationSeconds) => ipcRenderer.send('timer-start', durationSeconds),
-  togglePauseTimer: () => ipcRenderer.send('timer-toggle-pause'),
+  pauseTimer: () => ipcRenderer.send('timer-pause'),
+  resumeTimer: () => ipcRenderer.send('timer-resume'),
   resetTimer: () => ipcRenderer.send('timer-reset'),
   getTimerState: () => ipcRenderer.invoke('timer-get-state')
 
