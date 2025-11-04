@@ -65,6 +65,7 @@ class GameTracker extends BackgroundService {
   /**
    * Handles GameSession tracking controls.
    * A GameSession can be of 3 states: continuing, starting, or ending.
+   * Now updates the database on every interval tick for active sessions.
    *
    * @param {Array[Object]} snapshot an array of Game objects detected by the GameTracker at this current time step
    */
@@ -74,11 +75,18 @@ class GameTracker extends BackgroundService {
 
     for (const game of snapshot) {
       if (Object.hasOwn(this.activeGamingSessions, game.id)) {
-        // This game is continuing
+        // This game is continuing - update duration and write to DB
         nextActiveGamingSessions[game.id] = this.activeGamingSessions[game.id];
         nextActiveGamingSessions[game.id].durationMinutes += INTERVAL_SECONDS / 60;
+
+        // Update DB with current duration
+        let updateP = GamingSessionRepository.updateGamingSession(
+          nextActiveGamingSessions[game.id].id,
+          nextActiveGamingSessions[game.id].durationMinutes
+        );
+        promises.push(updateP);
       } else {
-        // This game just started
+        // This game just started - create DB record
         let startP = GamingSessionRepository.startGamingSession(game.id, 0).then((gs) => {
           nextActiveGamingSessions[game.id] = gs;
         });
@@ -88,7 +96,7 @@ class GameTracker extends BackgroundService {
 
     for (const [gid, gs] of Object.entries(this.activeGamingSessions)) {
       if (!Object.hasOwn(nextActiveGamingSessions, gid)) {
-        // This game has ended
+        // This game has ended - final DB update
         let endP = GamingSessionRepository.endGamingSession(gs.id, gs.durationMinutes);
         promises.push(endP);
       }

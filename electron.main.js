@@ -174,7 +174,10 @@ ipcMain.handle('get-game-stats', async (event, options = {}) => {
 
     console.log(`[electron.main.js] Fetching stats from ${startDate.toISOString()} to ${endDate.toISOString()}`);
 
+    // Get all sessions from database (including active ones, since they're now updated in real-time)
     const stats = await GamingSessionRepository.getGameStats(startDate, endDate);
+
+    console.log(`[electron.main.js] Returning ${stats.length} games`);
     return stats;
 
   } catch (error) {
