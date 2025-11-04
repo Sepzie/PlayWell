@@ -1,47 +1,101 @@
 const BackgroundService = require('./BackgroundService.js');
-
-const MAX_SECONDS = 24 * 3600;
+const { LimitsService } = require('../services/limitsService.js');
+const { UserRepository } = require('../repository/user.js');
 
 class TimerController extends BackgroundService {
     constructor() {
         super('TimerController');
-        this.state = { duration: 0, timeLeft: 0, running: false };
+        this.state = {
+            hasLimit: false,
+            limitMinutes: 0,
+            playedMinutes: 0,
+            remainingMinutes: 0,
+            isOverLimit: false,
+            // Legacy fields for backwards compatibility (converted to seconds)
+            duration: 0,
+            timeLeft: 0,
+            running: false
+        };
+        this.wasOverLimit = false; // Track previous over-limit state
     }
 
     _broadcast() {
         this.emit('update', { ...this.state });
     }
 
-    setup(durationSeconds) {
-        try {
-            // Setup timer with new duration
-            this.clearInterval();
-            this.state.duration = Math.max(0, Math.min(MAX_SECONDS, Number(durationSeconds) || 0));
-            this.state.timeLeft = this.state.duration;
-            this._broadcast();
+    /**
+     * Start the timer - it will auto-update based on limits and playtime
+     */
+    start() {
+        super.start();
+        this._startInterval(10000); // Update every 10 seconds
+        this.updateFromLimits(); // Initial update
+    }
 
-            // Start interval, not necessarily running
-            this._startInterval(1000);
+    /**
+     * Updates timer state by fetching current limit status from LimitsService.
+     * This replaces the old manual countdown logic.
+     */
+    async updateFromLimits() {
+        try {
+            const user = UserRepository.getCurrentUser();
+            if (!user) {
+                this._log('warn', 'No user loaded, cannot update limits');
+                return;
+            }
+
+            // Get current limit status
+            const status = await LimitsService.getLimitStatus(user.id);
+
+            // Update state
+            this.state.hasLimit = status.hasLimit;
+            this.state.limitMinutes = status.limitMinutes;
+            this.state.playedMinutes = status.playedMinutes;
+            this.state.remainingMinutes = status.remainingMinutes;
+            this.state.isOverLimit = status.isOverLimit;
+
+            // Convert to seconds for legacy compatibility
+            this.state.duration = status.limitMinutes * 60;
+            this.state.timeLeft = status.remainingMinutes * 60;
+            this.state.running = status.hasLimit; // Running if there's a limit
+
+            // Check if over-limit state changed
+            if (status.isOverLimit !== this.wasOverLimit) {
+                this.wasOverLimit = status.isOverLimit;
+                this.emit('over-limit-changed', { isOverLimit: status.isOverLimit });
+                this._log('info', `Over-limit state changed: ${status.isOverLimit ? 'OVER LIMIT' : 'within limit'}`);
+            }
+
+            this._broadcast();
         } catch (err) {
-            this._log('error', 'setup error', err);
+            this._log('error', 'updateFromLimits error', err);
         }
     }
 
+    /**
+     * Legacy method - kept for backward compatibility but now triggers limit update
+     */
+    setup(durationSeconds) {
+        this._log('info', 'Legacy setup() called, updating from limits instead');
+        this.updateFromLimits();
+    }
+
+    /**
+     * Legacy methods - kept for backward compatibility
+     */
     resume() {
-        this.state.running = true;
-        this._log('info', 'Timer resumed');
-        this._broadcast();
+        this._log('info', 'Legacy resume() called');
+        this.updateFromLimits();
     }
 
     pause() {
-        this.state.running = false;
-        this._log('info', 'Timer paused');
-        this._broadcast();
+        this._log('info', 'Legacy pause() called');
+        this.updateFromLimits();
     }
 
     reset() {
-        this.state.timeLeft = this.state.duration;
-        this._broadcast();
+        this._log('info', 'Legacy reset() called');
+        this.updateFromLimits();
     }
 
     getState() {
@@ -49,19 +103,8 @@ class TimerController extends BackgroundService {
     }
 
     _onIntervalTick() {
-        // Decrement time left if running
-        if (this.state.running) {
-            this.state.timeLeft = Math.max(0, this.state.timeLeft - 1);
-
-            // Stop timer if time's up
-            if (this.state.timeLeft <= 0) {
-                this.clearInterval();
-                this.state.running = false;
-            }
-
-            // Broadcast updated state
-            this._broadcast();
-        }
+        // Update from limits service on each tick
+        this.updateFromLimits();
     }
 }
 

@@ -30,6 +30,7 @@ async function startBackground() {
 
   console.info(`${server}[index.js]${reset} Starting background process...`);
   gameTracker.startTracking();
+  timer.start(); // Start the timer to track limits
   console.info(`${server}[index.js]${reset} Background processes started`);
 }
 
