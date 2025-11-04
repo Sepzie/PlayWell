@@ -133,6 +133,8 @@ function HistoryBarChart(){
         } else {
             // Month input returns YYYY-MM format
             const newDate = new Date(e.target.value);
+            newDate.setDate(1);
+            newDate.setMonth(newDate.getMonth() + 1);
             setCurrentDate(newDate);
         }
     };
@@ -153,6 +155,15 @@ function HistoryBarChart(){
         const month = String(currentMonth + 1).padStart(2, '0');
         return `${currentYear}-${month}`;
     };
+
+    const showDateSelector = () => {
+      if (yearBreakdown) {
+        document.getElementById("year-input").showPicker()
+      }
+      else {
+        document.getElementById("month-input").showPicker()
+      }
+    }
 
     return (
       <div id="history-bar-chart-components">
@@ -198,7 +209,7 @@ function HistoryBarChart(){
               </select>
             )}
 
-            <button id="current-date-button">
+            <button id="current-date-button" onClick={() => showDateSelector()}>
               {getDateDisplayText()}
             </button>
           </div>
