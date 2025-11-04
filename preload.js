@@ -35,7 +35,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getGameStats: (options) => ipcRenderer.invoke('get-game-stats', options),
 
   // History APIs
-  getHistoryData: (options) => ipcRenderer.invoke('get-history-data', options)
+  getHistoryData: (options) => ipcRenderer.invoke('get-history-data', options),
+
+  // Limits APIs
+  getLimits: () => ipcRenderer.invoke('get-limits'),
+  setLimit: (type, limitMinutes) => ipcRenderer.invoke('set-limit', { type, limitMinutes }),
+  deleteLimit: (type) => ipcRenderer.invoke('delete-limit', { type }),
+  getLimitStatus: () => ipcRenderer.invoke('get-limit-status')
 
   // TODO: Add more IPC methods as needed
   // Example:

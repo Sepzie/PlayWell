@@ -4,6 +4,8 @@ const TrayManager = require('./electron.tray.js');
 const { startBackground, stopBackground } = require('./background/index.js');
 const timer = require('./background/workers/timerController.js');
 const { StatsService } = require('./background/services/statsService.js');
+const { LimitsService } = require('./background/services/limitsService.js');
+const { UserRepository } = require('./background/repository/user.js');
 
 // Keep a global reference of the window object
 let mainWindow;
@@ -90,6 +92,25 @@ timer.on('update', (state) => {
   });
 });
 
+// Handle over-limit state changes - show tray popup
+timer.on('over-limit-changed', ({ isOverLimit }) => {
+  if (isOverLimit && trayManager && trayManager.trayWindow) {
+    try {
+      console.log('[Main] User went over limit - showing tray popup');
+      // Position and show the tray window
+      const tray = trayManager.tray;
+      const bounds = tray.getBounds();
+      const x = Math.round(bounds.x + (bounds.width / 2) - (trayManager.trayWindow.getSize()[0] / 2));
+      const y = Math.round(bounds.y - trayManager.trayWindow.getSize()[1]);
+      trayManager.trayWindow.setPosition(x, y);
+      trayManager.trayWindow.show();
+      trayManager.trayWindow.focus();
+    } catch (e) {
+      console.error('[Main] Error showing tray on over-limit:', e);
+    }
+  }
+});
+
 // Timer control IPC handlers
 ipcMain.on('timer-start', (ev, durationSeconds) => timer.setup(durationSeconds));
 ipcMain.on('timer-pause', () => timer.pause());
@@ -136,6 +157,50 @@ ipcMain.handle('get-game-stats', async (event, options = {}) => {
 // History IPC handler
 ipcMain.handle('get-history-data', async (event, options = {}) => {
   return await StatsService.getHistoryData(options);
+});
+
+// Limits IPC handlers
+ipcMain.handle('get-limits', async () => {
+  const user = UserRepository.getCurrentUser();
+  if (!user) {
+    console.error('[IPC] No user loaded for get-limits');
+    return [];
+  }
+  return await LimitsService.getUserLimits(user.id);
+});
+
+ipcMain.handle('set-limit', async (event, { type, limitMinutes }) => {
+  const user = UserRepository.getCurrentUser();
+  if (!user) {
+    console.error('[IPC] No user loaded for set-limit');
+    return {};
+  }
+  return await LimitsService.setLimit(user.id, type, limitMinutes);
+});
+
+ipcMain.handle('delete-limit', async (event, { type }) => {
+  const user = UserRepository.getCurrentUser();
+  if (!user) {
+    console.error('[IPC] No user loaded for delete-limit');
+    return {};
+  }
+  return await LimitsService.deleteLimit(user.id, type);
+});
+
+ipcMain.handle('get-limit-status', async () => {
+  const user = UserRepository.getCurrentUser();
+  if (!user) {
+    console.error('[IPC] No user loaded for get-limit-status');
+    return {
+      hasLimit: false,
+      limitMinutes: 0,
+      playedMinutes: 0,
+      remainingMinutes: 0,
+      isOverLimit: false,
+      dayOfWeek: 'UNKNOWN'
+    };
+  }
+  return await LimitsService.getLimitStatus(user.id);
 });
 
 function OpenMainWindow() {
