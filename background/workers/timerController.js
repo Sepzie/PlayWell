@@ -20,6 +20,21 @@ class TimerController extends BackgroundService {
         };
         this.wasOverLimit = false; // Track previous over-limit state
         this.tickCounter = 0; // Track ticks for DB sync timing
+        this.isGaming = false; // Track if user is currently gaming
+    }
+
+    /**
+     * Set gaming state - called when games start/stop
+     */
+    setGamingState(isGaming) {
+        const changed = this.isGaming !== isGaming;
+        this.isGaming = isGaming;
+
+        if (changed) {
+            this._log('info', `Gaming state: ${isGaming ? 'ACTIVE' : 'INACTIVE'}`);
+            // Force a DB sync when gaming state changes to get accurate values
+            this.updateFromLimits();
+        }
     }
 
     _broadcast() {
@@ -92,6 +107,7 @@ class TimerController extends BackgroundService {
     /**
      * Called every second for smooth countdown.
      * Periodically resyncs with DB for accuracy.
+     * Only counts down when actively gaming.
      */
     _onIntervalTick() {
         this.tickCounter++;
@@ -102,8 +118,8 @@ class TimerController extends BackgroundService {
             return; // updateFromLimits will broadcast
         }
 
-        // Local countdown: decrement timeLeft if we have a limit
-        if (this.state.hasLimit) {
+        // Local countdown: decrement timeLeft only if gaming and we have a limit
+        if (this.state.hasLimit && this.isGaming) {
             // Decrement local timer (can go negative when over limit)
             this.state.timeLeft--;
 
