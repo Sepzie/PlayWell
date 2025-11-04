@@ -25,7 +25,7 @@ gameTracker.on('gaming-state-changed', ({ isGaming }) => {
 });
 
 async function startBackground() {
-  connectDb();
+  await connectDb();
   await UserRepository.loadNewOrReturningUser("Elsa Prisma");
 
   console.info(`${server}[index.js]${reset} Starting background process...`);

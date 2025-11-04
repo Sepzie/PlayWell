@@ -1,3 +1,6 @@
+// Load environment variables first
+require('dotenv').config();
+
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const TrayManager = require('./electron.tray.js');
