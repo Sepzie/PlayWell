@@ -131,13 +131,14 @@ class GameTracker extends BackgroundService {
             this.emit('gaming-state-changed', { isGaming });
             this._log('info', `Gaming state changed: ${isGaming ? 'started' : 'stopped'}`);
           }
+
+          // every 10 seconds log (game tracker running, found n games)
+          if (Date.now() - this.lastLogTime >= 10000) {
+            this.lastLogTime = Date.now();
+            this._log('info', `Game tracker is running, found ${snapshot.length} games`);
+          }
         });
       });
-      // every 10 seconds log (game tracker running, found n games)
-      if (Date.now() - this.lastLogTime >= 10000) {
-        this.lastLogTime = Date.now();
-        this._log('info', `Game tracker is running, found ${snapshot.length} games`);
-      }
   }
 
   /**
