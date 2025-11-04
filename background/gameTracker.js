@@ -51,12 +51,14 @@ async function getGameProcessesSteam () {
 /**
  * GameTracker extends BackgroundService to track active gaming sessions.
  * It periodically scans for running game processes and manages session state.
+ *
+ * Emits 'gaming-state-changed' event with {isGaming: boolean} when gaming state changes.
  */
 class GameTracker extends BackgroundService {
-  constructor(timerController) {
+  constructor() {
     super('GameTracker');
     this.activeGamingSessions = {}; // {game_id: game_session}
-    this.timerController = timerController; // Optional timer controller for coordination
+    this.wasGaming = false; // Track previous state to detect changes
   }
 
   /**
@@ -128,17 +130,12 @@ class GameTracker extends BackgroundService {
         Promise.all(upserts).then((t) => {
           this.recordGameSessions(t);
 
-          // If we found any games in this snapshot, resume the timer; otherwise pause it
-          if (this.timerController) {
-            try {
-              if (snapshot && snapshot.length > 0) {
-                this.timerController.resume();
-              } else {
-                this.timerController.pause();
-              }
-            } catch (e) {
-              this._log('error', 'timer control error', e);
-            }
+          // Check if gaming state changed and emit event
+          const isGaming = snapshot && snapshot.length > 0;
+          if (isGaming !== this.wasGaming) {
+            this.wasGaming = isGaming;
+            this.emit('gaming-state-changed', { isGaming });
+            this._log('info', `Gaming state changed: ${isGaming ? 'started' : 'stopped'}`);
           }
         });
       });
