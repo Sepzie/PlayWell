@@ -35,7 +35,6 @@ GamingSessionRepository.getAllGamingSessions = async () => {
         console.error(`${repo}[GamingSessionRepository]${err} ${error}${reset}`);
         return [];
     }
-    console.info(`${repo}[GamingSessionRepository]${reset} All gsessions: `, res);
     return res;
 }
 
@@ -53,7 +52,7 @@ GamingSessionRepository.deleteAllGamingSessions = async () => {
         console.error(`${repo}[GamingSessionRepository]${err} ${error}${reset}`);
         return {};
     }
-    console.info(`${repo}[GamingSessionRepository]${reset} Deleted gessions: `, res);
+    console.info(`${repo}[GamingSessionRepository]${reset} Deleted ${res.count} session(s)`);
     return res;
 }
 
@@ -72,7 +71,6 @@ GamingSessionRepository.getGamingSessionById = async (gsid) => {
         console.error(`${repo}[GamingSessionRepository]${err} ${error}${reset}`);
         return {};
     }
-    console.info(`${repo}[GamingSessionRepository]${reset} Found gsession record: `, res);
     return res;
 }
 
@@ -102,7 +100,7 @@ GamingSessionRepository.startGamingSession = async (game_id, startingDurationSec
         return {};
     }
     u = res;
-    console.info(`${repo}[GamingSessionRepository]${reset} Started new gsession: `, res);
+    console.info(`${repo}[GamingSessionRepository]${reset} Started session for game ID: ${res.gameId}`);
     return res;
 }
 
@@ -135,7 +133,6 @@ GamingSessionRepository.updateGamingSession = async (gsid, currentDurationSecond
         console.error(`${repo}[GamingSessionRepository]${err} ${error}${reset}`);
         return {};
     }
-    console.info(`${repo}[GamingSessionRepository]${reset} Updated gsession: `, res);
     return res;
 }
 
@@ -168,7 +165,7 @@ GamingSessionRepository.endGamingSession = async (gsid, finalDurationSeconds) =>
         console.error(`${repo}[GamingSessionRepository]${err} ${error}${reset}`);
         return {};
     }
-    console.info(`${repo}[GamingSessionRepository]${reset} Ended gsession: `, res);
+    console.info(`${repo}[GamingSessionRepository]${reset} Ended session (${Math.round(res.durationSeconds / 60)}m)`);
     return res;
 }
 
@@ -260,7 +257,7 @@ GamingSessionRepository.getGameStats = async (startDate, endDate) => {
             };
         });
 
-        console.info(`${repo}[GamingSessionRepository]${reset} Game stats: `, stats);
+        console.info(`${repo}[GamingSessionRepository]${reset} Calculated stats for ${stats.length} game(s)`);
         return stats;
 
     } catch (error) {

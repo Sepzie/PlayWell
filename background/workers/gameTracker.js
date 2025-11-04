@@ -34,7 +34,8 @@ async function getGameProcessesSteam () {
   
   try {
     const { stdout, stderr } = await execFile('wmic', ['process', 'where', where, 'get', get, '/format:csv']);
-    if (stderr) {
+    // WMIC writes "No Instance(s) Available." to stderr when no processes match - this is not an error
+    if (stderr && !stderr.includes('No Instance(s) Available')) {
       console.error(`${proctracker}[GameTracker]${err}`, stderr, `${reset}`);
       return [];
     }
@@ -137,13 +138,7 @@ class GameTracker extends BackgroundService {
           if (isGaming !== this.wasGaming) {
             this.wasGaming = isGaming;
             this.emit('gaming-state-changed', { isGaming });
-            this._log('info', `Gaming state changed: ${isGaming ? 'started' : 'stopped'}`);
-          }
-
-          // every 10 seconds log (game tracker running, found n games)
-          if (Date.now() - this.lastLogTime >= 10000) {
-            this.lastLogTime = Date.now();
-            this._log('info', `Game tracker is running, found ${snapshot.length} games`);
+            this._log('info', `Gaming ${isGaming ? 'started' : 'stopped'}${isGaming ? ` (${snapshot.length} game${snapshot.length !== 1 ? 's' : ''})` : ''}`);
           }
         });
       });

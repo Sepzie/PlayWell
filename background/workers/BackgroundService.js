@@ -28,8 +28,6 @@ class BackgroundService extends EventEmitter {
         this._interval = setInterval(() => {
             this._onIntervalTick();
         }, intervalMs);
-
-        this._log('info', `Interval started (${intervalMs}ms)`);
     }
 
     /**
@@ -46,7 +44,6 @@ class BackgroundService extends EventEmitter {
         if (this._interval) {
             clearInterval(this._interval);
             this._interval = null;
-            this._log('info', 'Interval cleared');
         }
     }
 
@@ -88,7 +85,7 @@ class BackgroundService extends EventEmitter {
      * Override in subclasses to add initialization logic.
      */
     start() {
-        this._log('info', 'Starting service...');
+        // Override in subclasses if needed
     }
 
     /**
@@ -96,7 +93,6 @@ class BackgroundService extends EventEmitter {
      * Override in subclasses to add cleanup logic.
      */
     stop() {
-        this._log('info', 'Stopping service...');
         this.clearInterval();
     }
 }

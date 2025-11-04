@@ -118,8 +118,6 @@ StatsService.getGameStats = async (options) => {
     try {
         const { startDate, endDate } = parseDateRange(options);
 
-        console.info(`${service}[StatsService]${reset} Fetching stats from ${startDate.toISOString()} to ${endDate.toISOString()}`);
-
         // Get all sessions from database (these are being updated in real-time by GameTracker)
         const sessions = await GamingSessionRepository.getAllGamingSessions();
 
@@ -205,7 +203,7 @@ StatsService.getGameStats = async (options) => {
         return stats;
 
     } catch (error) {
-        console.error(`${service}[StatsService]${err} Error getting game stats:`, error, reset);
+        console.error(`${service}[StatsService]${err} Error getting game stats:${reset}`, error);
         return [];
     }
 };
@@ -222,8 +220,6 @@ StatsService.getHistoryData = async (options) => {
     try {
         const { granularity = 'day' } = options;
         const { startDate, endDate } = parseDateRange(options);
-
-        console.info(`${service}[StatsService]${reset} Fetching history data (${granularity}) from ${startDate.toISOString()} to ${endDate.toISOString()}`);
 
         // Get all sessions
         const sessions = await GamingSessionRepository.getAllGamingSessions();
@@ -302,7 +298,7 @@ StatsService.getHistoryData = async (options) => {
         return { labels, data };
 
     } catch (error) {
-        console.error(`${service}[StatsService]${err} Error getting history data:`, error, reset);
+        console.error(`${service}[StatsService]${err} Error getting history data:${reset}`, error);
         return { labels: [], data: [] };
     }
 };

@@ -27,7 +27,6 @@ GameRepository.getAllGames = async () => {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return [];
     }
-    console.info(`${repo}[GameRepository]${reset} All games: `, res);
     return res;
 }
 
@@ -48,7 +47,6 @@ GameRepository.getGameById = async (gid) => {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return {};
     }
-    console.info(`${repo}[GameRepository]${reset} Found game: `, res);
     return res;
 }
 
@@ -69,7 +67,6 @@ GameRepository.getGameByName = async (gname) => {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return {};
     }
-    console.info(`${repo}[GameRepository]${reset} Found game: `, res);
     return res;
 }
 
@@ -99,7 +96,7 @@ GameRepository.createGame = async (name, location, platform, genre) => {
         return {};
     }
     u = res;
-    console.info(`${repo}[GameRepository]${reset} Created new game: `, res);
+    console.info(`${repo}[GameRepository]${reset} Created game: ${res.name}`);
     return res;
 }
 
@@ -120,7 +117,7 @@ GameRepository.deleteGames = async (gnames) => {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return {};
     }
-    console.info(`${repo}[GameRepository]${reset} Deleted games: `, res);
+    console.info(`${repo}[GameRepository]${reset} Deleted ${res.count} game(s)`);
     return res;
 }
 
@@ -169,7 +166,7 @@ GameRepository.deleteAllGames = async () => {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return {};
     }
-    console.info(`${repo}[GameRepository]${reset} Deleted games: `, res);
+    console.info(`${repo}[GameRepository]${reset} Deleted ${res.count} game(s)`);
     return res;
 }
 

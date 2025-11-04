@@ -27,7 +27,6 @@ class TimerController extends BackgroundService {
         this.isGaming = isGaming;
 
         if (changed) {
-            this._log('info', `Gaming state: ${isGaming ? 'ACTIVE' : 'INACTIVE'}`);
             // Force a DB sync when gaming state changes to get accurate values
             this.updateFromLimits();
         }

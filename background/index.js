@@ -12,10 +12,9 @@ const gameTracker = new GameTracker();
 // Wire up coordination: when gaming state changes, update timer
 gameTracker.on('gaming-state-changed', ({ isGaming }) => {
   try {
-    console.info(`${server}[index.js]${reset} Gaming state changed: ${isGaming ? 'ACTIVE' : 'INACTIVE'}`);
     timer.setGamingState(isGaming);
   } catch (e) {
-    console.error(`${server}[index.js]${err} Timer gaming state update error:`, e, reset);
+    console.error(`${server}[index.js]${err} Timer gaming state update error:${reset}`, e);
   }
 });
 

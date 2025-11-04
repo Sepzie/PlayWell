@@ -38,7 +38,7 @@ LimitsService.getUserLimits = async (userId) => {
     try {
         return await LimitRepository.getUserLimits(userId);
     } catch (error) {
-        console.error(`${service}[LimitsService]${err} Error getting user limits:`, error, reset);
+        console.error(`${service}[LimitsService]${err} Error getting user limits:${reset}`, error);
         return [];
     }
 };
@@ -55,7 +55,7 @@ LimitsService.setLimit = async (userId, type, limitSeconds) => {
     try {
         return await LimitRepository.setLimit(userId, type, limitSeconds);
     } catch (error) {
-        console.error(`${service}[LimitsService]${err} Error setting limit:`, error, reset);
+        console.error(`${service}[LimitsService]${err} Error setting limit:${reset}`, error);
         return {};
     }
 };
@@ -71,7 +71,7 @@ LimitsService.deleteLimit = async (userId, type) => {
     try {
         return await LimitRepository.deleteLimit(userId, type);
     } catch (error) {
-        console.error(`${service}[LimitsService]${err} Error deleting limit:`, error, reset);
+        console.error(`${service}[LimitsService]${err} Error deleting limit:${reset}`, error);
         return {};
     }
 };
@@ -88,11 +88,9 @@ LimitsService.getTodayLimit = async (userId) => {
         const dayOfWeek = DAY_OF_WEEK_MAP[today.getDay()];
 
         const limit = await LimitRepository.getLimitForDay(userId, dayOfWeek);
-        console.info(`${service}[LimitsService]${reset} Today is ${dayOfWeek}, limit: ${limit ? limit.limitSeconds + ' seconds' : 'none'}`);
-
         return limit;
     } catch (error) {
-        console.error(`${service}[LimitsService]${err} Error getting today's limit:`, error, reset);
+        console.error(`${service}[LimitsService]${err} Error getting today's limit:${reset}`, error);
         return null;
     }
 };
@@ -139,8 +137,6 @@ LimitsService.getLimitStatus = async (userId) => {
         const remainingSeconds = todayLimit.limitSeconds - playedSeconds;
         const isOverLimit = remainingSeconds < 0;
 
-        console.info(`${service}[LimitsService]${reset} Limit status - Limit: ${todayLimit.limitSeconds}s, Played: ${playedSeconds}s, Remaining: ${remainingSeconds}s, Over: ${isOverLimit}`);
-
         return {
             hasLimit: true,
             limitSeconds: todayLimit.limitSeconds,
@@ -150,7 +146,7 @@ LimitsService.getLimitStatus = async (userId) => {
             dayOfWeek
         };
     } catch (error) {
-        console.error(`${service}[LimitsService]${err} Error getting limit status:`, error, reset);
+        console.error(`${service}[LimitsService]${err} Error getting limit status:${reset}`, error);
         return {
             hasLimit: false,
             limitSeconds: 0,

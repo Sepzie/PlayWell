@@ -21,7 +21,7 @@ LimitRepository.getUserLimits = async (userId) => {
         const limits = await getPrisma().limit.findMany({
             where: { userId }
         });
-        console.info(`${repo}[LimitRepository]${reset} Found ${limits.length} limits for user ${userId}`);
+        console.info(`${repo}[LimitRepository]${reset} Found ${limits.length} limit(s)`);
         return limits;
     } catch (error) {
         console.error(`${repo}[LimitRepository]${err} Error fetching limits: ${error}${reset}`);
@@ -53,7 +53,7 @@ LimitRepository.setLimit = async (userId, type, limitSeconds) => {
                 limitSeconds
             }
         });
-        console.info(`${repo}[LimitRepository]${reset} Set limit for ${type}: ${limitSeconds} seconds`);
+        console.info(`${repo}[LimitRepository]${reset} Set limit for ${type}: ${Math.round(limitSeconds / 60)}m`);
         return limit;
     } catch (error) {
         console.error(`${repo}[LimitRepository]${err} Error setting limit: ${error}${reset}`);
