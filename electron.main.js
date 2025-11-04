@@ -120,6 +120,7 @@ ipcMain.on('timer-pause', () => timer.pause());
 ipcMain.on('timer-reset', () => timer.reset());
 ipcMain.handle('timer-get-state', () => timer.getState());
 ipcMain.on('timer-resume', () => timer.resume());
+ipcMain.on('timer-force-update', () => timer.forceUpdate());
 
 // Open/focus main window and navigate to a limits page upon request from tray menu
 ipcMain.on('open-limits', () => {

@@ -110,8 +110,13 @@ function Limits() {
 
       await Promise.all(promises);
 
-      // Reload limits to update UI
+      // Reload limits to update UI with the newly saved values
       await loadLimits();
+
+      // Force timer to update immediately with new limits
+      if (window.electronAPI && window.electronAPI.forceTimerUpdate) {
+        window.electronAPI.forceTimerUpdate();
+      }
 
       console.log('Limits saved successfully');
     } catch (error) {

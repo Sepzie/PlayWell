@@ -73,6 +73,14 @@ class TimerController extends BackgroundService {
     }
 
     /**
+     * Forces an immediate update from limits (useful after changing limits)
+     */
+    forceUpdate() {
+        this._log('info', 'Force update requested');
+        this.updateFromLimits();
+    }
+
+    /**
      * Legacy method - kept for backward compatibility but now triggers limit update
      */
     setup(durationSeconds) {

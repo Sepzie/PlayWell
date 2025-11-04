@@ -29,6 +29,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   pauseTimer: () => ipcRenderer.send('timer-pause'),
   resumeTimer: () => ipcRenderer.send('timer-resume'),
   resetTimer: () => ipcRenderer.send('timer-reset'),
+  forceTimerUpdate: () => ipcRenderer.send('timer-force-update'),
   getTimerState: () => ipcRenderer.invoke('timer-get-state'),
 
   // Stats APIs
