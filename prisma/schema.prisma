@@ -49,18 +49,18 @@ enum Genre {
 // GamingSession of User
 model GamingSession {
   id        String   @id @default(cuid())
-  
+
   // FK
   sessionOwner User  @relation("SessionsDone", fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  
+
   // FK
-  gamePlayed Game @relation("PartOfSessions", fields: [gameId], references: [id], onDelete: Cascade)  
+  gamePlayed Game @relation("PartOfSessions", fields: [gameId], references: [id], onDelete: Cascade)
   gameId    String
 
   startTime DateTime @default(now())
   endTime   DateTime @updatedAt
-  durationMinutes  Int?
+  durationSeconds  Int?
 }
 
 enum DayOfWeek {
@@ -81,7 +81,7 @@ model Limit {
   userId    Int
 
   type      DayOfWeek
-  limitMinutes  Int  @default(60)
+  limitSeconds  Int  @default(3600)
 
   @@unique([userId, type])
 }
