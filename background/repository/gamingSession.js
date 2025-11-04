@@ -11,9 +11,9 @@ const GamingSessionRepository = {
 
     getGamingSessionById: async (gsid) => {return {}},
 
-    startGamingSession: async (gameId, startingDurationMinutes) => {return {}},
-    updateGamingSession: async (gsid, durationMinutes) => {return {}},
-    endGamingSession: async (gsid, durationMinutes) => {return {}},
+    startGamingSession: async (gameId, startingDurationSeconds) => {return {}},
+    updateGamingSession: async (gsid, durationSeconds) => {return {}},
+    endGamingSession: async (gsid, durationSeconds) => {return {}},
 
     getGameStats: async (startDate, endDate) => {return []}
 };
@@ -79,21 +79,21 @@ GamingSessionRepository.getGamingSessionById = async (gsid) => {
 /**
  * Starts a GamingSession.
  * This creates a GamingSession record in database.
- * 
- * @param {string} game_id the id of a Game object 
- * @param {int} startingDurationMinutes non-negative integer representing a starting duration in minutes 
+ *
+ * @param {string} game_id the id of a Game object
+ * @param {int} startingDurationSeconds non-negative integer representing a starting duration in seconds
  * @returns the created GamingSession JSON object
  */
-GamingSessionRepository.startGamingSession = async (game_id, startingDurationMinutes) => {
+GamingSessionRepository.startGamingSession = async (game_id, startingDurationSeconds) => {
     try {
-        if (startingDurationMinutes < 0) {
-            throw Error("Can't have negative durationMinutes");
+        if (startingDurationSeconds < 0) {
+            throw Error("Can't have negative durationSeconds");
         }
 
         res = await getPrisma().gamingSession.create({
             data: {
                 gameId: game_id,
-                durationMinutes: startingDurationMinutes,
+                durationSeconds: startingDurationSeconds,
                 userId: UserRepository.getCurrentUser().id
             }
         });
@@ -112,13 +112,13 @@ GamingSessionRepository.startGamingSession = async (game_id, startingDurationMin
  * Does NOT update endTime, so the session remains "active" (endTime != updatedAt).
  *
  * @param {string} gsid id of the GamingSession
- * @param {number} currentDurationMinutes non-negative integer representing current duration
+ * @param {number} currentDurationSeconds non-negative integer representing current duration in seconds
  * @returns the updated GamingSession JSON object
  */
-GamingSessionRepository.updateGamingSession = async (gsid, currentDurationMinutes) => {
+GamingSessionRepository.updateGamingSession = async (gsid, currentDurationSeconds) => {
     try {
-        if (currentDurationMinutes < 0) {
-            throw Error("Can't have negative durationMinutes");
+        if (currentDurationSeconds < 0) {
+            throw Error("Can't have negative durationSeconds");
         }
 
         res = await getPrisma().gamingSession.update({
@@ -127,7 +127,7 @@ GamingSessionRepository.updateGamingSession = async (gsid, currentDurationMinute
                 userId: UserRepository.getCurrentUser().id
             },
             data: {
-                durationMinutes: currentDurationMinutes
+                durationSeconds: currentDurationSeconds
                 // Note: NOT updating endTime, it will auto-update via @updatedAt
             }
         });
@@ -144,13 +144,13 @@ GamingSessionRepository.updateGamingSession = async (gsid, currentDurationMinute
  * This updates a GamingSession record with final duration and marks it as complete.
  *
  * @param {string} gsid id of the GamingSession
- * @param {number} finalDurationMinutes non-negative integer representing final duration
+ * @param {number} finalDurationSeconds non-negative integer representing final duration in seconds
  * @returns the ended GamingSession JSON object
  */
-GamingSessionRepository.endGamingSession = async (gsid, finalDurationMinutes) => {
+GamingSessionRepository.endGamingSession = async (gsid, finalDurationSeconds) => {
     try {
-        if (finalDurationMinutes < 0) {
-            throw Error("Can't have negative durationMinutes");
+        if (finalDurationSeconds < 0) {
+            throw Error("Can't have negative durationSeconds");
         }
 
         // Final update with the ending duration
@@ -160,7 +160,7 @@ GamingSessionRepository.endGamingSession = async (gsid, finalDurationMinutes) =>
                 userId: UserRepository.getCurrentUser().id
             },
             data: {
-                durationMinutes: finalDurationMinutes
+                durationSeconds: finalDurationSeconds
                 // endTime will auto-update via @updatedAt
             }
         });
@@ -213,10 +213,10 @@ GamingSessionRepository.getGameStats = async (startDate, endDate) => {
         sessions.forEach(session => {
             const gameId = session.gameId;
             const gameName = session.gamePlayed.name;
-            const duration = session.durationMinutes || 0;
+            const durationSeconds = session.durationSeconds || 0;
 
             // Skip sessions with no duration (incomplete/stale sessions)
-            if (duration <= 0) {
+            if (durationSeconds <= 0) {
                 return;
             }
 
@@ -231,7 +231,8 @@ GamingSessionRepository.getGameStats = async (startDate, endDate) => {
                 };
             }
 
-            gameStatsMap[gameId].totalPlayTime += duration;
+            // Convert seconds to minutes for stats display
+            gameStatsMap[gameId].totalPlayTime += (durationSeconds / 60);
             gameStatsMap[gameId].playDates.add(playDate);
         });
 

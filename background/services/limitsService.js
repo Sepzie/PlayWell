@@ -48,12 +48,12 @@ LimitsService.getUserLimits = async (userId) => {
  *
  * @param {number} userId - The user's ID
  * @param {string} type - Day of week enum value (SUNDAY, MONDAY, etc.)
- * @param {number} limitMinutes - Limit in minutes
+ * @param {number} limitSeconds - Limit in seconds
  * @returns {Object} The created/updated limit object
  */
-LimitsService.setLimit = async (userId, type, limitMinutes) => {
+LimitsService.setLimit = async (userId, type, limitSeconds) => {
     try {
-        return await LimitRepository.setLimit(userId, type, limitMinutes);
+        return await LimitRepository.setLimit(userId, type, limitSeconds);
     } catch (error) {
         console.error(`${service}[LimitsService]${err} Error setting limit:`, error, reset);
         return {};
@@ -88,7 +88,7 @@ LimitsService.getTodayLimit = async (userId) => {
         const dayOfWeek = DAY_OF_WEEK_MAP[today.getDay()];
 
         const limit = await LimitRepository.getLimitForDay(userId, dayOfWeek);
-        console.info(`${service}[LimitsService]${reset} Today is ${dayOfWeek}, limit: ${limit ? limit.limitMinutes + ' minutes' : 'none'}`);
+        console.info(`${service}[LimitsService]${reset} Today is ${dayOfWeek}, limit: ${limit ? limit.limitSeconds + ' seconds' : 'none'}`);
 
         return limit;
     } catch (error) {
@@ -104,9 +104,9 @@ LimitsService.getTodayLimit = async (userId) => {
  * @param {number} userId - The user's ID
  * @returns {Object} Status object with:
  *   - hasLimit: boolean - whether a limit is set for today
- *   - limitMinutes: number - the limit in minutes (0 if no limit)
- *   - playedMinutes: number - time played today in minutes
- *   - remainingMinutes: number - time remaining (negative if over limit)
+ *   - limitSeconds: number - the limit in seconds (0 if no limit)
+ *   - playedSeconds: number - time played today in seconds
+ *   - remainingSeconds: number - time remaining in seconds (negative if over limit)
  *   - isOverLimit: boolean - whether user has exceeded the limit
  *   - dayOfWeek: string - current day name
  */
@@ -115,9 +115,10 @@ LimitsService.getLimitStatus = async (userId) => {
         // Get today's limit
         const todayLimit = await LimitsService.getTodayLimit(userId);
 
-        // Get today's playtime from stats
+        // Get today's playtime from stats (returns minutes, convert to seconds)
         const stats = await StatsService.getGameStats({ period: 'today' });
         const playedMinutes = stats.reduce((sum, game) => sum + game.playTime, 0);
+        const playedSeconds = Math.round(playedMinutes * 60);
 
         const today = new Date();
         const dayOfWeek = DAY_OF_WEEK_MAP[today.getDay()];
@@ -126,25 +127,25 @@ LimitsService.getLimitStatus = async (userId) => {
         if (!todayLimit) {
             return {
                 hasLimit: false,
-                limitMinutes: 0,
-                playedMinutes: Math.round(playedMinutes),
-                remainingMinutes: 0,
+                limitSeconds: 0,
+                playedSeconds,
+                remainingSeconds: 0,
                 isOverLimit: false,
                 dayOfWeek
             };
         }
 
-        // Calculate remaining time
-        const remainingMinutes = todayLimit.limitMinutes - playedMinutes;
-        const isOverLimit = remainingMinutes < 0;
+        // Calculate remaining time in seconds
+        const remainingSeconds = todayLimit.limitSeconds - playedSeconds;
+        const isOverLimit = remainingSeconds < 0;
 
-        console.info(`${service}[LimitsService]${reset} Limit status - Limit: ${todayLimit.limitMinutes}m, Played: ${Math.round(playedMinutes)}m, Remaining: ${Math.round(remainingMinutes)}m, Over: ${isOverLimit}`);
+        console.info(`${service}[LimitsService]${reset} Limit status - Limit: ${todayLimit.limitSeconds}s, Played: ${playedSeconds}s, Remaining: ${remainingSeconds}s, Over: ${isOverLimit}`);
 
         return {
             hasLimit: true,
-            limitMinutes: todayLimit.limitMinutes,
-            playedMinutes: Math.round(playedMinutes),
-            remainingMinutes: Math.round(remainingMinutes),
+            limitSeconds: todayLimit.limitSeconds,
+            playedSeconds,
+            remainingSeconds,
             isOverLimit,
             dayOfWeek
         };
@@ -152,9 +153,9 @@ LimitsService.getLimitStatus = async (userId) => {
         console.error(`${service}[LimitsService]${err} Error getting limit status:`, error, reset);
         return {
             hasLimit: false,
-            limitMinutes: 0,
-            playedMinutes: 0,
-            remainingMinutes: 0,
+            limitSeconds: 0,
+            playedSeconds: 0,
+            remainingSeconds: 0,
             isOverLimit: false,
             dayOfWeek: 'UNKNOWN'
         };

@@ -157,7 +157,7 @@ async function main() {
 
     // Pick a game based on weights
     const game = pickWeightedGame(createdGames, gameWeights);
-    const duration = randomSessionDuration();
+    const durationMinutes = randomSessionDuration();
 
     // Set realistic time of day (more gaming in evenings)
     const hour = Math.floor(Math.random() * 8) + 14; // 2 PM to 10 PM
@@ -165,14 +165,14 @@ async function main() {
     sessionDate.setHours(hour, minute, 0, 0);
 
     const startTime = new Date(sessionDate);
-    const endTime = new Date(startTime.getTime() + duration * 60 * 1000);
+    const endTime = new Date(startTime.getTime() + durationMinutes * 60 * 1000);
 
     sessions.push({
       gameId: game.id,
       userId: user.id,
       startTime,
       endTime,
-      durationMinutes: duration
+      durationSeconds: durationMinutes * 60  // Convert minutes to seconds
     });
   }
 
@@ -195,13 +195,13 @@ async function main() {
   console.log('Creating weekly gaming limits...');
 
   const limits = [
-    { type: 'MONDAY', limitMinutes: 120 },
-    { type: 'TUESDAY', limitMinutes: 120 },
-    { type: 'WEDNESDAY', limitMinutes: 90 },
-    { type: 'THURSDAY', limitMinutes: 120 },
-    { type: 'FRIDAY', limitMinutes: 180 },
-    { type: 'SATURDAY', limitMinutes: 240 },
-    { type: 'SUNDAY', limitMinutes: 240 },
+    { type: 'MONDAY', limitSeconds: 120 * 60 },    // 2 hours
+    { type: 'TUESDAY', limitSeconds: 120 * 60 },   // 2 hours
+    { type: 'WEDNESDAY', limitSeconds: 90 * 60 },  // 1.5 hours
+    { type: 'THURSDAY', limitSeconds: 120 * 60 },  // 2 hours
+    { type: 'FRIDAY', limitSeconds: 180 * 60 },    // 3 hours
+    { type: 'SATURDAY', limitSeconds: 240 * 60 },  // 4 hours
+    { type: 'SUNDAY', limitSeconds: 240 * 60 },    // 4 hours
   ];
 
   for (const limitData of limits) {
@@ -213,12 +213,12 @@ async function main() {
         }
       },
       update: {
-        limitMinutes: limitData.limitMinutes
+        limitSeconds: limitData.limitSeconds
       },
       create: {
         userId: user.id,
         type: limitData.type,
-        limitMinutes: limitData.limitMinutes
+        limitSeconds: limitData.limitSeconds
       }
     });
   }

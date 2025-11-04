@@ -141,11 +141,11 @@ StatsService.getGameStats = async (options) => {
             const gameName = session.gamePlayed?.name || 'Unknown Game';
 
             // Skip sessions with no duration
-            if (!session.durationMinutes || session.durationMinutes <= 0) {
+            if (!session.durationSeconds || session.durationSeconds <= 0) {
                 return;
             }
 
-            // Calculate how much time was spent in our date range
+            // Calculate how much time was spent in our date range (in minutes for display)
             const timeInRange = calculateOverlap(sessionStart, sessionEnd, startDate, endDate);
 
             if (timeInRange <= 0) {
@@ -267,7 +267,7 @@ StatsService.getHistoryData = async (options) => {
             const sessionStart = new Date(session.startTime);
             const sessionEnd = new Date(session.endTime);
 
-            if (!session.durationMinutes || session.durationMinutes <= 0) {
+            if (!session.durationSeconds || session.durationSeconds <= 0) {
                 return;
             }
 

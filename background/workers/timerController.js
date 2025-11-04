@@ -10,13 +10,9 @@ class TimerController extends BackgroundService {
         super('TimerController');
         this.state = {
             hasLimit: false,
-            limitMinutes: 0,
-            playedMinutes: 0,
-            remainingMinutes: 0,
             isOverLimit: false,
-            // UI-friendly fields in seconds
-            duration: 0,
-            timeLeft: 0
+            duration: 0,      // Limit duration in seconds
+            timeLeft: 0       // Time remaining in seconds (negative when over limit)
         };
         this.wasOverLimit = false; // Track previous over-limit state
         this.tickCounter = 0; // Track ticks for DB sync timing
@@ -62,19 +58,14 @@ class TimerController extends BackgroundService {
                 return;
             }
 
-            // Get current limit status from DB
+            // Get current limit status from DB (all values in seconds)
             const status = await LimitsService.getLimitStatus(user.id);
 
-            // Update state with DB values
+            // Update state
             this.state.hasLimit = status.hasLimit;
-            this.state.limitMinutes = status.limitMinutes;
-            this.state.playedMinutes = status.playedMinutes;
-            this.state.remainingMinutes = status.remainingMinutes;
             this.state.isOverLimit = status.isOverLimit;
-
-            // Convert to seconds for UI
-            this.state.duration = status.limitMinutes * 60;
-            this.state.timeLeft = status.remainingMinutes * 60;
+            this.state.duration = status.limitSeconds;
+            this.state.timeLeft = status.remainingSeconds;
 
             // Check if over-limit state changed
             if (status.isOverLimit !== this.wasOverLimit) {
@@ -118,13 +109,10 @@ class TimerController extends BackgroundService {
             return; // updateFromLimits will broadcast
         }
 
-        // Local countdown: decrement timeLeft only if gaming and we have a limit
+        // Local countdown: decrement timer only if gaming and we have a limit
         if (this.state.hasLimit && this.isGaming) {
             // Decrement local timer (can go negative when over limit)
             this.state.timeLeft--;
-
-            // Update remaining minutes for consistency
-            this.state.remainingMinutes = Math.round(this.state.timeLeft / 60);
 
             // Check if we just crossed the limit threshold
             const isNowOverLimit = this.state.timeLeft < 0;

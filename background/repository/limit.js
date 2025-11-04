@@ -5,7 +5,7 @@ const { repo, reset, err } = debug_colors;
 
 const LimitRepository = {
     getUserLimits: async (userId) => { return []; },
-    setLimit: async (userId, type, limitMinutes) => { return {}; },
+    setLimit: async (userId, type, limitSeconds) => { return {}; },
     deleteLimit: async (userId, type) => { return {}; },
     getLimitForDay: async (userId, dayOfWeek) => { return null; }
 };
@@ -35,25 +35,25 @@ LimitRepository.getUserLimits = async (userId) => {
  *
  * @param {number} userId - The user's ID
  * @param {string} type - Day of week enum value (SUNDAY, MONDAY, etc.)
- * @param {number} limitMinutes - Limit in minutes
+ * @param {number} limitSeconds - Limit in seconds
  * @returns {Object} The created/updated limit object
  */
-LimitRepository.setLimit = async (userId, type, limitMinutes) => {
+LimitRepository.setLimit = async (userId, type, limitSeconds) => {
     try {
         const limit = await getPrisma().limit.upsert({
             where: {
                 userId_type: { userId, type }
             },
             update: {
-                limitMinutes
+                limitSeconds
             },
             create: {
                 userId,
                 type,
-                limitMinutes
+                limitSeconds
             }
         });
-        console.info(`${repo}[LimitRepository]${reset} Set limit for ${type}: ${limitMinutes} minutes`);
+        console.info(`${repo}[LimitRepository]${reset} Set limit for ${type}: ${limitSeconds} seconds`);
         return limit;
     } catch (error) {
         console.error(`${repo}[LimitRepository]${err} Error setting limit: ${error}${reset}`);

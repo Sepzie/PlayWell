@@ -13,15 +13,15 @@ function Limits() {
   const [tempHours, setTempHours] = useState(0);
   const [tempMinutes, setTempMinutes] = useState(0);
 
-  // Track which days are checked and their current limits
+  // Track which days are checked and their current limits (in seconds)
   const [dayLimits, setDayLimits] = useState({
-    SUNDAY: { checked: false, limitMinutes: 0 },
-    MONDAY: { checked: false, limitMinutes: 0 },
-    TUESDAY: { checked: false, limitMinutes: 0 },
-    WEDNESDAY: { checked: false, limitMinutes: 0 },
-    THURSDAY: { checked: false, limitMinutes: 0 },
-    FRIDAY: { checked: false, limitMinutes: 0 },
-    SATURDAY: { checked: false, limitMinutes: 0 }
+    SUNDAY: { checked: false, limitSeconds: 0 },
+    MONDAY: { checked: false, limitSeconds: 0 },
+    TUESDAY: { checked: false, limitSeconds: 0 },
+    WEDNESDAY: { checked: false, limitSeconds: 0 },
+    THURSDAY: { checked: false, limitSeconds: 0 },
+    FRIDAY: { checked: false, limitSeconds: 0 },
+    SATURDAY: { checked: false, limitSeconds: 0 }
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -40,7 +40,7 @@ function Limits() {
         if (newDayLimits[limit.type]) {
           newDayLimits[limit.type] = {
             checked: true,
-            limitMinutes: limit.limitMinutes
+            limitSeconds: limit.limitSeconds  // Now in seconds from backend
           };
         }
       });
@@ -80,7 +80,7 @@ function Limits() {
   const handleApply = async () => {
     try {
       setIsSaving(true);
-      const limitMinutes = (tempHours * 60) + tempMinutes;
+      const limitSeconds = (tempHours * 3600) + (tempMinutes * 60);  // Convert to seconds
 
       // Validate that at least one day is checked
       const anyChecked = Object.values(dayLimits).some(day => day.checked);
@@ -91,8 +91,8 @@ function Limits() {
       }
 
       // Validate that limit is greater than 0
-      if (limitMinutes <= 0) {
-        alert('Please set a limit greater than 0 minutes');
+      if (limitSeconds <= 0) {
+        alert('Please set a limit greater than 0');
         setIsSaving(false);
         return;
       }
@@ -100,8 +100,8 @@ function Limits() {
       // Save/delete limits for each day
       const promises = DAY_TYPES.map(async (dayType) => {
         if (dayLimits[dayType].checked) {
-          // Set limit for checked days
-          return window.electronAPI.setLimit(dayType, limitMinutes);
+          // Set limit for checked days (in seconds)
+          return window.electronAPI.setLimit(dayType, limitSeconds);
         } else {
           // Delete limit for unchecked days
           return window.electronAPI.deleteLimit(dayType);
@@ -148,7 +148,7 @@ function Limits() {
             key={dayType}
             label={DAY_LABELS[index]}
             isChecked={dayLimits[dayType].checked}
-            limitMinutes={dayLimits[dayType].limitMinutes}
+            limitSeconds={dayLimits[dayType].limitSeconds}  // Pass seconds
             onChange={(checked) => handleDayCheckChange(dayType, checked)}
           />
         ))}

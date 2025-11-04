@@ -71,18 +71,18 @@ class GameTracker extends BackgroundService {
    */
   recordGameSessions(snapshot) {
     let promises = [];
-    const nextActiveGamingSessions = {}; // {game_id: {session_id, user_id, game_id, durationMinutes}}
+    const nextActiveGamingSessions = {}; // {game_id: {session_id, user_id, game_id, durationSeconds}}
 
     for (const game of snapshot) {
       if (Object.hasOwn(this.activeGamingSessions, game.id)) {
         // This game is continuing - update duration and write to DB
         nextActiveGamingSessions[game.id] = this.activeGamingSessions[game.id];
-        nextActiveGamingSessions[game.id].durationMinutes += INTERVAL_SECONDS / 60;
+        nextActiveGamingSessions[game.id].durationSeconds += INTERVAL_SECONDS;
 
         // Update DB with current duration
         let updateP = GamingSessionRepository.updateGamingSession(
           nextActiveGamingSessions[game.id].id,
-          nextActiveGamingSessions[game.id].durationMinutes
+          nextActiveGamingSessions[game.id].durationSeconds
         );
         promises.push(updateP);
       } else {
@@ -97,7 +97,7 @@ class GameTracker extends BackgroundService {
     for (const [gid, gs] of Object.entries(this.activeGamingSessions)) {
       if (!Object.hasOwn(nextActiveGamingSessions, gid)) {
         // This game has ended - final DB update
-        let endP = GamingSessionRepository.endGamingSession(gs.id, gs.durationMinutes);
+        let endP = GamingSessionRepository.endGamingSession(gs.id, gs.durationSeconds);
         promises.push(endP);
       }
     }
