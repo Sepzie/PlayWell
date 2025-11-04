@@ -29,11 +29,13 @@ class TimerController extends BackgroundService {
 
     resume() {
         this.state.running = true;
+        this._log('info', 'Timer resumed');
         this._broadcast();
     }
 
     pause() {
         this.state.running = false;
+        this._log('info', 'Timer paused');
         this._broadcast();
     }
 

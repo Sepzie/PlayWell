@@ -59,6 +59,7 @@ class GameTracker extends BackgroundService {
     super('GameTracker');
     this.activeGamingSessions = {}; // {game_id: game_session}
     this.wasGaming = false; // Track previous state to detect changes
+    this.lastLogTime = 0;
   }
 
   /**
@@ -68,8 +69,6 @@ class GameTracker extends BackgroundService {
    * @param {Array[Object]} snapshot an array of Game objects detected by the GameTracker at this current time step
    */
   recordGameSessions(snapshot) {
-    this._log('info', 'Recording game sessions...');
-
     let promises = [];
     const nextActiveGamingSessions = {}; // {game_id: {session_id, user_id, game_id, durationMinutes}}
 
@@ -97,7 +96,6 @@ class GameTracker extends BackgroundService {
 
     Promise.all(promises).then(() => {
       this.activeGamingSessions = nextActiveGamingSessions;
-      console.info(`${proctracker}[GameTracker]${reset} Active Gaming Sessions =`, this.activeGamingSessions);
     });
   }
 
@@ -105,16 +103,12 @@ class GameTracker extends BackgroundService {
    * Called on each interval tick to scan for game processes.
    */
   _onIntervalTick() {
-    console.info(`${proctracker}[GameTracker]${reset} Running process tracking routine!`);
-
     // Add different methods of finding games here
     const steamGames = getGameProcessesSteam();
 
     Promise.all([steamGames]) // Then, add the Promise inside the array
       .then((values) => {
         let snapshot = [].concat(...values);
-        // console.log(`${proctracker}[GameTracker]${reset} Found games:\n`, snapshot)
-
         let upserts = [];
         for (const s of snapshot) {
           // Upsert to account for newly detected games.
@@ -139,6 +133,11 @@ class GameTracker extends BackgroundService {
           }
         });
       });
+      // every 10 seconds log (game tracker running, found n games)
+      if (Date.now() - this.lastLogTime >= 10000) {
+        this.lastLogTime = Date.now();
+        this._log('info', `Game tracker is running, found ${snapshot.length} games`);
+      }
   }
 
   /**
