@@ -10,9 +10,11 @@ const GamingSessionRepository = {
     deleteAllGamingSessions: async () => {return []},
 
     getGamingSessionById: async (gsid) => {return {}},
-    
+
     startGamingSession: async (gameId, startingDurationMinutes) => {return {}},
-    endGamingSession: async (gsid, durationMinutes) => {return {}}
+    endGamingSession: async (gsid, durationMinutes) => {return {}},
+
+    getGameStats: async (startDate, endDate) => {return []}
 };
 
 /**
@@ -137,6 +139,95 @@ GamingSessionRepository.endGamingSession = async (gsid, finalDurationMinutes) =>
     u = res;
     console.info(`${repo}[GamingSessionRepository]${reset} Ended gsession: `, res);
     return res;
+}
+
+/**
+ * Gets aggregated gaming statistics for all games within a date range.
+ * Aggregates GamingSessions by game and calculates:
+ * - Total playtime
+ * - Daily average playtime (total / days actually played)
+ * - Average days per week played
+ *
+ * @param {Date} startDate - Start of date range (inclusive)
+ * @param {Date} endDate - End of date range (inclusive)
+ * @returns {Array} Array of game stats objects with structure:
+ *   [{
+ *     name: string,
+ *     playTime: number (in minutes),
+ *     dailyAverage: number (in minutes),
+ *     averageDaysPerWeek: number
+ *   }]
+ */
+GamingSessionRepository.getGameStats = async (startDate, endDate) => {
+    try {
+        // Fetch all gaming sessions for the current user within the date range
+        const sessions = await getPrisma().gamingSession.findMany({
+            where: {
+                userId: UserRepository.getCurrentUser().id,
+                startTime: {
+                    gte: startDate,
+                    lte: endDate
+                }
+            },
+            include: {
+                gamePlayed: true // Include game details
+            }
+        });
+
+        // Group sessions by game and aggregate stats
+        const gameStatsMap = {};
+
+        sessions.forEach(session => {
+            const gameId = session.gameId;
+            const gameName = session.gamePlayed.name;
+            const duration = session.durationMinutes || 0;
+
+            // Get date (without time) for counting unique play days
+            const playDate = session.startTime.toISOString().split('T')[0];
+
+            if (!gameStatsMap[gameId]) {
+                gameStatsMap[gameId] = {
+                    name: gameName,
+                    totalPlayTime: 0,
+                    playDates: new Set()
+                };
+            }
+
+            gameStatsMap[gameId].totalPlayTime += duration;
+            gameStatsMap[gameId].playDates.add(playDate);
+        });
+
+        // Calculate final stats
+        const stats = Object.values(gameStatsMap).map(game => {
+            const totalPlayTime = game.totalPlayTime;
+            const uniqueDaysPlayed = game.playDates.size;
+
+            // Daily average: total playtime / days actually played (excludes zero-play days)
+            const dailyAverage = uniqueDaysPlayed > 0 ? totalPlayTime / uniqueDaysPlayed : 0;
+
+            // Calculate weeks in the date range
+            const millisecondsInWeek = 7 * 24 * 60 * 60 * 1000;
+            const dateRangeDuration = endDate - startDate;
+            const weeksInRange = dateRangeDuration / millisecondsInWeek;
+
+            // Average days per week: unique days played / weeks in range
+            const averageDaysPerWeek = weeksInRange > 0 ? uniqueDaysPlayed / weeksInRange : uniqueDaysPlayed;
+
+            return {
+                name: game.name,
+                playTime: Math.round(totalPlayTime),
+                dailyAverage: Math.round(dailyAverage),
+                averageDaysPerWeek: parseFloat(averageDaysPerWeek.toFixed(1))
+            };
+        });
+
+        console.info(`${repo}[GamingSessionRepository]${reset} Game stats: `, stats);
+        return stats;
+
+    } catch (error) {
+        console.error(`${repo}[GamingSessionRepository]${err} ${error}${reset}`);
+        return [];
+    }
 }
 
 module.exports = {GamingSessionRepository};
