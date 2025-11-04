@@ -3,7 +3,7 @@ import "/src/css/Home.css";
 import { Chart as ChartJS } from "chart.js/auto"
 import { Bar } from "react-chartjs-2"
 import Top3GamesBarChart from '/src/components/Top3GamesBarChart';
-import { formatMinutesToDecimalHours } from '../utils/timeFormatter';
+import { formatMinutesToHoursMinutes } from '../utils/timeFormatter';
 
 function Home() {
   const [totalPlaytime, setTotalPlaytime] = useState(0);
@@ -46,7 +46,7 @@ function Home() {
       <div className="hours-played">
         <p>You have played for...</p>
         <h2>
-          {isLoading ? 'Loading...' : formatMinutesToDecimalHours(totalPlaytime)}
+          {isLoading ? 'Loading...' : formatMinutesToHoursMinutes(totalPlaytime)}
         </h2>
         <p>today</p>
       </div>
