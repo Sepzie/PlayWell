@@ -26,5 +26,65 @@
     justify-content: center;
     justify-self: center;
     display: flex;
+    flex-direction: column;
     font-family: 'system-ui';
+}
+
+.stats-controls {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.period-selector {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.period-selector button {
+    padding: 10px 20px;
+    border: 2px solid #81C784;
+    background-color: white;
+    color: #333;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1em;
+    transition: all 0.3s ease;
+}
+
+.period-selector button:hover {
+    background-color: #f0f0f0;
+}
+
+.period-selector button.active {
+    background-color: #81C784;
+    color: white;
+}
+
+.custom-date-range {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.custom-date-range label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1em;
+}
+
+.custom-date-range input[type="date"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+#stats-table {
+    width: 100%;
+    border-collapse: collapse;
 }
