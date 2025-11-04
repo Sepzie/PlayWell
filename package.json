@@ -12,7 +12,10 @@
     "start": "electron .",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "db:seed": "node prisma/seed.js",
+    "db:reset": "prisma migrate reset --force",
+    "db:reset:seed": "prisma migrate reset --force && node prisma/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^6.16.3",

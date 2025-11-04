@@ -5,6 +5,7 @@ const { repo, reset, err } = debug_colors;
 
 const GameRepository = {
     getAllGames: async () => {return []},
+    getGameById: async (gid) => {return {}},
     getGameByName: async (gname) => {return {}},
     deleteGames: async (gnames) => {return {}},
     deleteAllGames: async () => {return {}},
@@ -16,7 +17,7 @@ const GameRepository = {
 
 /**
  * Returns all Games in the database.
- * 
+ *
  * @returns a JSON array
  */
 GameRepository.getAllGames = async () => {
@@ -26,14 +27,33 @@ GameRepository.getAllGames = async () => {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return [];
     }
-    console.info(`${repo}[GameRepository]${reset} All games: `, res);
+    return res;
+}
+
+/**
+ * Returns the Game with the given gid.
+ *
+ * @param {String} gid unique game id
+ * @returns a JSON object
+ */
+GameRepository.getGameById = async (gid) => {
+    try {
+        res = await getPrisma().game.findUnique({
+            where: {
+                id: gid
+            }
+        })
+    } catch (error) {
+        console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
+        return {};
+    }
     return res;
 }
 
 /**
  * Returns the Game with the given gname.
- * 
- * @param {String} gname unique name 
+ *
+ * @param {String} gname unique name
  * @returns a JSON object
  */
 GameRepository.getGameByName = async (gname) => {
@@ -47,7 +67,6 @@ GameRepository.getGameByName = async (gname) => {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return {};
     }
-    console.info(`${repo}[GameRepository]${reset} Found game: `, res);
     return res;
 }
 
@@ -77,7 +96,7 @@ GameRepository.createGame = async (name, location, platform, genre) => {
         return {};
     }
     u = res;
-    console.info(`${repo}[GameRepository]${reset} Created new game: `, res);
+    console.info(`${repo}[GameRepository]${reset} Created game: ${res.name}`);
     return res;
 }
 
@@ -98,7 +117,7 @@ GameRepository.deleteGames = async (gnames) => {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return {};
     }
-    console.info(`${repo}[GameRepository]${reset} Deleted games: `, res);
+    console.info(`${repo}[GameRepository]${reset} Deleted ${res.count} game(s)`);
     return res;
 }
 
@@ -147,7 +166,7 @@ GameRepository.deleteAllGames = async () => {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return {};
     }
-    console.info(`${repo}[GameRepository]${reset} Deleted games: `, res);
+    console.info(`${repo}[GameRepository]${reset} Deleted ${res.count} game(s)`);
     return res;
 }
 

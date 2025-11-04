@@ -4,6 +4,7 @@ import CircleTimer from './components/CircleTimer.jsx';
 function TrayMenu() {
   const [duration, setDuration] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
+  const [isOverLimit, setIsOverLimit] = useState(false);
 
   useEffect(() => {
     // initialize and subscribe to main timer
@@ -11,11 +12,13 @@ function TrayMenu() {
       window.electronAPI.getTimerState().then(state => {
         setDuration(state.duration || 0);
         setTimeLeft(state.timeLeft || 0);
+        setIsOverLimit(state.isOverLimit || false);
       }).catch(() => { });
 
       const off = window.electronAPI.onTimerUpdate((state) => {
         setDuration(state.duration || 0);
         setTimeLeft(state.timeLeft || 0);
+        setIsOverLimit(state.isOverLimit || false);
       });
       return () => { try { off && off(); } catch (e) { } };
     }
@@ -24,7 +27,9 @@ function TrayMenu() {
   return (
     <div className="main-container">
       <div className="title">
-        <p className="text">Your current gaming time limit</p>
+        <p className="text">
+          {isOverLimit ? "You've exceeded your gaming limit!" : "Your current gaming time limit"}
+        </p>
       </div>
 
       <CircleTimer durationInSeconds={duration} timeLeft={timeLeft} />

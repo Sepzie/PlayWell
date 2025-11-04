@@ -1,11 +1,14 @@
-import { number } from "framer-motion";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { formatMinutesToHoursMinutes } from "../utils/timeFormatter";
 
 function StatsTable() {
-    const columns = newColumns()
-    const DATA = starterData()
-    const [data, setData] = useState(DATA);
+    const columns = newColumns();
+    const [data, setData] = useState([]);
+    const [period, setPeriod] = useState('today');
+    const [customStart, setCustomStart] = useState('');
+    const [customEnd, setCustomEnd] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
 
     const table = useReactTable({
         data,
@@ -13,75 +16,137 @@ function StatsTable() {
         getCoreRowModel: getCoreRowModel(),
     });
 
+    // Fetch stats data
+    const fetchStats = async () => {
+        try {
+            setIsLoading(true);
+            const options = { period };
+
+            if (period === 'custom' && customStart && customEnd) {
+                options.customStart = customStart;
+                options.customEnd = customEnd;
+            }
+
+            const stats = await window.electronAPI.getGameStats(options);
+            setData(stats);
+        } catch (error) {
+            console.error('Error fetching stats:', error);
+            setData([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Fetch on mount and when period changes
+    useEffect(() => {
+        fetchStats();
+    }, [period, customStart, customEnd]);
+
+    // Auto-refresh every 60 seconds
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            fetchStats();
+        }, 60000); // 60 seconds
+
+        return () => clearInterval(intervalId);
+    }, [period, customStart, customEnd]);
+
 
     return (
         <div id="stats-table-container">
-            <thead id="stats-table" w={table.getTotalSize()}>
-                {table.getHeaderGroups().map(headerGroup => 
-                <tr className="stats-row" key={headerGroup.id}>
-                    {headerGroup.headers.map(header => 
-                    <th className="stats-header" w={header.getSize()} key={header.id}>
-                        {header.column.columnDef.header}
-                    </th>
-                    )}
-                </tr>)}
+            {/* Time Period Selector */}
+            <div className="stats-controls">
+                <div className="period-selector">
+                    <button
+                        className={period === 'today' ? 'active' : ''}
+                        onClick={() => setPeriod('today')}
+                    >
+                        Today
+                    </button>
+                    <button
+                        className={period === 'week' ? 'active' : ''}
+                        onClick={() => setPeriod('week')}
+                    >
+                        This Week
+                    </button>
+                    <button
+                        className={period === 'month' ? 'active' : ''}
+                        onClick={() => setPeriod('month')}
+                    >
+                        This Month
+                    </button>
+                    <button
+                        className={period === 'custom' ? 'active' : ''}
+                        onClick={() => setPeriod('custom')}
+                    >
+                        Custom
+                    </button>
+                </div>
 
-                {table.getRowModel().rows.map(row =>
-                    <tr className="stats-row" key={row.id}>
-                        {row.getVisibleCells().map(cell =>
-                            <td className="stats-data" w={cell.column.getSize()} key={cell.id}>
-                                {
-                                    flexRender(
-                                        cell.column.columnDef.cell,
-                                        cell.getContext()
-                                    )
-                                }
-                            </td>
-                        )}
-                    </tr>
+                {/* Custom Date Range Picker */}
+                {period === 'custom' && (
+                    <div className="custom-date-range">
+                        <label>
+                            Start:
+                            <input
+                                type="date"
+                                value={customStart}
+                                onChange={(e) => setCustomStart(e.target.value)}
+                            />
+                        </label>
+                        <label>
+                            End:
+                            <input
+                                type="date"
+                                value={customEnd}
+                                onChange={(e) => setCustomEnd(e.target.value)}
+                            />
+                        </label>
+                    </div>
                 )}
-            </thead>
+            </div>
+
+            {/* Stats Table */}
+            {isLoading ? (
+                <p>Loading stats...</p>
+            ) : data.length === 0 ? (
+                <p>No gaming sessions found for this period.</p>
+            ) : (
+                <table id="stats-table" w={table.getTotalSize()}>
+                    <thead>
+                        {table.getHeaderGroups().map(headerGroup =>
+                        <tr className="stats-row" key={headerGroup.id}>
+                            {headerGroup.headers.map(header =>
+                            <th className="stats-header" w={header.getSize()} key={header.id}>
+                                {header.column.columnDef.header}
+                            </th>
+                            )}
+                        </tr>)}
+                    </thead>
+                    <tbody>
+                        {table.getRowModel().rows.map(row =>
+                            <tr className="stats-row" key={row.id}>
+                                {row.getVisibleCells().map(cell =>
+                                    <td className="stats-data" w={cell.column.getSize()} key={cell.id}>
+                                        {
+                                            flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )
+                                        }
+                                    </td>
+                                )}
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            )}
         </div>
     )
 }
 
-function starterData() {
-    const newStarterData =  
-    [
-        {
-            name: "League of Legends",
-            playTime: 4000,
-            dailyAverage: 60,
-            averageDaysPerWeek: 4
-        },
-
-        {
-            name: "Hollow Knight: Silksong",
-            playTime: 600,
-            dailyAverage: 20,
-            averageDaysPerWeek: 2
-        },
-
-        {
-            name: "Hades II",
-            playTime: 1000,
-            dailyAverage: 20,
-            averageDaysPerWeek: 3
-        },
-
-        {
-            name: "Valorant",
-            playTime: 60,
-            dailyAverage: 10,
-            averageDaysPerWeek: 1
-        },
-    ];
-
-    return newStarterData;
-}
-
 function newColumns() {
-    const columns = 
+    const columns =
     [
         {
             accessorKey: 'name',
@@ -92,13 +157,13 @@ function newColumns() {
         {
             accessorKey: 'playTime',
             header: 'Playtime',
-            cell: (props) => <p>{props.getValue()}</p>
+            cell: (props) => <p>{formatMinutesToHoursMinutes(props.getValue())}</p>
         },
 
         {
             accessorKey: 'dailyAverage',
             header: 'Daily Average Playtime',
-            cell: (props) => <p>{props.getValue()}</p>
+            cell: (props) => <p>{formatMinutesToHoursMinutes(props.getValue())}</p>
         },
 
         {

@@ -25,11 +25,20 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('timer-update', listener);
     return () => ipcRenderer.removeListener('timer-update', listener);
   },
-  startTimer: (durationSeconds) => ipcRenderer.send('timer-start', durationSeconds),
-  pauseTimer: () => ipcRenderer.send('timer-pause'),
-  resumeTimer: () => ipcRenderer.send('timer-resume'),
-  resetTimer: () => ipcRenderer.send('timer-reset'),
-  getTimerState: () => ipcRenderer.invoke('timer-get-state')
+  forceTimerUpdate: () => ipcRenderer.send('timer-force-update'),
+  getTimerState: () => ipcRenderer.invoke('timer-get-state'),
+
+  // Stats APIs
+  getGameStats: (options) => ipcRenderer.invoke('get-game-stats', options),
+
+  // History APIs
+  getHistoryData: (options) => ipcRenderer.invoke('get-history-data', options),
+
+  // Limits APIs
+  getLimits: () => ipcRenderer.invoke('get-limits'),
+  setLimit: (type, limitMinutes) => ipcRenderer.invoke('set-limit', { type, limitMinutes }),
+  deleteLimit: (type) => ipcRenderer.invoke('delete-limit', { type }),
+  getLimitStatus: () => ipcRenderer.invoke('get-limit-status')
 
   // TODO: Add more IPC methods as needed
   // Example:

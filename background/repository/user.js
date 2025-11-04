@@ -17,7 +17,6 @@ const UserRepository = {
             console.error(`${repo}[UserRepository]${err} ${error}${reset}`);
             return null;
         }
-        console.info(`${repo}[UserRepository]${reset} All users: `, res);
         return res;
     },
     /**
@@ -47,7 +46,7 @@ const UserRepository = {
         
         // Return res if User is found
         if (res) {
-            console.info(`${repo}[UserRepository]${reset} Loaded existing user: `, res);
+            console.info(`${repo}[UserRepository]${reset} Loaded user: ${res.username}`);
             u = res;
             return;
         }
@@ -62,7 +61,7 @@ const UserRepository = {
             return;
         }
         u = res;
-        console.info(`${repo}[UserRepository]${reset} Created new user: `, res);
+        console.info(`${repo}[UserRepository]${reset} Created user: ${res.username}`);
         return;
     },
 
@@ -80,7 +79,7 @@ const UserRepository = {
 
         tmp = u;
         u = null;
-        console.info(`${repo}[UserRepository]${reset} Unloaded user`, tmp);
+        console.info(`${repo}[UserRepository]${reset} Unloaded user: ${tmp.username}`);
         return tmp;
     }
 }

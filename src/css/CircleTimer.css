@@ -38,3 +38,23 @@
     color: #2E7D32;
     user-select: none;
 }
+
+/* Over-limit styling */
+.circle-timer-progress.over-limit {
+    stroke: #D32F2F;
+}
+
+.circle-timer-text.over-limit {
+    color: #D32F2F;
+}
+
+.over-limit-warning {
+    position: absolute;
+    bottom: -30px;
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #D32F2F;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    user-select: none;
+}
