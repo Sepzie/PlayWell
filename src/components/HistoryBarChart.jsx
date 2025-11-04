@@ -1,7 +1,5 @@
 import { Chart as ChartJS } from "chart.js/auto"
-import { number } from "framer-motion";
-import { useEffect } from "react";
-import { Bar } from "react-chartjs-2"
+import { useEffect, useState, useRef } from "react";
 
 function HistoryBarChart(){
     // Store names of months
@@ -9,237 +7,215 @@ function HistoryBarChart(){
   "July", "August", "September", "October", "November", "December"
   ];
 
-    // Setup current date
-    let currentDate = new Date();
-    let currentMonth = currentDate.getMonth();
-    let currentYear = currentDate.getFullYear();
+    // State management
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [yearBreakdown, setYearBreakdown] = useState(true);
+    const [chartData, setChartData] = useState({ labels: [], data: [] });
+    const [isLoading, setIsLoading] = useState(true);
 
-    // To store inputs & date button
-    let currentDateButton;
-    let currentMonthYearInput;
-    let currentYearInput;
+    // Refs for canvas and chart instance
+    const canvasRef = useRef(null);
+    const chartInstanceRef = useRef(null);
 
-    // To be toggled to show playtime breakdowns by year or by month
-    let yearBreakdown = true;
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
 
-    // Setup data for bar chart by year
-    const playTimeList = {dates: [], timePlayed: []};
-    populateList(playTimeList, yearBreakdown);
+    // Fetch data from backend
+    const fetchHistoryData = async () => {
+        try {
+            setIsLoading(true);
 
-    const data = {
-        labels: playTimeList.dates,
-            datasets: [
-              {
-                label: "Time Played (Minutes)",
-                data: playTimeList.timePlayed,
-                borderRadius: 5,
-                barThickness: 30,
-              },
-            ],
-    }
-    
-    // Add options for bar chart
-    const options = {
-        maintainAspectRatio: false
-    }
+            const options = yearBreakdown
+                ? {
+                    period: 'year',
+                    year: currentYear,
+                    granularity: 'month'
+                  }
+                : {
+                    period: 'specific-month',
+                    year: currentYear,
+                    month: currentMonth,
+                    granularity: 'day'
+                  };
 
-    // Bar chart configuration when it is created
-    const config = {
-      type: 'bar',
-      data: data,
-      options: options
-    }
+            const data = await window.electronAPI.getHistoryData(options);
+            setChartData(data);
+        } catch (error) {
+            console.error('Error fetching history data:', error);
+            setChartData({ labels: [], data: [] });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-    let barChart; // Store bar chart here
-    let useEffectExecuted = false; // Some functions need to be executed once only
+    // Fetch data when date or breakdown changes
     useEffect(() => {
-      // Get canvas & create bar chart in it
-      // Destroy any existing bar charts
-      let ctx = document.getElementById('bar-chart').getContext('2d');
-      if (barChart) {
-        barChart.destroy();
-      }
-      barChart = new ChartJS(ctx, config);
-      
-      // Update current date text
-      currentDateButton = document.getElementById('current-date-button');
-      currentDateButton.textContent = `${currentYear}`;
+        fetchHistoryData();
+    }, [currentDate, yearBreakdown]);
 
-      // Store date inputs
-      currentMonthYearInput = document.getElementById('month-input');
-      currentYearInput = document.getElementById('year-input');
-      currentMonthYearInput.value = currentDate.getFullYear(currentYearInput);
-      currentYearInput.value = currentYear;
+    // Create/update chart when data changes
+    useEffect(() => {
+        if (!canvasRef.current || isLoading) return;
 
-      // Add years dynamically to input
-      if (!useEffectExecuted) {
-        addYearsInput(currentYearInput, currentDate);
-      }
+        const ctx = canvasRef.current.getContext('2d');
 
-      // Stop above function from executing twice
-      useEffectExecuted = true;
-    }, [])
+        // Destroy existing chart
+        if (chartInstanceRef.current) {
+            chartInstanceRef.current.destroy();
+        }
 
-    // Update list depending on the current breakdown
-    const updateList = () => {
-      populateList(playTimeList, yearBreakdown);
-      barChart.data.labels = playTimeList.dates;
-      barChart.update();
-    }
+        // Create new chart
+        chartInstanceRef.current = new ChartJS(ctx, {
+            type: 'bar',
+            data: {
+                labels: chartData.labels,
+                datasets: [
+                    {
+                        label: "Time Played (Hours)",
+                        data: chartData.data,
+                        borderRadius: 5,
+                        barThickness: 30,
+                    },
+                ],
+            },
+            options: {
+                maintainAspectRatio: false
+            }
+        });
+
+        // Cleanup on unmount
+        return () => {
+            if (chartInstanceRef.current) {
+                chartInstanceRef.current.destroy();
+            }
+        };
+    }, [chartData, isLoading]);
 
     // Toggle yearly or monthly breakdown
     const toggleBreakdown = (breakdownBool) => {
-      // Do nothing if the breakdown doesn't change
-      // ex. yearBreakdown is true and Yearly button is pressed
-      if (yearBreakdown == breakdownBool) {
-        return
-      }
+        if (yearBreakdown === breakdownBool) {
+            return;
+        }
 
-      // Set current date if breakdown changes
-      currentDate = new Date();
-      currentMonth = currentDate.getMonth();
-      currentYear = currentDate.getFullYear();
-      
-      // Set breakdown
-      yearBreakdown = breakdownBool
-      
-      // Update text depending on the breakdown
-      if (yearBreakdown) {
-        currentDateButton.textContent = `${currentYear}`
-      }
-      else {
-        currentDateButton.textContent = `${monthNames[currentMonth]} ${currentYear}`
-      }
+        // Reset to current date when switching views
+        setCurrentDate(new Date());
+        setYearBreakdown(breakdownBool);
+    };
 
-      // Update list afterwards
-      updateList();
-    }
-
-    // Performed on clicking on the current date
-    // Shows options to the user
-    const showDatePicker = () => {
-      if (yearBreakdown) {
-        currentYearInput.showPicker();
-      }
-      else {
-        currentMonthYearInput.showPicker();
-      }
-    }
-
-    // Updates the date with the chosen date in the date input value
-    const updateDate = () => {
-      if (yearBreakdown) {
-        currentYear = currentYearInput.value;
-        currentDateButton.textContent = `${currentYear}`;
-        updateList();
-      }
-
-      else {
-        currentDate = new Date(currentMonthYearInput.value);
-        currentMonth = currentDate.getMonth();
-        currentYear = currentDate.getFullYear();
-        nextDate(); // Date is offset by one month, so nextDate() is called
-      }
-    }
-
-    // Goes to the previous year / month & updates the current date text & bar chart
+    // Navigate to previous period
     const previousDate = () => {
-      if (yearBreakdown) {
-        currentYear--;
-        currentDateButton.textContent = `${currentYear}`;
-        currentYearInput.value = currentYear;
-        updateList();
-      }
-
-      else {
-        currentMonth--;
-        if (currentMonth < 0) {
-          currentMonth = 11;
-          currentYear--;
+        const newDate = new Date(currentDate);
+        if (yearBreakdown) {
+            newDate.setFullYear(newDate.getFullYear() - 1);
+        } else {
+            newDate.setMonth(newDate.getMonth() - 1);
         }
-        currentDateButton.textContent = `${monthNames[currentMonth]} ${currentYear}`;
-        updateList();
-      }
-      
-    }
+        setCurrentDate(newDate);
+    };
 
-    // Goes to the next year / month & updates the current date text & bar chart
+    // Navigate to next period
     const nextDate = () => {
-      if (yearBreakdown) {
-        currentYear++;
-        currentDateButton.textContent = `${currentYear}`;
-        currentYearInput.value = currentYear;
-        updateList();
-      }
-
-      else {
-        currentMonth++;
-        if (currentMonth > 11) {
-          currentMonth = 0;
-          currentYear++;
+        const newDate = new Date(currentDate);
+        if (yearBreakdown) {
+            newDate.setFullYear(newDate.getFullYear() + 1);
+        } else {
+            newDate.setMonth(newDate.getMonth() + 1);
         }
-        currentDateButton.textContent = `${monthNames[currentMonth]} ${currentYear}`;
-        updateList();
-      }
-    }
+        setCurrentDate(newDate);
+    };
+
+    // Handle date picker change
+    const handleDateChange = (e) => {
+        if (yearBreakdown) {
+            const newDate = new Date(currentDate);
+            newDate.setFullYear(parseInt(e.target.value));
+            setCurrentDate(newDate);
+        } else {
+            // Month input returns YYYY-MM format
+            const newDate = new Date(e.target.value);
+            setCurrentDate(newDate);
+        }
+    };
+
+    // Get display text for current date
+    const getDateDisplayText = () => {
+        if (yearBreakdown) {
+            return `${currentYear}`;
+        } else {
+            return `${monthNames[currentMonth]} ${currentYear}`;
+        }
+    };
+
+    // Get formatted date for inputs
+    const getYearInputValue = () => currentYear;
+    const getMonthInputValue = () => {
+        // Format as YYYY-MM for month input
+        const month = String(currentMonth + 1).padStart(2, '0');
+        return `${currentYear}-${month}`;
+    };
 
     return (
       <div id="history-bar-chart-components">
         <div id="breakdown-toggle-buttons-container">
-          <button id="year-breakdown-button" onClick ={() => toggleBreakdown(true)}>Yearly</button>
-          <button id="month-breakdown-button" onClick={() => toggleBreakdown(false)}>Monthly</button>
+          <button
+            id="year-breakdown-button"
+            className={yearBreakdown ? 'active' : ''}
+            onClick={() => toggleBreakdown(true)}
+          >
+            Yearly
+          </button>
+          <button
+            id="month-breakdown-button"
+            className={!yearBreakdown ? 'active' : ''}
+            onClick={() => toggleBreakdown(false)}
+          >
+            Monthly
+          </button>
         </div>
+
         <div id="date-buttons-container">
-          <button id="back-button" onClick={() => previousDate()}>&lt;</button>
+          <button id="back-button" onClick={previousDate}>&lt;</button>
           <div>
-            <input type="month" id="month-input" onChange={() => updateDate()}></input>
+            {!yearBreakdown && (
+              <input
+                type="month"
+                id="month-input"
+                value={getMonthInputValue()}
+                onChange={handleDateChange}
+              />
+            )}
 
-            <select id="year-input" min="2025" max="2075" onChange={() => updateDate()}>
+            {yearBreakdown && (
+              <select
+                id="year-input"
+                value={getYearInputValue()}
+                onChange={handleDateChange}
+              >
+                {/* Generate year options from 2020 to current year + 5 */}
+                {Array.from({ length: (new Date().getFullYear() + 5) - 2020 + 1 }, (_, i) => 2020 + i).map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            )}
 
-            </select>
-            <button id="current-date-button" onClick={() => showDatePicker()}>Update Data</button>
+            <button id="current-date-button">
+              {getDateDisplayText()}
+            </button>
           </div>
-          <button id="next-button" onClick={() => nextDate()}>&gt;</button>
+          <button id="next-button" onClick={nextDate}>&gt;</button>
         </div>
 
         <div id="history-bar-chart">
-          <canvas id="bar-chart"></canvas>
+          {isLoading ? (
+            <p style={{ textAlign: 'center', padding: '20px' }}>Loading history data...</p>
+          ) : chartData.labels.length === 0 ? (
+            <p style={{ textAlign: 'center', padding: '20px' }}>No gaming data for this period.</p>
+          ) : (
+            <canvas ref={canvasRef} id="bar-chart"></canvas>
+          )}
         </div>
       </div>
-      
   );
-}
-
-function populateList(playTimeList, yearBreakdown) {
-    // Add randomized data to list for bar chart
-    // Year breakdown has all 12 months
-    if (yearBreakdown) {
-      playTimeList.dates = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-      for (let i = 0; i < 12; i++) {
-          playTimeList.timePlayed[i] = Math.round(Math.random() * 400);
-      }
-    }
-
-    // Month breakdown currently has 4 weeks
-    else {
-      playTimeList.dates = ["Week 1", "Week 2", "Week 3", "Week 4"]
-      for (let i = 0; i < 4; i++) {
-        playTimeList.timePlayed[i] = Math.round(Math.random() * 400);
-      }
-    }
-    
-}
-
-
-function addYearsInput(currentYearInput, currentDate) {
-  // Add years to yearInput depending on the min & max year
-  let minimumYear = 2025;
-  let maximumYear = 2075;
-  for (let i = minimumYear; i <= maximumYear; i++) {
-    currentYearInput.innerHTML += `<option value='${i}'>${i}</option>`;
-  }
-  currentYearInput.value = currentDate.getFullYear();
 }
 
 export default HistoryBarChart;

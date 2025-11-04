@@ -1,8 +1,8 @@
 const { connectDb, disconnectDb } = require('./dbService.js');
-const { GameTracker } = require('./gameTracker.js');
+const { GameTracker } = require('./workers/gameTracker.js');
 const { UserRepository } = require('./repository/user.js');
 const { GameRepository } = require('./repository/game.js');
-const timer = require('./timerController.js');
+const timer = require('./workers/timerController.js');
 const { debug_colors } = require('../src/theme/colors.js');
 const { server, reset, err } = debug_colors;
 

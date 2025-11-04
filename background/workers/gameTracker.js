@@ -1,11 +1,11 @@
 const csv = require('csvtojson');
 const BackgroundService = require('./BackgroundService.js');
-const { debug_colors } = require('../src/theme/colors.js');
+const { debug_colors } = require('../../src/theme/colors.js');
 const { proctracker, reset, err } = debug_colors;
 const util = require('node:util');
 const execFile = util.promisify(require('node:child_process').execFile);
-const { GameRepository } = require('./repository/game.js');
-const { GamingSessionRepository } = require('./repository/gamingSession.js');
+const { GameRepository } = require('../repository/game.js');
+const { GamingSessionRepository } = require('../repository/gamingSession.js');
 const { Genre } = require('@prisma/client');
 
 const INTERVAL_SECONDS = 3;

@@ -32,7 +32,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getTimerState: () => ipcRenderer.invoke('timer-get-state'),
 
   // Stats APIs
-  getGameStats: (options) => ipcRenderer.invoke('get-game-stats', options)
+  getGameStats: (options) => ipcRenderer.invoke('get-game-stats', options),
+
+  // History APIs
+  getHistoryData: (options) => ipcRenderer.invoke('get-history-data', options)
 
   // TODO: Add more IPC methods as needed
   // Example:

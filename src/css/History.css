@@ -43,6 +43,17 @@ button:active {
     font-size: 3vw;
 }
 
+#year-breakdown-button.active,
+#month-breakdown-button.active {
+    background-color: #81C784;
+    color: white;
+}
+
+#year-breakdown-button.active:hover,
+#month-breakdown-button.active:hover {
+    background-color: #66BB6A;
+}
+
 #date-buttons-container {
     justify-self: center;
     justify-content: space-between;

@@ -20,13 +20,16 @@ const GamingSessionRepository = {
 
 /**
  * Returns all GamingSessions of currently loaded User.
- * 
- * @returns JSON Array of GamingSessions
+ *
+ * @returns JSON Array of GamingSessions with game details included
  */
 GamingSessionRepository.getAllGamingSessions = async () => {
     try {
         res = await getPrisma().gamingSession.findMany({
             where: {userId: UserRepository.getCurrentUser().id},
+            include: {
+                gamePlayed: true // Include game details
+            }
         });
     } catch (error) {
         console.error(`${repo}[GamingSessionRepository]${err} ${error}${reset}`);
