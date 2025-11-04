@@ -9,21 +9,6 @@ const { server, reset, err } = debug_colors;
 // Instantiate GameTracker (no dependencies)
 const gameTracker = new GameTracker();
 
-// Wire up coordination: when gaming state changes, control the timer
-gameTracker.on('gaming-state-changed', ({ isGaming }) => {
-  try {
-    if (isGaming) {
-      console.info(`${server}[index.js]${reset} Gaming detected, resuming timer`);
-      timer.resume();
-    } else {
-      console.info(`${server}[index.js]${reset} No games detected, pausing timer`);
-      timer.pause();
-    }
-  } catch (e) {
-    console.error(`${server}[index.js]${err} Timer control error:`, e, reset);
-  }
-});
-
 async function startBackground() {
   await connectDb();
   await UserRepository.loadNewOrReturningUser("Elsa Prisma");
