@@ -1,12 +1,11 @@
-const { EventEmitter } = require('events');
+const BackgroundService = require('./BackgroundService.js');
 
 const MAX_SECONDS = 24 * 3600;
 
-class TimerController extends EventEmitter {
+class TimerController extends BackgroundService {
     constructor() {
-        super();
+        super('TimerController');
         this.state = { duration: 0, timeLeft: 0, running: false };
-        this._interval = null;
     }
 
     _broadcast() {
@@ -22,9 +21,9 @@ class TimerController extends EventEmitter {
             this._broadcast();
 
             // Start interval, not necessarily running
-            this._startInterval();
+            this._startInterval(1000);
         } catch (err) {
-            console.error('TimerController.setup error', err);
+            this._log('error', 'setup error', err);
         }
     }
 
@@ -47,29 +46,19 @@ class TimerController extends EventEmitter {
         return { ...this.state };
     }
 
-    _startInterval() {
-        if (this._interval) return;
-        this._interval = setInterval(() => {
-            // Decrement time left if running
-            if (this.state.running) {
-                this.state.timeLeft = Math.max(0, this.state.timeLeft - 1);
+    _onIntervalTick() {
+        // Decrement time left if running
+        if (this.state.running) {
+            this.state.timeLeft = Math.max(0, this.state.timeLeft - 1);
 
-                // Stop timer if time's up
-                if (this.state.timeLeft <= 0) {
-                    this.clearInterval();
-                    this.state.running = false;
-                }
-                
-                // Broadcast updated state
-                this._broadcast();
+            // Stop timer if time's up
+            if (this.state.timeLeft <= 0) {
+                this.clearInterval();
+                this.state.running = false;
             }
-        }, 1000);
-    }
 
-    clearInterval() {
-        if (this._interval) {
-            clearInterval(this._interval);
-            this._interval = null;
+            // Broadcast updated state
+            this._broadcast();
         }
     }
 }
