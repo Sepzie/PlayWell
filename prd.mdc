@@ -1,0 +1,124 @@
+---
+alwaysApply: true
+---
+Create an Electron + React project scaffold with a background process and an ORM setup for PostgreSQL.
+Use plain JavaScript (no business logic yet), with minimal placeholder exports.
+
+# Stack
+- Electron (main process + tray)
+- React (renderer) with React Router
+- Node background worker (for game tracking, db access)
+- ORM: Prisma (JS). Provide schema + migrations setup, but keep models empty for now.
+
+# Scripts
+- "dev": concurrently run Vite (renderer) + Electron (main) with hot reload
+- "build": build renderer + package Electron
+- "start": run built app
+- "prisma:*" scripts for migrate/generate (see below)
+
+# Folder structure
+.
+├─ package.json
+├─ electron.main.js                # Electron entry (BrowserWindow + load renderer URL in dev)
+├─ electron.tray.js                # Placeholder tray module (export initTray)
+├─ background/
+│  ├─ index.js                     # Background process entry (export startBackground)
+│  ├─ gameTracker.js               # Placeholder (export startTracking/stopTracking)
+│  ├─ dbService.js                 # Placeholder (export connectDb/disconnectDb)
+│  └─ prismaClient.js              # Prisma client singleton (basic import/export)
+├─ prisma/
+│  └─ schema.prisma                # Datasource+generator; leave models empty with TODOs
+├─ src/                            # React renderer
+│  ├─ main.jsx                     # React entry, Router setup
+│  ├─ App.jsx
+│  ├─ pages/
+│  │  ├─ Home.jsx
+│  │  ├─ Limits.jsx
+│  │  ├─ Stats.jsx
+│  │  ├─ History.jsx
+│  │  └─ Settings.jsx
+│  ├─ components/
+│  │  └─ Nav.jsx
+│  └─ theme/
+│     ├─ colors.js                 # central color scheme constants
+│     ├─ spacing.js                # spacing/size scale constants
+│     ├─ typography.js             # font families/sizes/weights
+│     └─ index.js                  # aggregate + simple ThemeContext (no logic yet)
+├─ public/
+│  └─ index.html
+├─ vite.config.js
+└─ .env.example                    # include DATABASE_URL placeholder
+
+# Package.json (key points)
+- Add dependencies:
+  electron, react, react-dom, react-router-dom
+  prisma, @prisma/client
+- Add devDependencies:
+  vite, @vitejs/plugin-react, electron-builder (or electron-packager), concurrently, wait-on, cross-env
+- Scripts:
+  "dev:renderer": "vite",
+  "dev:electron": "cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
+  "dev": "concurrently -k \"npm:dev:renderer\" \"wait-on tcp:5173 && npm:dev:electron\"",
+  "build:renderer": "vite build",
+  "build": "npm run build:renderer && electron-builder",
+  "start": "electron .",
+  "prisma:generate": "prisma generate",
+  "prisma:migrate": "prisma migrate dev",
+  "prisma:studio": "prisma studio"
+
+# Electron basics
+- electron.main.js: create BrowserWindow, load dev server in dev, load local file in prod. Wire minimal IPC channel placeholder.
+- electron.tray.js: export function initTray(app, BrowserWindow) { /* TODO */ }
+- Add auto-start at login placeholder (comment only).
+
+# Background process
+- background/index.js: export startBackground() { /* TODO: wire gameTracker + dbService later */ }
+- background/gameTracker.js: export startTracking(){}, stopTracking(){}
+- background/dbService.js: export connectDb(){}, disconnectDb(){}
+- background/prismaClient.js: 
+  const { PrismaClient } = require('@prisma/client');
+  let prisma;
+  function getPrisma(){ if(!prisma) prisma = new PrismaClient(); return prisma; }
+  module.exports = { getPrisma };
+
+# Prisma setup
+- prisma/schema.prisma content:
+  generator client { provider = "prisma-client-js" }
+  datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+  // TODO: add models later (Game, Session, Limit)
+- .env.example should include:
+  DATABASE_URL="postgresql://USER:PASS@HOST:PORT/DBNAME?schema=public"
+
+# React renderer
+- src/main.jsx sets up Router with routes: / (Home), /limits, /stats, /history, /settings
+- Each page file exports a placeholder component with the page title only.
+- components/Nav.jsx: basic nav with Links for the 5 sections (no styling yet).
+
+# Theme / UI constants
+- src/theme/colors.js: export a constant object with app palette:
+    export const colors = {
+      primary: "#2E7D32",   // green
+      primaryAccent: "#81C784",
+      danger: "#C62828",
+      warning: "#ED6C02",
+      surface: "#0F1A13",
+      surfaceAlt: "#1E2A22",
+      text: "#E8F5E9",
+      muted: "#9E9E9E"
+    };
+- src/theme/spacing.js: export scale: { xs:4, sm:8, md:12, lg:16, xl:24, '2xl':32 }
+- src/theme/typography.js: export font stacks and sizes (base, sm, lg, xl, 2xl)
+- src/theme/index.js: export { colors, spacing, typography }; export a stub ThemeContext and ThemeProvider with no runtime logic yet.
+
+# Wiring
+- Electron main should import startBackground from background/index.js and call it.
+- Electron main should create the BrowserWindow and load renderer.
+- Don’t implement business logic; only placeholder exports and minimal wiring so the app runs.
+
+# Deliverables
+- Project compiles and runs with:
+  - npm install
+  - npm run dev  → opens Electron window showing the React router shell
+- Prisma is installed and `npx prisma generate` works (even with empty schema).
+- Theme constants are importable in React pages (but not used yet).
+- Background/tray modules exist with empty functions ready for later implementation.

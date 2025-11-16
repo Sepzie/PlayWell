@@ -24,3 +24,4 @@ release/
 *.swp
 *.swo
 *~
+.claude/

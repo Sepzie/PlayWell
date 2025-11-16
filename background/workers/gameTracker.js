@@ -1,11 +1,11 @@
 const csv = require('csvtojson');
 const BackgroundService = require('./BackgroundService.js');
-const { debug_colors } = require('../src/theme/colors.js');
+const { debug_colors } = require('../../src/theme/colors.js');
 const { proctracker, reset, err } = debug_colors;
 const util = require('node:util');
 const execFile = util.promisify(require('node:child_process').execFile);
-const { GameRepository } = require('./repository/game.js');
-const { GamingSessionRepository } = require('./repository/gamingSession.js');
+const { GameRepository } = require('../repository/game.js');
+const { GamingSessionRepository } = require('../repository/gamingSession.js');
 const { Genre } = require('@prisma/client');
 
 const INTERVAL_SECONDS = 3;
@@ -34,7 +34,8 @@ async function getGameProcessesSteam () {
   
   try {
     const { stdout, stderr } = await execFile('wmic', ['process', 'where', where, 'get', get, '/format:csv']);
-    if (stderr) {
+    // WMIC writes "No Instance(s) Available." to stderr when no processes match - this is not an error
+    if (stderr && !stderr.includes('No Instance(s) Available')) {
       console.error(`${proctracker}[GameTracker]${err}`, stderr, `${reset}`);
       return [];
     }
@@ -65,20 +66,28 @@ class GameTracker extends BackgroundService {
   /**
    * Handles GameSession tracking controls.
    * A GameSession can be of 3 states: continuing, starting, or ending.
+   * Now updates the database on every interval tick for active sessions.
    *
    * @param {Array[Object]} snapshot an array of Game objects detected by the GameTracker at this current time step
    */
   recordGameSessions(snapshot) {
     let promises = [];
-    const nextActiveGamingSessions = {}; // {game_id: {session_id, user_id, game_id, durationMinutes}}
+    const nextActiveGamingSessions = {}; // {game_id: {session_id, user_id, game_id, durationSeconds}}
 
     for (const game of snapshot) {
       if (Object.hasOwn(this.activeGamingSessions, game.id)) {
-        // This game is continuing
+        // This game is continuing - update duration and write to DB
         nextActiveGamingSessions[game.id] = this.activeGamingSessions[game.id];
-        nextActiveGamingSessions[game.id].durationMinutes += INTERVAL_SECONDS / 60;
+        nextActiveGamingSessions[game.id].durationSeconds += INTERVAL_SECONDS;
+
+        // Update DB with current duration
+        let updateP = GamingSessionRepository.updateGamingSession(
+          nextActiveGamingSessions[game.id].id,
+          nextActiveGamingSessions[game.id].durationSeconds
+        );
+        promises.push(updateP);
       } else {
-        // This game just started
+        // This game just started - create DB record
         let startP = GamingSessionRepository.startGamingSession(game.id, 0).then((gs) => {
           nextActiveGamingSessions[game.id] = gs;
         });
@@ -88,8 +97,8 @@ class GameTracker extends BackgroundService {
 
     for (const [gid, gs] of Object.entries(this.activeGamingSessions)) {
       if (!Object.hasOwn(nextActiveGamingSessions, gid)) {
-        // This game has ended
-        let endP = GamingSessionRepository.endGamingSession(gs.id, gs.durationMinutes);
+        // This game has ended - final DB update
+        let endP = GamingSessionRepository.endGamingSession(gs.id, gs.durationSeconds);
         promises.push(endP);
       }
     }
@@ -129,15 +138,10 @@ class GameTracker extends BackgroundService {
           if (isGaming !== this.wasGaming) {
             this.wasGaming = isGaming;
             this.emit('gaming-state-changed', { isGaming });
-            this._log('info', `Gaming state changed: ${isGaming ? 'started' : 'stopped'}`);
+            this._log('info', `Gaming ${isGaming ? 'started' : 'stopped'}${isGaming ? ` (${snapshot.length} game${snapshot.length !== 1 ? 's' : ''})` : ''}`);
           }
         });
       });
-      // every 10 seconds log (game tracker running, found n games)
-      if (Date.now() - this.lastLogTime >= 10000) {
-        this.lastLogTime = Date.now();
-        this._log('info', `Game tracker is running, found ${snapshot.length} games`);
-      }
   }
 
   /**
