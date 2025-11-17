@@ -38,7 +38,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getLimits: () => ipcRenderer.invoke('get-limits'),
   setLimit: (type, limitMinutes) => ipcRenderer.invoke('set-limit', { type, limitMinutes }),
   deleteLimit: (type) => ipcRenderer.invoke('delete-limit', { type }),
-  getLimitStatus: () => ipcRenderer.invoke('get-limit-status')
+  getLimitStatus: () => ipcRenderer.invoke('get-limit-status'),
+
+  // Settings APIs
+  exitApp: () => ipcRenderer.send('quit-app'),
 
   // TODO: Add more IPC methods as needed
   // Example:

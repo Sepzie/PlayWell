@@ -75,10 +75,10 @@ app.whenReady().then(() => {
 });
 
 // Quit when all windows are closed
-app.on('window-all-closed', () => {
+app.on('quit', () => {
   if (process.platform !== 'darwin') {
     stopBackground();
-    app.quit();
+    // app.quit();
   }
 });
 
@@ -202,6 +202,9 @@ ipcMain.handle('get-limit-status', async () => {
   }
   return await LimitsService.getLimitStatus(user.id);
 });
+
+// Exit handler (via "Exit App" button on Settings page)
+ipcMain.on('quit-app', () => {app.quit();})
 
 function OpenMainWindow() {
   if (!mainWindow) {
