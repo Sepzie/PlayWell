@@ -1,0 +1,19 @@
+.centered-h {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.exit-button {
+    color: white;
+    font-weight: bold;
+    font-size: 1.1em;
+    width: 125px;
+    height: 50px;
+    background-color: #2E7D32;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-top: 1em;
+}
