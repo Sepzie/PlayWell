@@ -58,12 +58,6 @@ function StatsTable() {
             <div className="stats-controls">
                 <div className="period-selector">
                     <button
-                        className={period === 'today' ? 'active' : ''}
-                        onClick={() => setPeriod('today')}
-                    >
-                        Today
-                    </button>
-                    <button
                         className={period === 'week' ? 'active' : ''}
                         onClick={() => setPeriod('week')}
                     >
@@ -74,6 +68,12 @@ function StatsTable() {
                         onClick={() => setPeriod('month')}
                     >
                         This Month
+                    </button>
+                    <button
+                        className={period === 'total' ? 'active' : ''}
+                        onClick={() => setPeriod('total')}
+                    >
+                        Total
                     </button>
                     <button
                         className={period === 'custom' ? 'active' : ''}
@@ -167,9 +167,9 @@ function newColumns() {
         },
 
         {
-            accessorKey: 'averageDaysPerWeek',
-            header: 'Average Days Per Week Played',
-            cell: (props) => <p>{props.getValue()}</p>
+            accessorKey: 'averageSessionLength',
+            header: 'Average Session Length',
+            cell: (props) => <p>{formatMinutesToHoursMinutes(props.getValue())}</p>
         },
     ];
     return columns;

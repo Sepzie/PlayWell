@@ -1,5 +1,6 @@
 const { GamingSessionRepository } = require('../repository/gamingSession.js');
 const { debug_colors } = require('../../src/theme/colors.js');
+const { session } = require('electron');
 const { service, reset, err } = debug_colors;
 
 /**
@@ -51,6 +52,16 @@ function parseDateRange(options) {
             startDate = new Date(selectedYear, 0, 1); // Jan 1
             startDate.setHours(0, 0, 0, 0);
             endDate = new Date(selectedYear, 11, 31); // Dec 31
+            endDate.setHours(23, 59, 59, 999);
+            break;
+
+        case 'total':
+            // Get all records from year 0
+            startDate = new Date(0, 0, 1);
+            startDate.setHours(0, 0, 0, 0);
+
+            // Until the year 9999
+            endDate = new Date(9999, 11, 31);
             endDate.setHours(23, 59, 59, 999);
             break;
 
@@ -155,11 +166,13 @@ StatsService.getGameStats = async (options) => {
                 gameStatsMap[gameId] = {
                     name: gameName,
                     totalPlayTime: 0,
-                    playDates: new Set()
+                    playDates: new Set(),
+                    sessionsCount: 0
                 };
             }
 
             gameStatsMap[gameId].totalPlayTime += timeInRange;
+            gameStatsMap[gameId].sessionsCount++;
 
             // Track unique days played (iterate through each day the session touches)
             let currentDay = new Date(Math.max(sessionStart, startDate));
@@ -179,23 +192,20 @@ StatsService.getGameStats = async (options) => {
         const stats = Object.values(gameStatsMap).map(game => {
             const totalPlayTime = game.totalPlayTime;
             const uniqueDaysPlayed = game.playDates.size;
+            const sessionsCount = game.sessionsCount;
 
             // Daily average: total playtime / days actually played
             const dailyAverage = uniqueDaysPlayed > 0 ? totalPlayTime / uniqueDaysPlayed : 0;
 
-            // Calculate weeks in the date range
-            const millisecondsInWeek = 7 * 24 * 60 * 60 * 1000;
-            const dateRangeDuration = endDate - startDate;
-            const weeksInRange = dateRangeDuration / millisecondsInWeek;
-
-            // Average days per week
-            const averageDaysPerWeek = weeksInRange > 0 ? uniqueDaysPlayed / weeksInRange : uniqueDaysPlayed;
+            // Average Session Length
+            // Accounts for multiple sessions in one day
+            const averageSessionLength = sessionsCount > 0 ? totalPlayTime / sessionsCount : 0;
 
             return {
                 name: game.name,
                 playTime: Math.round(totalPlayTime),
                 dailyAverage: Math.round(dailyAverage),
-                averageDaysPerWeek: parseFloat(averageDaysPerWeek.toFixed(1))
+                averageSessionLength: Math.round(averageSessionLength)
             };
         });
 
