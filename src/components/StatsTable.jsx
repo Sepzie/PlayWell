@@ -5,7 +5,7 @@ import { formatMinutesToHoursMinutes } from "../utils/timeFormatter";
 function StatsTable() {
     const columns = newColumns();
     const [data, setData] = useState([]);
-    const [period, setPeriod] = useState('today');
+    const [period, setPeriod] = useState('week');
     const [customStart, setCustomStart] = useState('');
     const [customEnd, setCustomEnd] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -112,22 +112,25 @@ function StatsTable() {
             ) : data.length === 0 ? (
                 <p>No gaming sessions found for this period.</p>
             ) : (
-                <table id="stats-table" w={table.getTotalSize()}>
-                    <thead>
+                <div id={period === 'custom'? 'stats-all-rows-custom' : 'stats-all-rows'}>
+                <table id="stats-table">
+                    <thead id="stats-headers">
                         {table.getHeaderGroups().map(headerGroup =>
                         <tr className="stats-row" key={headerGroup.id}>
                             {headerGroup.headers.map(header =>
-                            <th className="stats-header" w={header.getSize()} key={header.id}>
+                            <th className="stats-header" key={header.id}>
                                 {header.column.columnDef.header}
                             </th>
                             )}
                         </tr>)}
                     </thead>
+                    
                     <tbody>
+                        
                         {table.getRowModel().rows.map(row =>
                             <tr className="stats-row" key={row.id}>
                                 {row.getVisibleCells().map(cell =>
-                                    <td className="stats-data" w={cell.column.getSize()} key={cell.id}>
+                                    <td className="stats-data" key={cell.id}>
                                         {
                                             flexRender(
                                                 cell.column.columnDef.cell,
@@ -138,8 +141,11 @@ function StatsTable() {
                                 )}
                             </tr>
                         )}
+                        
                     </tbody>
+                    
                 </table>
+                </div>
             )}
         </div>
     )
