@@ -1,11 +1,12 @@
 .circle-timer-container {
     position: relative;
-    width: 200px;
-    height: 200px;
+    width: 75%;
+    height: 75%;
+    margin-top: 10vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    grid-area: 2 / 2 / 5 / 8;
+    grid-area: 2 / 1 / 5 / 9;
 }
 
 .circle-timer-svg {
@@ -15,6 +16,7 @@
     width: 100%;
     height: 100%;
     transform: rotate(-90deg);
+    pointer-events: none;
 }
 
 .circle-timer-background {
@@ -33,7 +35,7 @@
 
 .circle-timer-text {
     position: relative;
-    font-size: 2em;
+    font-size: 3vw;
     font-weight: lighter;
     color: #2E7D32;
     user-select: none;

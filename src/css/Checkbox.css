@@ -12,10 +12,14 @@
 
 .current-limit {
     color: #9E9E9E;
-    font-size: 14px;
+    font-size: 1.5vw;
+}
+
+.day-label {
+    font-size: 2vw;
 }
 
 input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
+    width: 2.5vw;
+    height: 2.5vh;
 }

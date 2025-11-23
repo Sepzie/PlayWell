@@ -17,7 +17,7 @@ function Checkbox({ label, isChecked, limitSeconds, onChange }) {
 
     return (
         <label className="checkbox-container">
-            <p>{label}</p>
+            <p className='day-label'>{label}</p>
             <p className='current-limit'>{formatTime(limitSeconds)}</p>
             <input
                 type="checkbox"

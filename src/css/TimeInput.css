@@ -9,10 +9,10 @@
 }
 
 .time-input-container input {
-    width: 45px;
-    height: 25px;
+    width: 5vw;
+    height: 4vh;
     padding: 10px;
-    font-size: 1.1em;
+    font-size: 2vw;
     border: 2px solid #9E9E9E;
     border-radius: 10px;
 }
@@ -34,7 +34,13 @@
     transform: translateY(-50%);
     pointer-events: none;
     color: #616161;
+    font-size: 2vw;
     font-weight: 600;
+}
+
+.daily-limit-label {
+    font-size: 2.5vw;
+    margin-left: 1vw;
 }
 
 input[type=number]::-webkit-outer-spin-button,
@@ -45,7 +51,7 @@ input[type=number]::-webkit-inner-spin-button {
 
 .input-with-unit .spinner {
     position: absolute;
-    right: -30px;
+    right: -3.5vw;
     top: 50%;
     transform: translateY(-50%);
     display: flex;
@@ -56,11 +62,11 @@ input[type=number]::-webkit-inner-spin-button {
 .input-with-unit .spin {
     background: transparent;
     border: 1px solid #cfcfcf;
-    width: 28px;
-    height: 18px;
+    width: 3vw;
+    height: 3vh;
     padding: 0;
     line-height: 12px;
-    font-size: 10px;
+    font-size: 1vw;
     color: #424242;
     cursor: pointer;
     border-radius: 4px;
