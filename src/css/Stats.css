@@ -135,3 +135,26 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #818181; 
 }
+
+.stats-header-text {
+    text-align: center;
+}
+
+.sortButton {
+    background-image: url("/src/public/sortIcon.png");
+    background-repeat: no-repeat;
+    width: 0.5em;
+    height: 0.5em;
+    background-size: contain;
+    background-position: center;
+    cursor: pointer;
+    padding: 1%;
+}
+
+.sortButton:hover {
+    background-color: #91df95;
+}
+
+.sortButton:active {
+    background-color: #3b9e40;
+}

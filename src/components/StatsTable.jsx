@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { flexRender, getCoreRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
 import { formatMinutesToHoursMinutes } from "../utils/timeFormatter";
 
 function StatsTable() {
@@ -14,6 +14,7 @@ function StatsTable() {
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel()
     });
 
     // Fetch stats data
@@ -114,19 +115,24 @@ function StatsTable() {
             ) : (
                 <div id={period === 'custom'? 'stats-all-rows-custom' : 'stats-all-rows'}>
                 <table id="stats-table">
+
                     <thead id="stats-headers">
                         {table.getHeaderGroups().map(headerGroup =>
                         <tr className="stats-row" key={headerGroup.id}>
                             {headerGroup.headers.map(header =>
                             <th className="stats-header" key={header.id}>
-                                {header.column.columnDef.header}
+                                <p className="stats-header-text">{header.column.columnDef.header}</p>
+                                {
+                                    header.column.getCanSort() && 
+                                    <button className="sortButton"
+                                    onClick={header.column.getToggleSortingHandler()}></button>
+                                }
                             </th>
                             )}
                         </tr>)}
                     </thead>
                     
                     <tbody>
-                        
                         {table.getRowModel().rows.map(row =>
                             <tr className="stats-row" key={row.id}>
                                 {row.getVisibleCells().map(cell =>
