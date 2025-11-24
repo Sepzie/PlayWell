@@ -45,6 +45,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Example:
   // getGameSessions: () => ipcRenderer.invoke('get-game-sessions'),
   // saveGameSession: (session) => ipcRenderer.invoke('save-game-session', session)
+
+  // Notification preferences APIs
+  getNotificationPreferences: () => ipcRenderer.invoke('get-notification-preferences'),
+  updateNotificationPreferences: (prefs) => ipcRenderer.invoke('update-notification-preferences', prefs)
 });
 
 

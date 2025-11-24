@@ -9,6 +9,8 @@ const timer = require('./background/workers/timerController.js');
 const { StatsService } = require('./background/services/statsService.js');
 const { LimitsService } = require('./background/services/limitsService.js');
 const { UserRepository } = require('./background/repository/user.js');
+const { GameRepository } = require('./background/repository/game.js');
+const { NotificationPreferencesRepository } = require('./background/repository/notificationPreferences.js');
 
 // Keep a global reference of the window object
 let mainWindow;
@@ -66,6 +68,14 @@ app.whenReady().then(() => {
 
   // Start background process
   startBackground();
+
+  // Listen for currently playing game changes and update tray
+  const { gameTracker } = require('./background/index.js');
+  gameTracker.on('currently-playing-changed', (game) => {
+    if (trayManager) {
+      trayManager.setCurrentlyPlayingGame(game ? game.gameName : null);
+    }
+  });
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -204,6 +214,36 @@ ipcMain.handle('get-limit-status', async () => {
     };
   }
   return await LimitsService.getLimitStatus(user.id);
+});
+
+
+// Notification preferences IPC handlers
+ipcMain.handle('get-notification-preferences', async () => {
+  try {
+    const user = UserRepository.getCurrentUser();
+    if (!user) {
+      console.error('[IPC] No user loaded for get-notification-preferences');
+      return { newGameDetected: true, gameStarted: true, gameStopped: true };
+    }
+    return await NotificationPreferencesRepository.getPreferences(user.id);
+  } catch (error) {
+    console.error('[IPC] Error getting notification preferences:', error);
+    return { newGameDetected: true, gameStarted: true, gameStopped: true };
+  }
+});
+
+ipcMain.handle('update-notification-preferences', async (event, prefs) => {
+  try {
+    const user = UserRepository.getCurrentUser();
+    if (!user) {
+      console.error('[IPC] No user loaded for update-notification-preferences');
+      return {};
+    }
+    return await NotificationPreferencesRepository.updatePreferences(user.id, prefs);
+  } catch (error) {
+    console.error('[IPC] Error updating notification preferences:', error);
+    return {};
+  }
 });
 
 function OpenMainWindow() {
