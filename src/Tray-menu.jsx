@@ -8,6 +8,9 @@ function TrayMenu() {
   const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
 
   useEffect(() => {
+    let offTimer = null;
+    let offPlaying = null;
+
     // initialize and subscribe to main timer
     if (window && window.electronAPI && window.electronAPI.getTimerState) {
       window.electronAPI.getTimerState().then(state => {
@@ -16,21 +19,25 @@ function TrayMenu() {
         setIsOverLimit(state.isOverLimit || false);
       }).catch(() => { });
 
-      const off = window.electronAPI.onTimerUpdate((state) => {
+      offTimer = window.electronAPI.onTimerUpdate((state) => {
         setDuration(state.duration || 0);
         setTimeLeft(state.timeLeft || 0);
         setIsOverLimit(state.isOverLimit || false);
       });
-      return () => { try { off && off(); } catch (e) { } };
     }
 
     // Listen for currently playing game updates
     if (window && window.electronAPI && window.electronAPI.onCurrentlyPlayingChanged) {
-      const offPlaying = window.electronAPI.onCurrentlyPlayingChanged((game) => {
+      offPlaying = window.electronAPI.onCurrentlyPlayingChanged((game) => {
         setCurrentlyPlaying(game);
       });
-      return () => { try { offPlaying && offPlaying(); } catch (e) { } };
     }
+
+    // Return cleanup function that calls both
+    return () => {
+      try { offTimer && offTimer(); } catch (e) { }
+      try { offPlaying && offPlaying(); } catch (e) { }
+    };
   }, []);
 
   return (

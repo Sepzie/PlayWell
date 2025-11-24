@@ -19,7 +19,6 @@ function NotificationSettings() {
     try {
       setLoading(true);
       const prefs = await window.electronAPI.getNotificationPreferences();
-      console.log('Loaded preferences:', prefs);
       // Ensure all fields are present with defaults if missing
       setPreferences({
         newGameDetected: prefs.newGameDetected !== undefined ? prefs.newGameDetected : true,
@@ -45,9 +44,7 @@ function NotificationSettings() {
   const handleSave = async () => {
     try {
       setLoading(true);
-      console.log('Saving preferences:', preferences);
-      const result = await window.electronAPI.updateNotificationPreferences(preferences);
-      console.log('Save result:', result);
+      await window.electronAPI.updateNotificationPreferences(preferences);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
       // Reload preferences to ensure sync

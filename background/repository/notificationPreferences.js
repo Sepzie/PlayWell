@@ -23,11 +23,9 @@ NotificationPreferencesRepository.getPreferences = async (userId) => {
 
     // If no preferences exist, create default ones
     if (!prefs) {
-      console.info(`${repo}[NotificationPreferencesRepository]${reset} No preferences found, creating defaults for user ${userId}`);
       prefs = await NotificationPreferencesRepository.createDefaultPreferences(userId);
     }
 
-    console.info(`${repo}[NotificationPreferencesRepository]${reset} Retrieved preferences:`, prefs);
     return prefs;
   } catch (error) {
     console.error(`${repo}[NotificationPreferencesRepository]${err} ${error}${reset}`);
@@ -52,7 +50,6 @@ NotificationPreferencesRepository.getPreferences = async (userId) => {
  */
 NotificationPreferencesRepository.updatePreferences = async (userId, prefs) => {
   try {
-    console.info(`${repo}[NotificationPreferencesRepository]${reset} Updating preferences for user ${userId}:`, prefs);
     const updated = await getPrisma().notificationPreferences.upsert({
       where: { userId: userId },
       update: prefs,
@@ -65,7 +62,7 @@ NotificationPreferencesRepository.updatePreferences = async (userId, prefs) => {
       }
     });
 
-    console.info(`${repo}[NotificationPreferencesRepository]${reset} Successfully updated preferences:`, updated);
+    console.info(`${repo}[NotificationPreferencesRepository]${reset} Updated preferences for user ${userId}`);
     return updated;
   } catch (error) {
     console.error(`${repo}[NotificationPreferencesRepository]${err} ${error}${reset}`);
