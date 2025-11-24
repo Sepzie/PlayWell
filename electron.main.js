@@ -154,9 +154,12 @@ ipcMain.handle('get-game-stats', async (event, options = {}) => {
   return await StatsService.getGameStats(options);
 });
 
-// History IPC handler
+// History IPC handlers
 ipcMain.handle('get-history-data', async (event, options = {}) => {
   return await StatsService.getHistoryData(options);
+});
+ipcMain.handle('get-oldest-and-newest-session-dates', async () => {
+  return await StatsService.getOldestAndNewestSessionDates();
 });
 
 // Limits IPC handlers

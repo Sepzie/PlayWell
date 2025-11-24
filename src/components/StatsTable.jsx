@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import { flexRender, getCoreRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
 import { formatMinutesToHoursMinutes } from "../utils/timeFormatter";
 
 function StatsTable() {
     const columns = newColumns();
     const [data, setData] = useState([]);
-    const [period, setPeriod] = useState('today');
+    const [period, setPeriod] = useState('week');
     const [customStart, setCustomStart] = useState('');
     const [customEnd, setCustomEnd] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -14,6 +14,7 @@ function StatsTable() {
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel()
     });
 
     // Fetch stats data
@@ -58,12 +59,6 @@ function StatsTable() {
             <div className="stats-controls">
                 <div className="period-selector">
                     <button
-                        className={period === 'today' ? 'active' : ''}
-                        onClick={() => setPeriod('today')}
-                    >
-                        Today
-                    </button>
-                    <button
                         className={period === 'week' ? 'active' : ''}
                         onClick={() => setPeriod('week')}
                     >
@@ -74,6 +69,12 @@ function StatsTable() {
                         onClick={() => setPeriod('month')}
                     >
                         This Month
+                    </button>
+                    <button
+                        className={period === 'total' ? 'active' : ''}
+                        onClick={() => setPeriod('total')}
+                    >
+                        Total
                     </button>
                     <button
                         className={period === 'custom' ? 'active' : ''}
@@ -112,22 +113,30 @@ function StatsTable() {
             ) : data.length === 0 ? (
                 <p>No gaming sessions found for this period.</p>
             ) : (
-                <table id="stats-table" w={table.getTotalSize()}>
-                    <thead>
+                <div id={period === 'custom'? 'stats-all-rows-custom' : 'stats-all-rows'}>
+                <table id="stats-table">
+
+                    <thead id="stats-headers">
                         {table.getHeaderGroups().map(headerGroup =>
                         <tr className="stats-row" key={headerGroup.id}>
                             {headerGroup.headers.map(header =>
-                            <th className="stats-header" w={header.getSize()} key={header.id}>
-                                {header.column.columnDef.header}
+                            <th className="stats-header" key={header.id}>
+                                <p className="stats-header-text">{header.column.columnDef.header}</p>
+                                {
+                                    header.column.getCanSort() && 
+                                    <button className="sortButton"
+                                    onClick={header.column.getToggleSortingHandler()}></button>
+                                }
                             </th>
                             )}
                         </tr>)}
                     </thead>
+                    
                     <tbody>
                         {table.getRowModel().rows.map(row =>
                             <tr className="stats-row" key={row.id}>
                                 {row.getVisibleCells().map(cell =>
-                                    <td className="stats-data" w={cell.column.getSize()} key={cell.id}>
+                                    <td className="stats-data" key={cell.id}>
                                         {
                                             flexRender(
                                                 cell.column.columnDef.cell,
@@ -138,8 +147,11 @@ function StatsTable() {
                                 )}
                             </tr>
                         )}
+                        
                     </tbody>
+                    
                 </table>
+                </div>
             )}
         </div>
     )
@@ -167,9 +179,9 @@ function newColumns() {
         },
 
         {
-            accessorKey: 'averageDaysPerWeek',
-            header: 'Average Days Per Week Played',
-            cell: (props) => <p>{props.getValue()}</p>
+            accessorKey: 'averageSessionLength',
+            header: 'Average Session Length',
+            cell: (props) => <p>{formatMinutesToHoursMinutes(props.getValue())}</p>
         },
     ];
     return columns;

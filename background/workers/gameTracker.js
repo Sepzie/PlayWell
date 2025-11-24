@@ -119,11 +119,15 @@ class GameTracker extends BackgroundService {
       .then((values) => {
         let snapshot = [].concat(...values);
         let upserts = [];
+        const path = require('node:path');
         for (const s of snapshot) {
+          // Remove .exe from game name.
+          let gameName = path.basename(s['Name'], path.extname(s['Name']))
+
           // Upsert to account for newly detected games.
           upserts.push(
             GameRepository.upsertGame(
-              s['Name'],
+              gameName,
               s['ExecutablePath'],
               'Steam (PC)', // everything is this for now
               Genre.DECKBUILDER // everything is this for now

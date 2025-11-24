@@ -48,9 +48,20 @@ function HistoryBarChart(){
         }
     };
 
+    const fetchSessionDates = async () => {
+      // Get oldest & newest session dates
+      const sessionDates = await window.electronAPI.getOldestAndNewestSessionDates()
+      const oldestSessionDate = sessionDates.oldestSessionDate
+      const newestSessionDate = sessionDates.newestSessionDate
+
+      // Check date change buttons with oldest & newest session dates
+      checkDateChangeButtons(oldestSessionDate, newestSessionDate);
+    }
+
     // Fetch data when date or breakdown changes
     useEffect(() => {
         fetchHistoryData();
+        fetchSessionDates();
     }, [currentDate, yearBreakdown]);
 
     // Create/update chart when data changes
@@ -162,6 +173,53 @@ function HistoryBarChart(){
       }
       else {
         document.getElementById("month-input").showPicker()
+      }
+    }
+
+    const checkDateChangeButtons = async (oldestSessionDate, newestSessionDate) => {
+      // Immediately disable buttons
+      document.getElementById("back-button").disabled = true;
+      document.getElementById("next-button").disabled = true;
+
+      // Assume buttons are disabled
+      let disableBackButton = true;
+      let disableNextButton = true;
+
+      // Get oldest & newest year & month
+      const oldestYear = oldestSessionDate.getFullYear()
+      const oldestMonth = oldestSessionDate.getMonth()
+      const newestYear = newestSessionDate.getFullYear()
+      const newestMonth = newestSessionDate.getMonth()
+
+      // Compare oldest & newest year to current year
+      if (oldestYear < currentYear) {
+        disableBackButton = false
+      }
+      if (newestYear > currentYear) {
+        disableNextButton = false
+      }
+
+      // For monthly breakdown
+      if (!yearBreakdown) {
+        // Compare oldest & newest month to current month
+        // If oldest / newest month are on the same year
+        if (oldestMonth < currentMonth && oldestYear === currentYear) {
+          disableBackButton = false
+        }
+        if (newestMonth > currentMonth && newestYear === currentYear) {
+          disableNextButton = false
+        }
+      }
+
+      // Enable buttons if there is data
+      if (!disableBackButton)
+      {
+        document.getElementById("back-button").disabled = false;
+      }
+
+      if (!disableNextButton)
+        {
+          document.getElementById("next-button").disabled = false;
       }
     }
 
