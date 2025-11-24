@@ -216,6 +216,59 @@ ipcMain.handle('get-limit-status', async () => {
   return await LimitsService.getLimitStatus(user.id);
 });
 
+// Game management IPC handlers
+ipcMain.handle('get-all-games', async () => {
+  try {
+    return await GameRepository.getAllGames();
+  } catch (error) {
+    console.error('[IPC] Error getting all games:', error);
+    return [];
+  }
+});
+
+ipcMain.handle('enable-game', async (event, { gameId }) => {
+  try {
+    return await GameRepository.enableGame(gameId);
+  } catch (error) {
+    console.error('[IPC] Error enabling game:', error);
+    return {};
+  }
+});
+
+ipcMain.handle('disable-game', async (event, { gameId }) => {
+  try {
+    return await GameRepository.disableGame(gameId);
+  } catch (error) {
+    console.error('[IPC] Error disabling game:', error);
+    return {};
+  }
+});
+
+ipcMain.handle('delete-game', async (event, { gameId }) => {
+  try {
+    const { gameTracker } = require('./background/index.js');
+    const result = await GameRepository.deleteGame(gameId);
+    // Refresh game cache after deletion
+    await gameTracker.refreshGameCache();
+    return result;
+  } catch (error) {
+    console.error('[IPC] Error deleting game:', error);
+    return {};
+  }
+});
+
+ipcMain.handle('add-manual-game', async (event, { name, location }) => {
+  try {
+    const { gameTracker } = require('./background/index.js');
+    const game = await GameRepository.createGame(name, location, 'Manual');
+    // Refresh game cache after addition
+    await gameTracker.refreshGameCache();
+    return game;
+  } catch (error) {
+    console.error('[IPC] Error adding manual game:', error);
+    return {};
+  }
+});
 
 // Notification preferences IPC handlers
 ipcMain.handle('get-notification-preferences', async () => {

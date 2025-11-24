@@ -39,12 +39,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getLimits: () => ipcRenderer.invoke('get-limits'),
   setLimit: (type, limitMinutes) => ipcRenderer.invoke('set-limit', { type, limitMinutes }),
   deleteLimit: (type) => ipcRenderer.invoke('delete-limit', { type }),
-  getLimitStatus: () => ipcRenderer.invoke('get-limit-status')
+  getLimitStatus: () => ipcRenderer.invoke('get-limit-status'),
 
-  // TODO: Add more IPC methods as needed
-  // Example:
-  // getGameSessions: () => ipcRenderer.invoke('get-game-sessions'),
-  // saveGameSession: (session) => ipcRenderer.invoke('save-game-session', session)
+  // Game management APIs
+  getAllGames: () => ipcRenderer.invoke('get-all-games'),
+  enableGame: (gameId) => ipcRenderer.invoke('enable-game', { gameId }),
+  disableGame: (gameId) => ipcRenderer.invoke('disable-game', { gameId }),
+  deleteGame: (gameId) => ipcRenderer.invoke('delete-game', { gameId }),
+  addManualGame: (name, location) => ipcRenderer.invoke('add-manual-game', { name, location }),
 
   // Notification preferences APIs
   getNotificationPreferences: () => ipcRenderer.invoke('get-notification-preferences'),
