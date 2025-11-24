@@ -1,6 +1,6 @@
 .time-input-container {
     text-align: center;
-    grid-area: 5 / 1 / 6 / 9;
+    grid-area: 6 / 1 / 6 / 9;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: auto;
@@ -9,10 +9,10 @@
 }
 
 .time-input-container input {
-    width: 5vw;
-    height: 4vh;
+    width: 4vw;
+    height: 3vh;
     padding: 10px;
-    font-size: 2vw;
+    font-size: 1.5vw;
     border: 2px solid #9E9E9E;
     border-radius: 10px;
 }
@@ -34,12 +34,12 @@
     transform: translateY(-50%);
     pointer-events: none;
     color: #616161;
-    font-size: 2vw;
+    font-size: 1.5vw;
     font-weight: 600;
 }
 
 .daily-limit-label {
-    font-size: 2.5vw;
+    font-size: 2vw;
     margin-left: 1vw;
 }
 

@@ -25,6 +25,7 @@ function Limits() {
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Load existing limits on mount
   useEffect(() => {
@@ -34,12 +35,18 @@ function Limits() {
   const loadLimits = async () => {
     try {
       const limits = await window.electronAPI.getLimits();
-      const newDayLimits = { ...dayLimits };
 
+      // Start with a clean defaults object (unchecked, 0 seconds) so missing limits clear previous state
+      const newDayLimits = DAY_TYPES.reduce((acc, type) => {
+        acc[type] = { checked: false, limitSeconds: 0 };
+        return acc;
+      }, {});
+
+      // Populate returned limits (if any)
       limits.forEach(limit => {
         if (newDayLimits[limit.type]) {
           newDayLimits[limit.type] = {
-            checked: true,
+            checked: false,
             limitSeconds: limit.limitSeconds  // Now in seconds from backend
           };
         }
@@ -102,9 +109,6 @@ function Limits() {
         if (dayLimits[dayType].checked) {
           // Set limit for checked days (in seconds)
           return window.electronAPI.setLimit(dayType, limitSeconds);
-        } else {
-          // Delete limit for unchecked days
-          return window.electronAPI.deleteLimit(dayType);
         }
       });
 
@@ -124,6 +128,44 @@ function Limits() {
       alert('Failed to save limits. Please try again.');
     } finally {
       setIsSaving(false);
+    }
+  };
+  
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+
+      // Validate that at least one day is checked
+      const anyChecked = Object.values(dayLimits).some(day => day.checked);
+      if (!anyChecked) {
+        alert('Please select at least one day to delete a limit');
+        setIsDeleting(false);
+        return;
+      }
+
+      // Delete limits for each checked day
+      const promises = DAY_TYPES.map(async (dayType) => {
+        if (dayLimits[dayType].checked) {
+          return window.electronAPI.deleteLimit(dayType);
+        }
+      });
+
+      await Promise.all(promises);
+
+      // Reload limits to update UI with the newly saved values
+      await loadLimits();
+
+      // Force timer to update immediately with new limits
+      if (window.electronAPI && window.electronAPI.forceTimerUpdate) {
+        window.electronAPI.forceTimerUpdate();
+      }
+
+      console.log('Limits deleted successfully');
+    } catch (error) {
+      console.error('Error deleting limits:', error);
+      alert('Failed to delete limits. Please try again.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -160,6 +202,14 @@ function Limits() {
           disabled={isSaving}
         >
           {isSaving ? 'Saving...' : 'Apply'}
+        </button>
+
+        <button
+          className="timer-button delete-button"
+          onClick={handleDelete}
+          disabled={isDeleting}
+        >
+          {isDeleting ? 'Deleting...' : 'Delete'}
         </button>
       </div>
     </div>
