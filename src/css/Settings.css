@@ -2,6 +2,8 @@
   padding: 32px;
   max-width: 900px;
   margin: 0 auto;
+  overflow-y: auto;
+  height: 100%;
 }
 
 .settings-page h1 {
@@ -29,6 +31,19 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.settings-section.game-management {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.game-management-content {
+  flex: 1;
+  min-width: 250px;
+}
+
 .settings-section h2 {
   margin: 0 0 8px 0;
   font-size: 20px;
@@ -44,7 +59,7 @@
 
 .manage-games-button {
   padding: 12px 24px;
-  background-color: #2196F3;
+  background-color: #4CAF50;
   color: white;
   border: none;
   border-radius: 8px;
@@ -52,11 +67,26 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
+  align-self: center;
 }
 
 .manage-games-button:hover {
-  background-color: #1976D2;
+  background-color: #45a049;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+@media (max-width: 768px) {
+  .settings-page {
+    padding: 16px;
+  }
+  
+  .settings-section.game-management {
+    flex-direction: column;
+  }
+  
+  .manage-games-button {
+    width: 100%;
+  }
 }
 

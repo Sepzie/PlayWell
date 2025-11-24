@@ -50,7 +50,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Notification preferences APIs
   getNotificationPreferences: () => ipcRenderer.invoke('get-notification-preferences'),
-  updateNotificationPreferences: (prefs) => ipcRenderer.invoke('update-notification-preferences', prefs)
+  updateNotificationPreferences: (prefs) => ipcRenderer.invoke('update-notification-preferences', prefs),
+
+  // Currently playing game listener
+  onCurrentlyPlayingChanged: (callback) => {
+    const listener = (event, gameName) => callback(gameName);
+    ipcRenderer.on('currently-playing-changed', listener);
+    return () => ipcRenderer.removeListener('currently-playing-changed', listener);
+  }
 });
 
 

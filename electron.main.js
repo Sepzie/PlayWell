@@ -75,6 +75,15 @@ app.whenReady().then(() => {
     if (trayManager) {
       trayManager.setCurrentlyPlayingGame(game ? game.gameName : null);
     }
+    
+    // Also broadcast to tray window
+    if (trayManager && trayManager.trayWindow) {
+      try {
+        trayManager.trayWindow.webContents.send('currently-playing-changed', game ? game.gameName : null);
+      } catch (e) {
+        // Tray window might not be ready yet
+      }
+    }
   });
 
   app.on('activate', () => {

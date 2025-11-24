@@ -11,6 +11,19 @@
   color: #333;
 }
 
+.notification-settings .section-title {
+  margin: 20px 0 12px 0;
+  font-size: 16px;
+  color: #555;
+  font-weight: 600;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 8px;
+}
+
+.notification-settings .section-title:first-of-type {
+  margin-top: 0;
+}
+
 .notification-settings .description {
   margin: 0 0 20px 0;
   color: #666;

@@ -32,6 +32,11 @@ body {
     color: #9E9E9E;
 }
 
+.text.currently-playing {
+    color: #4CAF50;
+    font-weight: 600;
+}
+
 footer {
     position: fixed;
     height: 25px;

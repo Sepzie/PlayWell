@@ -13,11 +13,13 @@ function Settings() {
 
       <div className="settings-sections">
         {/* Game Management Section */}
-        <div className="settings-section">
-          <h2>Game Management</h2>
-          <p className="section-description">
-            Manage which games are tracked. PlayWell automatically detects games, but you can also add them manually.
-          </p>
+        <div className="settings-section game-management">
+          <div className="game-management-content">
+            <h2>Game Management</h2>
+            <p className="section-description">
+              Manage which games are tracked. PlayWell automatically detects games, but you can also add them manually.
+            </p>
+          </div>
           <button 
             className="manage-games-button"
             onClick={() => setIsGameModalOpen(true)}

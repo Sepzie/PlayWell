@@ -23,16 +23,19 @@ NotificationPreferencesRepository.getPreferences = async (userId) => {
 
     // If no preferences exist, create default ones
     if (!prefs) {
+      console.info(`${repo}[NotificationPreferencesRepository]${reset} No preferences found, creating defaults for user ${userId}`);
       prefs = await NotificationPreferencesRepository.createDefaultPreferences(userId);
     }
 
+    console.info(`${repo}[NotificationPreferencesRepository]${reset} Retrieved preferences:`, prefs);
     return prefs;
   } catch (error) {
     console.error(`${repo}[NotificationPreferencesRepository]${err} ${error}${reset}`);
     return {
       newGameDetected: true,
       gameStarted: true,
-      gameStopped: true
+      gameStopped: true,
+      stopTrackingOnUnfocus: true
     };
   }
 };
@@ -49,6 +52,7 @@ NotificationPreferencesRepository.getPreferences = async (userId) => {
  */
 NotificationPreferencesRepository.updatePreferences = async (userId, prefs) => {
   try {
+    console.info(`${repo}[NotificationPreferencesRepository]${reset} Updating preferences for user ${userId}:`, prefs);
     const updated = await getPrisma().notificationPreferences.upsert({
       where: { userId: userId },
       update: prefs,
@@ -56,11 +60,12 @@ NotificationPreferencesRepository.updatePreferences = async (userId, prefs) => {
         userId: userId,
         newGameDetected: prefs.newGameDetected !== undefined ? prefs.newGameDetected : true,
         gameStarted: prefs.gameStarted !== undefined ? prefs.gameStarted : true,
-        gameStopped: prefs.gameStopped !== undefined ? prefs.gameStopped : true
+        gameStopped: prefs.gameStopped !== undefined ? prefs.gameStopped : true,
+        stopTrackingOnUnfocus: prefs.stopTrackingOnUnfocus !== undefined ? prefs.stopTrackingOnUnfocus : true
       }
     });
 
-    console.info(`${repo}[NotificationPreferencesRepository]${reset} Updated preferences for user ${userId}`);
+    console.info(`${repo}[NotificationPreferencesRepository]${reset} Successfully updated preferences:`, updated);
     return updated;
   } catch (error) {
     console.error(`${repo}[NotificationPreferencesRepository]${err} ${error}${reset}`);
@@ -81,7 +86,8 @@ NotificationPreferencesRepository.createDefaultPreferences = async (userId) => {
         userId: userId,
         newGameDetected: true,
         gameStarted: true,
-        gameStopped: true
+        gameStopped: true,
+        stopTrackingOnUnfocus: true
       }
     });
 
@@ -92,7 +98,8 @@ NotificationPreferencesRepository.createDefaultPreferences = async (userId) => {
     return {
       newGameDetected: true,
       gameStarted: true,
-      gameStopped: true
+      gameStopped: true,
+      stopTrackingOnUnfocus: true
     };
   }
 };

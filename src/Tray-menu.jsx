@@ -5,6 +5,7 @@ function TrayMenu() {
   const [duration, setDuration] = useState(0);
   const [timeLeft, setTimeLeft] = useState(0);
   const [isOverLimit, setIsOverLimit] = useState(false);
+  const [currentlyPlaying, setCurrentlyPlaying] = useState(null);
 
   useEffect(() => {
     // initialize and subscribe to main timer
@@ -22,14 +23,28 @@ function TrayMenu() {
       });
       return () => { try { off && off(); } catch (e) { } };
     }
+
+    // Listen for currently playing game updates
+    if (window && window.electronAPI && window.electronAPI.onCurrentlyPlayingChanged) {
+      const offPlaying = window.electronAPI.onCurrentlyPlayingChanged((game) => {
+        setCurrentlyPlaying(game);
+      });
+      return () => { try { offPlaying && offPlaying(); } catch (e) { } };
+    }
   }, []);
 
   return (
     <div className="main-container">
       <div className="title">
-        <p className="text">
-          {isOverLimit ? "You've exceeded your gaming limit!" : "Your current gaming time limit"}
-        </p>
+        {currentlyPlaying ? (
+          <p className="text currently-playing">
+            🎮 Playing: {currentlyPlaying}
+          </p>
+        ) : (
+          <p className="text">
+            {isOverLimit ? "You've exceeded your gaming limit!" : "Your current gaming time limit"}
+          </p>
+        )}
       </div>
 
       <CircleTimer durationInSeconds={duration} timeLeft={timeLeft} />

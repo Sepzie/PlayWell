@@ -7,6 +7,8 @@ const execFile = util.promisify(require('node:child_process').execFile);
 const { GameRepository } = require('../repository/game.js');
 const { GamingSessionRepository } = require('../repository/gamingSession.js');
 const { FocusTracker } = require('./focusTracker.js');
+const { NotificationPreferencesRepository } = require('../repository/notificationPreferences.js');
+const { UserRepository } = require('../repository/user.js');
 
 const INTERVAL_SECONDS = 3;
 const UNFOCUS_TIMEOUT_MS = 30000; // 30 seconds
@@ -362,7 +364,19 @@ class GameTracker extends BackgroundService {
       }
     }
 
-    // End sessions that lost focus for more than 30 seconds
+    // End sessions that lost focus for more than 30 seconds (if enabled)
+    // Check user preference for stopping on unfocus
+    const user = UserRepository.getCurrentUser();
+    let stopOnUnfocus = true; // default behavior
+    if (user) {
+      try {
+        const prefs = await NotificationPreferencesRepository.getPreferences(user.id);
+        stopOnUnfocus = prefs.stopTrackingOnUnfocus !== false;
+      } catch (error) {
+        // Use default if can't load preferences
+      }
+    }
+
     const now = Date.now();
     for (const [gid, gs] of Object.entries(this.activeGamingSessions)) {
       const shouldContinue = Object.hasOwn(nextActiveGamingSessions, gid);
@@ -370,9 +384,12 @@ class GameTracker extends BackgroundService {
       if (!shouldContinue) {
         const lastFocusTime = this.focusTimestamps[gid] || 0;
         const timeSinceLastFocus = now - lastFocusTime;
+        const gameIsClosed = !enabledGames.find(g => g.id === gid);
 
-        // End session if unfocused for more than 30 seconds or game closed
-        if (timeSinceLastFocus > UNFOCUS_TIMEOUT_MS || !enabledGames.find(g => g.id === gid)) {
+        // End session if: game is closed OR (unfocus tracking is enabled AND unfocused for 30+ seconds)
+        const shouldEndSession = gameIsClosed || (stopOnUnfocus && timeSinceLastFocus > UNFOCUS_TIMEOUT_MS);
+
+        if (shouldEndSession) {
           const endP = GamingSessionRepository.endGamingSession(gs.id, gs.durationSeconds).then(() => {
             this.emit('game-stopped', {
               gameId: gid,
@@ -383,7 +400,7 @@ class GameTracker extends BackgroundService {
           promises.push(endP);
           delete this.focusTimestamps[gid];
         } else {
-          // Keep session alive but don't increment duration
+          // Keep session alive but don't increment duration if not focused
           nextActiveGamingSessions[gid] = gs;
         }
       }
