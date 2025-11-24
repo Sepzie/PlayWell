@@ -17,6 +17,7 @@ button {
     background-color: transparent;
     transition: background-color 0.15s ease-in-out;
     border-radius: 5px;
+    cursor: pointer;
 }
 
 button:hover {

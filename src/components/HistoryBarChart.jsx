@@ -40,6 +40,7 @@ function HistoryBarChart(){
 
             const data = await window.electronAPI.getHistoryData(options);
             setChartData(data);
+            checkDateChangeButtons(options, data);
         } catch (error) {
             console.error('Error fetching history data:', error);
             setChartData({ labels: [], data: [] });
@@ -163,6 +164,113 @@ function HistoryBarChart(){
       else {
         document.getElementById("month-input").showPicker()
       }
+    }
+
+    const checkDateChangeButtons = async (options, data) => {
+      // Immediately disable buttons
+      document.getElementById("back-button").disabled = true;
+      document.getElementById("next-button").disabled = true;
+
+      // References to previous, next & current date
+      let previousYearData;
+      let nextYearData;
+      let currentYearData;
+
+      // Get previous & next years
+      let previousYear = currentYear - 1;
+      let nextYear = currentYear + 1;
+
+      // Only get yearly breakdown
+      if (!yearBreakdown) {
+        options.period = 'year';
+        options.granularity = 'month';
+      }
+
+      // Get data from the current year
+      currentYearData = await window.electronAPI.getHistoryData(options);
+
+      // Get data from the previous year
+      options.year = previousYear;
+      previousYearData = await window.electronAPI.getHistoryData(options);
+
+      // Get data from the next year
+      options.year = nextYear;
+      nextYearData = await window.electronAPI.getHistoryData(options);
+
+      // Assume buttons will be disabled
+      let disableBackButton = true;
+      let disableNextButton = true;
+
+      // Year Breakdown
+      if (yearBreakdown) {
+        // For previous year
+        // Check each date for data
+        for (let i = 0; i < previousYearData.data.length; i++) {
+          // Set bool if there is any data
+          if (previousYearData.data[i] > 0) {
+            disableBackButton = false;
+          }
+        }
+
+        // Same logic for previous year as next year
+        disableNextButton = true;
+        for (let i = 0; i < nextYearData.data.length; i++) {
+          if (nextYearData.data[i] > 0) {
+            disableNextButton = false;
+          }
+        }
+      }
+
+      // Month Breakdown
+      else {
+        // For previous month
+        // Check previous year if previous month is december
+        if ((currentMonth - 1) < 0) {
+          for (let i = 0; i < previousYearData.data.length; i++) {
+            if (previousYearData.data[i] > 0) {
+              disableBackButton = false;
+            }
+          }
+        }
+        // Check current year for any other months
+        else {
+          for (let i = 0; i < currentMonth; i++) {
+            if (currentYearData.data[i] > 0) {
+              disableBackButton = false;
+            }
+          }
+        }
+
+        // For next month
+        // Check next year if next month is January
+        if ((currentMonth + 1) > (currentYearData.data.length - 1)) {
+          for (let i = 0; i < nextYearData.data.length; i++) {
+            if (nextYearData.data[i] > 0) {
+              disableNextButton = false;
+            }
+          }
+        }
+        // Check current year for any other months
+        else {
+          for (let i = currentYearData.data.length; i > currentMonth; i--) {
+            if (currentYearData.data[i] > 0) {
+              disableNextButton = false;
+            }
+          }
+        }
+      }
+
+      // Enable buttons if there is data
+      if (!disableBackButton)
+      {
+        document.getElementById("back-button").disabled = false;
+      }
+
+      if (!disableNextButton)
+        {
+          document.getElementById("next-button").disabled = false;
+      }
+
     }
 
     return (
