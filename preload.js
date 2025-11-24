@@ -33,7 +33,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // History APIs
   getHistoryData: (options) => ipcRenderer.invoke('get-history-data', options),
-
+  getOldestAndNewestSessionDates: () => ipcRenderer.invoke('get-oldest-and-newest-session-dates'),
+  
   // Limits APIs
   getLimits: () => ipcRenderer.invoke('get-limits'),
   setLimit: (type, limitMinutes) => ipcRenderer.invoke('set-limit', { type, limitMinutes }),

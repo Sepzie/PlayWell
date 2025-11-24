@@ -313,4 +313,29 @@ StatsService.getHistoryData = async (options) => {
     }
 };
 
+StatsService.getOldestAndNewestSessionDates = async () => {
+    try {
+        // Get all sessions
+        const sessions = await GamingSessionRepository.getAllGamingSessions();
+        let oldestSessionDate = sessions[0].startTime;
+        let newestSessionDate = sessions[0].startTime; 
+
+        sessions.forEach(session => {
+            if (session.startTime < oldestSessionDate) {
+                oldestSessionDate = session.startTime;
+            }
+            else if (session.startTime > newestSessionDate) {
+                newestSessionDate = session.startTime;
+            }
+        })
+
+        console.info(`${service}[StatsService]${reset} Returning oldest & newest sessions`);
+        return { oldestSessionDate, newestSessionDate };
+
+    } catch (error) {
+        console.error(`${service}[StatsService]${err} Error getting oldest & newest sessions:${reset}`, error);
+        return { oldestSessionDate: undefined, newestSessionDate: undefined };
+    }
+};
+
 module.exports = { StatsService };
