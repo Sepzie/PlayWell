@@ -8,19 +8,14 @@ class TrayManager {
     this.tray = null;
     this.trayWindow = null;
     this.openMainCallback = openMainCallback;
+    this.currentlyPlayingGame = null;
   }
 
   createTray() {
     const icon = nativeImage.createFromPath(this.iconPath);
     this.tray = new Tray(icon);
-    this.tray.setToolTip('PlayWell');
-
-    // Create context menu
-    const contextMenu = Menu.buildFromTemplate([
-      { label: 'Open App', click: () => { if (this.openMainCallback) this.openMainCallback(); } },
-      { label: 'Quit', click: () => app.quit() }
-    ]);
-    this.tray.setContextMenu(contextMenu);
+    this.updateTrayTooltip();
+    this.updateTrayMenu();
 
     // Create tray window
     this.createTrayWindow();
@@ -70,6 +65,58 @@ class TrayManager {
         this.trayWindow.hide();
       }
     });
+  }
+
+  /**
+   * Updates the tray context menu with current game status.
+   */
+  updateTrayMenu() {
+    const menuTemplate = [];
+    
+    // Add currently playing game at the top if available
+    if (this.currentlyPlayingGame) {
+      menuTemplate.push({
+        label: `Currently Playing: ${this.currentlyPlayingGame}`,
+        enabled: false
+      });
+      menuTemplate.push({ type: 'separator' });
+    } else {
+      menuTemplate.push({
+        label: 'No game active',
+        enabled: false
+      });
+      menuTemplate.push({ type: 'separator' });
+    }
+    
+    menuTemplate.push(
+      { label: 'Open App', click: () => { if (this.openMainCallback) this.openMainCallback(); } },
+      { label: 'Quit', click: () => app.quit() }
+    );
+
+    const contextMenu = Menu.buildFromTemplate(menuTemplate);
+    this.tray.setContextMenu(contextMenu);
+  }
+
+  /**
+   * Updates the tray tooltip to show currently playing game.
+   */
+  updateTrayTooltip() {
+    if (this.currentlyPlayingGame) {
+      this.tray.setToolTip(`PlayWell - Playing: ${this.currentlyPlayingGame}`);
+    } else {
+      this.tray.setToolTip('PlayWell');
+    }
+  }
+
+  /**
+   * Sets the currently playing game and updates the tray display.
+   *
+   * @param {string|null} gameName - The name of the currently playing game, or null
+   */
+  setCurrentlyPlayingGame(gameName) {
+    this.currentlyPlayingGame = gameName;
+    this.updateTrayTooltip();
+    this.updateTrayMenu();
   }
 }
 

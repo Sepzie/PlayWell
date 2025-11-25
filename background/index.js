@@ -3,6 +3,7 @@ const { GameTracker } = require('./workers/gameTracker.js');
 const { UserRepository } = require('./repository/user.js');
 const { GameRepository } = require('./repository/game.js');
 const timer = require('./workers/timerController.js');
+const { NotificationService } = require('./services/notificationService.js');
 const { debug_colors } = require('../src/theme/colors.js');
 const { server, reset, err } = debug_colors;
 
@@ -15,6 +16,31 @@ gameTracker.on('gaming-state-changed', ({ isGaming }) => {
     timer.setGamingState(isGaming);
   } catch (e) {
     console.error(`${server}[index.js]${err} Timer gaming state update error:${reset}`, e);
+  }
+});
+
+// Wire up notification events
+gameTracker.on('new-game-detected', ({ gameName }) => {
+  try {
+    NotificationService.notifyNewGameDetected(gameName);
+  } catch (e) {
+    console.error(`${server}[index.js]${err} New game notification error:${reset}`, e);
+  }
+});
+
+gameTracker.on('game-started', ({ gameName }) => {
+  try {
+    NotificationService.notifyGameStarted(gameName);
+  } catch (e) {
+    console.error(`${server}[index.js]${err} Game started notification error:${reset}`, e);
+  }
+});
+
+gameTracker.on('game-stopped', ({ gameName, durationSeconds }) => {
+  try {
+    NotificationService.notifyGameStopped(gameName, durationSeconds);
+  } catch (e) {
+    console.error(`${server}[index.js]${err} Game stopped notification error:${reset}`, e);
   }
 });
 

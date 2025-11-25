@@ -5,14 +5,19 @@ const { repo, reset, err } = debug_colors;
 
 const GameRepository = {
     getAllGames: async () => {return []},
+    getEnabledGames: async () => {return []},
     getGameById: async (gid) => {return {}},
     getGameByName: async (gname) => {return {}},
+    getGameByLocation: async (location) => {return {}},
+    deleteGame: async (gid) => {return {}},
     deleteGames: async (gnames) => {return {}},
     deleteAllGames: async () => {return {}},
+    enableGame: async (gid) => {return {}},
+    disableGame: async (gid) => {return {}},
 
     // FUNCTIONS UNDER HERE REQUIRE A USER TO BE LOADED. See UserRepository.loadNewOrReturningUser
-    createGame: async (name, location, platform, genre) => {return {}},
-    upsertGame: async (name, location, platform, genre) => {return {}}
+    createGame: async (name, location, platform) => {return {}},
+    upsertGame: async (name, location, platform) => {return {}}
 };
 
 /**
@@ -23,6 +28,25 @@ const GameRepository = {
 GameRepository.getAllGames = async () => {
     try {
         res = await getPrisma().game.findMany();
+    } catch (error) {
+        console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
+        return [];
+    }
+    return res;
+}
+
+/**
+ * Returns all enabled Games in the database.
+ *
+ * @returns a JSON array
+ */
+GameRepository.getEnabledGames = async () => {
+    try {
+        res = await getPrisma().game.findMany({
+            where: {
+                enabled: true
+            }
+        });
     } catch (error) {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return [];
@@ -71,23 +95,41 @@ GameRepository.getGameByName = async (gname) => {
 }
 
 /**
+ * Returns the Game with the given executable location.
+ *
+ * @param {String} location executable path
+ * @returns a JSON object or null
+ */
+GameRepository.getGameByLocation = async (location) => {
+    try {
+        res = await getPrisma().game.findFirst({
+            where: {
+                location: location
+            }
+        })
+    } catch (error) {
+        console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
+        return null;
+    }
+    return res;
+}
+
+/**
  * Creates a Game in the database, or throws an error if there is already a Game in db with the given name.
  * A User must be loaded in. See: UserRepository.loadNewOrReturningUser
  * 
  * @param {String} name unique name of the game
  * @param {String} location the executable path of the game
- * @param {String} platform game platform (only for compatibility, for now)
- * @param {Genre} genre one of the values in the Genre enum (only for compatibility, for now)
+ * @param {String} platform game platform
  * @returns 
  */
-GameRepository.createGame = async (name, location, platform, genre) => {
+GameRepository.createGame = async (name, location, platform) => {
     try {
         res = await getPrisma().game.create({
             data: {
                 name: name,
                 location: location,
                 platform: platform,
-                category: genre,
                 userId: UserRepository.getCurrentUser().id
             }
         });
@@ -97,6 +139,27 @@ GameRepository.createGame = async (name, location, platform, genre) => {
     }
     u = res;
     console.info(`${repo}[GameRepository]${reset} Created game: ${res.name}`);
+    return res;
+}
+
+/**
+ * Deletes a single game by ID.
+ * 
+ * @param {String} gid the game ID
+ * @returns a JSON object of the deleted game
+ */
+GameRepository.deleteGame = async (gid) => {
+    try {
+        res = await getPrisma().game.delete({
+            where: {
+                id: gid
+            }
+        })
+    } catch (error) {
+        console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
+        return {};
+    }
+    console.info(`${repo}[GameRepository]${reset} Deleted game: ${res.name}`);
     return res;
 }
 
@@ -122,20 +185,18 @@ GameRepository.deleteGames = async (gnames) => {
 }
 
 /**
- * Updates the location, platform, or genre of a Game in db, or creates a new one with the given fields if not yet in db.
+ * Updates the location or platform of a Game in db, or creates a new one with the given fields if not yet in db.
  * A User must be loaded in. See: UserRepository.loadNewOrReturningUser
  * 
  * @param {String} name a unique name (this cannot be updated through this method)
  * @param {String} location the executable path of the game
- * @param {String} platform game platform (only for compatibility, for now)
- * @param {Genre} genre one of the values in the Genre enum (only for compatibility, for now)
+ * @param {String} platform game platform
  * @returns nothing on error, or a JSON Array of the upserted games
  */
-GameRepository.upsertGame = async (name, location, platform, genre) => {
+GameRepository.upsertGame = async (name, location, platform) => {
     let data = {
         location: location,
         platform: platform,
-        category: genre,
     }
     try {
         res = await getPrisma().game.upsert({
@@ -167,6 +228,46 @@ GameRepository.deleteAllGames = async () => {
         return {};
     }
     console.info(`${repo}[GameRepository]${reset} Deleted ${res.count} game(s)`);
+    return res;
+}
+
+/**
+ * Enables a game for tracking.
+ * 
+ * @param {String} gid the game ID
+ * @returns the updated game object
+ */
+GameRepository.enableGame = async (gid) => {
+    try {
+        res = await getPrisma().game.update({
+            where: { id: gid },
+            data: { enabled: true }
+        });
+        console.info(`${repo}[GameRepository]${reset} Enabled game: ${res.name}`);
+    } catch (error) {
+        console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
+        return {};
+    }
+    return res;
+}
+
+/**
+ * Disables a game from tracking.
+ * 
+ * @param {String} gid the game ID
+ * @returns the updated game object
+ */
+GameRepository.disableGame = async (gid) => {
+    try {
+        res = await getPrisma().game.update({
+            where: { id: gid },
+            data: { enabled: false }
+        });
+        console.info(`${repo}[GameRepository]${reset} Disabled game: ${res.name}`);
+    } catch (error) {
+        console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
+        return {};
+    }
     return res;
 }
 

@@ -44,10 +44,23 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Settings APIs
   exitApp: () => ipcRenderer.send('quit-app'),
 
-  // TODO: Add more IPC methods as needed
-  // Example:
-  // getGameSessions: () => ipcRenderer.invoke('get-game-sessions'),
-  // saveGameSession: (session) => ipcRenderer.invoke('save-game-session', session)
+  // Game management APIs
+  getAllGames: () => ipcRenderer.invoke('get-all-games'),
+  enableGame: (gameId) => ipcRenderer.invoke('enable-game', { gameId }),
+  disableGame: (gameId) => ipcRenderer.invoke('disable-game', { gameId }),
+  deleteGame: (gameId) => ipcRenderer.invoke('delete-game', { gameId }),
+  addManualGame: (name, location) => ipcRenderer.invoke('add-manual-game', { name, location }),
+
+  // Notification preferences APIs
+  getNotificationPreferences: () => ipcRenderer.invoke('get-notification-preferences'),
+  updateNotificationPreferences: (prefs) => ipcRenderer.invoke('update-notification-preferences', prefs),
+
+  // Currently playing game listener
+  onCurrentlyPlayingChanged: (callback) => {
+    const listener = (event, gameName) => callback(gameName);
+    ipcRenderer.on('currently-playing-changed', listener);
+    return () => ipcRenderer.removeListener('currently-playing-changed', listener);
+  }
 });
 
 

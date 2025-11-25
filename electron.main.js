@@ -9,6 +9,8 @@ const timer = require('./background/workers/timerController.js');
 const { StatsService } = require('./background/services/statsService.js');
 const { LimitsService } = require('./background/services/limitsService.js');
 const { UserRepository } = require('./background/repository/user.js');
+const { GameRepository } = require('./background/repository/game.js');
+const { NotificationPreferencesRepository } = require('./background/repository/notificationPreferences.js');
 
 // Keep a global reference of the window object
 let mainWindow;
@@ -66,6 +68,23 @@ app.whenReady().then(() => {
 
   // Start background process
   startBackground();
+
+  // Listen for currently playing game changes and update tray
+  const { gameTracker } = require('./background/index.js');
+  gameTracker.on('currently-playing-changed', (game) => {
+    if (trayManager) {
+      trayManager.setCurrentlyPlayingGame(game ? game.gameName : null);
+    }
+    
+    // Also broadcast to tray window
+    if (trayManager && trayManager.trayWindow) {
+      try {
+        trayManager.trayWindow.webContents.send('currently-playing-changed', game ? game.gameName : null);
+      } catch (e) {
+        // Tray window might not be ready yet
+      }
+    }
+  });
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -208,6 +227,89 @@ ipcMain.handle('get-limit-status', async () => {
 
 // Exit handler (via "Exit App" button on Settings page)
 ipcMain.on('quit-app', () => {app.quit();})
+
+// Game management IPC handlers
+ipcMain.handle('get-all-games', async () => {
+  try {
+    return await GameRepository.getAllGames();
+  } catch (error) {
+    console.error('[IPC] Error getting all games:', error);
+    return [];
+  }
+});
+
+ipcMain.handle('enable-game', async (event, { gameId }) => {
+  try {
+    return await GameRepository.enableGame(gameId);
+  } catch (error) {
+    console.error('[IPC] Error enabling game:', error);
+    return {};
+  }
+});
+
+ipcMain.handle('disable-game', async (event, { gameId }) => {
+  try {
+    return await GameRepository.disableGame(gameId);
+  } catch (error) {
+    console.error('[IPC] Error disabling game:', error);
+    return {};
+  }
+});
+
+ipcMain.handle('delete-game', async (event, { gameId }) => {
+  try {
+    const { gameTracker } = require('./background/index.js');
+    const result = await GameRepository.deleteGame(gameId);
+    // Refresh game cache after deletion
+    await gameTracker.refreshGameCache();
+    return result;
+  } catch (error) {
+    console.error('[IPC] Error deleting game:', error);
+    return {};
+  }
+});
+
+ipcMain.handle('add-manual-game', async (event, { name, location }) => {
+  try {
+    const { gameTracker } = require('./background/index.js');
+    const game = await GameRepository.createGame(name, location, 'Manual');
+    // Refresh game cache after addition
+    await gameTracker.refreshGameCache();
+    return game;
+  } catch (error) {
+    console.error('[IPC] Error adding manual game:', error);
+    return {};
+  }
+});
+
+// Notification preferences IPC handlers
+ipcMain.handle('get-notification-preferences', async () => {
+  try {
+    const user = UserRepository.getCurrentUser();
+    if (!user) {
+      console.error('[IPC] No user loaded for get-notification-preferences');
+      return { newGameDetected: true, gameStarted: true, gameStopped: true };
+    }
+    return await NotificationPreferencesRepository.getPreferences(user.id);
+  } catch (error) {
+    console.error('[IPC] Error getting notification preferences:', error);
+    return { newGameDetected: true, gameStarted: true, gameStopped: true };
+  }
+});
+
+ipcMain.handle('update-notification-preferences', async (event, prefs) => {
+  try {
+    const user = UserRepository.getCurrentUser();
+    if (!user) {
+      console.error('[IPC] No user loaded for update-notification-preferences');
+      return {};
+    }
+    return await NotificationPreferencesRepository.updatePreferences(user.id, prefs);
+  } catch (error) {
+    console.error('[IPC] Error updating notification preferences:', error);
+    return {};
+  }
+});
 
 function OpenMainWindow() {
   if (!mainWindow) {

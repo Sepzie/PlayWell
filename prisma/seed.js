@@ -4,38 +4,43 @@ require('dotenv').config();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Sample game data with various genres
+// Sample game data (genre field removed as it's no longer in schema)
 const SAMPLE_GAMES = [
-  { name: 'Dark Souls III', platform: 'Steam (PC)', genre: 'SURVIVAL' },
-  { name: 'Elden Ring', platform: 'Steam (PC)', genre: 'SURVIVAL' },
-  { name: 'The Binding of Isaac', platform: 'Steam (PC)', genre: 'ROGUELIKE' },
-  { name: 'Hades', platform: 'Steam (PC)', genre: 'ROGUELIKE' },
-  { name: 'Dead Cells', platform: 'Steam (PC)', genre: 'ROGUELIKE' },
-  { name: 'Slay the Spire', platform: 'Steam (PC)', genre: 'DECKBUILDER' },
-  { name: 'Monster Train', platform: 'Steam (PC)', genre: 'DECKBUILDER' },
-  { name: 'Inscryption', platform: 'Steam (PC)', genre: 'DECKBUILDER' },
-  { name: 'Counter-Strike 2', platform: 'Steam (PC)', genre: 'SHOOTER' },
-  { name: 'Valorant', platform: 'Riot Games', genre: 'SHOOTER' },
-  { name: 'Apex Legends', platform: 'Steam (PC)', genre: 'SHOOTER' },
-  { name: 'Doom Eternal', platform: 'Steam (PC)', genre: 'SHOOTER' },
-  { name: 'Celeste', platform: 'Steam (PC)', genre: 'PLATFORMER' },
-  { name: 'Hollow Knight', platform: 'Steam (PC)', genre: 'PLATFORMER' },
-  { name: 'Ori and the Will of the Wisps', platform: 'Steam (PC)', genre: 'PLATFORMER' },
-  { name: 'Cuphead', platform: 'Steam (PC)', genre: 'PLATFORMER' },
-  { name: 'Risk of Rain 2', platform: 'Steam (PC)', genre: 'ROGUELIKE' },
-  { name: 'Enter the Gungeon', platform: 'Steam (PC)', genre: 'ROGUELIKE' },
-  { name: 'Sekiro: Shadows Die Twice', platform: 'Steam (PC)', genre: 'SURVIVAL' },
-  { name: 'The Witcher 3', platform: 'Steam (PC)', genre: 'SURVIVAL' },
-  { name: 'Minecraft', platform: 'Steam (PC)', genre: 'SURVIVAL' },
-  { name: 'Terraria', platform: 'Steam (PC)', genre: 'PLATFORMER' },
-  { name: 'Portal 2', platform: 'Steam (PC)', genre: 'PLATFORMER' },
-  { name: 'Titanfall 2', platform: 'Steam (PC)', genre: 'SHOOTER' },
-  { name: 'Destiny 2', platform: 'Steam (PC)', genre: 'SHOOTER' },
-  { name: 'Balatro', platform: 'Steam (PC)', genre: 'DECKBUILDER' },
-  { name: 'Darkest Dungeon', platform: 'Steam (PC)', genre: 'ROGUELIKE' },
-  { name: 'Bloodborne', platform: 'PlayStation', genre: 'SURVIVAL' },
-  { name: 'Stardew Valley', platform: 'Steam (PC)', genre: 'NOGENRE' },
-  { name: 'Among Us', platform: 'Steam (PC)', genre: 'NOGENRE' },
+  { name: 'Dark Souls III', platform: 'Steam (PC)' },
+  { name: 'Elden Ring', platform: 'Steam (PC)' },
+  { name: 'The Binding of Isaac', platform: 'Steam (PC)' },
+  { name: 'Hades', platform: 'Steam (PC)' },
+  { name: 'Dead Cells', platform: 'Steam (PC)' },
+  { name: 'Slay the Spire', platform: 'Steam (PC)' },
+  { name: 'Monster Train', platform: 'Steam (PC)' },
+  { name: 'Inscryption', platform: 'Steam (PC)' },
+  { name: 'Counter-Strike 2', platform: 'Steam (PC)' },
+  { name: 'Valorant', platform: 'Riot Games' },
+  { name: 'Apex Legends', platform: 'Steam (PC)' },
+  { name: 'Doom Eternal', platform: 'Steam (PC)' },
+  { name: 'Celeste', platform: 'Steam (PC)' },
+  { name: 'Hollow Knight', platform: 'Steam (PC)' },
+  { name: 'Ori and the Will of the Wisps', platform: 'Steam (PC)' },
+  { name: 'Cuphead', platform: 'Steam (PC)' },
+  { name: 'Risk of Rain 2', platform: 'Steam (PC)' },
+  { name: 'Enter the Gungeon', platform: 'Steam (PC)' },
+  { name: 'Sekiro: Shadows Die Twice', platform: 'Steam (PC)' },
+  { name: 'The Witcher 3', platform: 'Steam (PC)' },
+  { name: 'Minecraft', platform: 'Steam (PC)' },
+  { name: 'Terraria', platform: 'Steam (PC)' },
+  { name: 'Portal 2', platform: 'Steam (PC)' },
+  { name: 'Titanfall 2', platform: 'Steam (PC)' },
+  { name: 'Destiny 2', platform: 'Steam (PC)' },
+  { name: 'Balatro', platform: 'Steam (PC)' },
+  { name: 'Darkest Dungeon', platform: 'Steam (PC)' },
+  { name: 'Bloodborne', platform: 'PlayStation' },
+  { name: 'Stardew Valley', platform: 'Steam (PC)' },
+  { name: 'Among Us', platform: 'Steam (PC)' },
+  { name: 'League of Legends', platform: 'Riot Games' },
+  { name: 'Overwatch 2', platform: 'Battle.net' },
+  { name: 'Fortnite', platform: 'Epic Games' },
+  { name: 'Cyberpunk 2077', platform: 'GOG Galaxy' },
+  { name: 'Red Dead Redemption 2', platform: 'Rockstar' },
 ];
 
 // Helper to generate random date within a range
@@ -108,6 +113,21 @@ async function main() {
 
   console.log(`Using user: ${user.username} (ID: ${user.id})`);
 
+  // Create notification preferences for the user
+  console.log('Creating notification preferences...');
+  await prisma.notificationPreferences.upsert({
+    where: { userId: user.id },
+    update: {},
+    create: {
+      userId: user.id,
+      newGameDetected: true,
+      gameStarted: true,
+      gameStopped: true,
+      stopTrackingOnUnfocus: true
+    }
+  });
+  console.log('Notification preferences created');
+
   // Create games
   console.log('Creating games...');
   const createdGames = [];
@@ -119,7 +139,7 @@ async function main() {
         name: gameData.name,
         location: `C:\\Program Files\\${gameData.name.replace(/[^a-zA-Z0-9]/g, '')}\\game.exe`,
         platform: gameData.platform,
-        category: gameData.genre,
+        enabled: true,
         userId: user.id
       }
     });

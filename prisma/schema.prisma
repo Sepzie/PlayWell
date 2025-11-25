@@ -19,6 +19,7 @@ model User {
   ownedGames Game[]  @relation("OwnedGames") // fk
   doneSessions GamingSession[] @relation("SessionsDone") // fk
   limits     Limit[] @relation("Limits")
+  notificationPreferences NotificationPreferences?
 }
 
 model Game {
@@ -31,20 +32,11 @@ model Game {
   
   location  String
   platform  String
-  category  Genre
+  enabled   Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   partOfSessions GamingSession[] @relation("PartOfSessions") // fk
-}
-
-enum Genre {
-  NOGENRE
-  SURVIVAL
-  ROGUELIKE
-  SHOOTER
-  DECKBUILDER
-  PLATFORMER
 }
 
 // GamingSession of User
@@ -85,5 +77,18 @@ model Limit {
   limitSeconds  Int  @default(3600)
 
   @@unique([userId, type])
+}
+
+model NotificationPreferences {
+  id        Int      @id @default(autoincrement())
+
+  // FK
+  owner     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int      @unique
+
+  newGameDetected Boolean @default(true)
+  gameStarted     Boolean @default(true)
+  gameStopped     Boolean @default(true)
+  stopTrackingOnUnfocus Boolean @default(true)
 }
 
