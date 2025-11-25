@@ -31,8 +31,9 @@ main {
 }
 
 .title h1 {
-    margin: 0;
-    font-size: 4vw;
+    margin: 20px 0;
+    font-size: 2rem;
+    font-weight: 600;
 }
 
 .text {
@@ -64,9 +65,21 @@ main {
     height: 7vh;
     background-color: #2E7D32;
     border: none;
-    border-radius: 20px;
+    border-radius: 50px;
     padding: 10px 20px;
     cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.timer-button:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.timer-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .delete-button {

@@ -1,3 +1,15 @@
+.page h1 {
+    text-align: center;
+    font-family: 'system-ui';
+    font-size: 2rem;
+    margin: 20px 0;
+    font-weight: 600;
+}
+
+.page p {
+    text-align: center;
+}
+
 #stats-table-container {
     width: 90%;
     justify-content: center;

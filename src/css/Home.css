@@ -1,6 +1,9 @@
 h1 {
     font-family: 'system-ui';
-    padding-left: 2%;
+    text-align: center;
+    font-size: 2rem;
+    margin: 20px 0;
+    font-weight: 600;
 }
 
 p {
