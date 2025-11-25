@@ -63,12 +63,13 @@ const PLATFORM_PATTERNS = [
 ];
 
 /**
- * Gets all game processes by scanning for known platform patterns.
+ * Gets all game processes by scanning for known platform patterns and matching against known games.
  * Returns processes with window titles for better game name detection.
  *
+ * @param {Map} knownGames - Map of known game locations to game objects
  * @returns {Promise<Array>} Array of process objects with Name, ProcessId, ExecutablePath, MainWindowTitle
  */
-async function getGameProcessesByPlatform() {
+async function getGameProcessesByPlatform(knownGames = new Map()) {
   try {
     // Use PowerShell to get all processes with paths and window titles in one go
     const psCommand = `
@@ -103,34 +104,56 @@ async function getGameProcessesByPlatform() {
       return [];
     }
 
-    // Filter processes based on platform patterns
+    // Filter processes based on platform patterns OR known game locations
     const gameProcesses = processes.filter(proc => {
       const path = proc.Path || '';
       const name = proc.Name || '';
+      
+      // First check if this is a known game from the database (exact path match)
+      let isKnownGame = knownGames.has(path);
+      
+      // If not found by exact path, try fuzzy matching by executable name
+      if (!isKnownGame) {
+        const executableName = path.split(/[\\\/]/).pop()?.toLowerCase();
+        for (const [knownPath, game] of knownGames.entries()) {
+          const knownExeName = knownPath.split(/[\\\/]/).pop()?.toLowerCase();
+          if (executableName && knownExeName && executableName === knownExeName) {
+            isKnownGame = true;
+            break;
+          }
+        }
+      }
       
       // Check if path matches any platform pattern
       const matchesPlatform = PLATFORM_PATTERNS.some(pattern => 
         pattern.pathSegments.some(seg => path.includes(seg))
       );
 
-      if (!matchesPlatform) return false;
+      // Include if it's a known game OR matches a platform pattern
+      if (!isKnownGame && !matchesPlatform) {
+        return false;
+      }
 
-      // Exclude launcher executables
-      const isLauncher = PLATFORM_PATTERNS.some(pattern =>
-        pattern.launcherExeNames.some(launcherName => 
-          name.toLowerCase().includes(launcherName.toLowerCase().replace('.exe', ''))
-        )
-      );
+      // Exclude launcher executables (only for platform-detected games, not manual ones)
+      if (!isKnownGame) {
+        const isLauncher = PLATFORM_PATTERNS.some(pattern =>
+          pattern.launcherExeNames.some(launcherName => 
+            name.toLowerCase().includes(launcherName.toLowerCase().replace('.exe', ''))
+          )
+        );
 
-      if (isLauncher) return false;
+        if (isLauncher) return false;
 
-      // Exclude common non-game processes
-      const commonExclusions = ['unityCrashHandler', 'crashreporter', 'launcher'];
-      const isExcluded = commonExclusions.some(excl => 
-        name.toLowerCase().includes(excl.toLowerCase())
-      );
+        // Exclude common non-game processes
+        const commonExclusions = ['unityCrashHandler', 'crashreporter', 'launcher'];
+        const isExcluded = commonExclusions.some(excl => 
+          name.toLowerCase().includes(excl.toLowerCase())
+        );
 
-      return !isExcluded;
+        if (isExcluded) return false;
+      }
+
+      return true;
     });
 
     // Map to expected format
@@ -226,6 +249,7 @@ class GameTracker extends BackgroundService {
       for (const game of games) {
         this.knownGames.set(game.location, game);
       }
+      console.log(`${proctracker}[GameTracker]${reset} Loaded ${games.length} known games from database`);
     } catch (error) {
       console.error(`${proctracker}[GameTracker]${err} Error refreshing known games:${reset}`, error);
     }
@@ -234,11 +258,13 @@ class GameTracker extends BackgroundService {
   /**
    * Detects games from running processes and matches them against known games.
    * Auto-adds new games to the database.
+   * Uses fuzzy matching by executable name if exact path doesn't match.
    *
    * @returns {Promise<Array>} Array of detected game objects from DB
    */
   async detectGames() {
-    const processes = await getGameProcessesByPlatform();
+    // Pass known games to help identify manually added games
+    const processes = await getGameProcessesByPlatform(this.knownGames);
     const detectedGames = [];
     const newGames = [];
 
@@ -246,8 +272,31 @@ class GameTracker extends BackgroundService {
       const execPath = proc.ExecutablePath;
       const windowTitle = proc.MainWindowTitle;
       
-      // Check if we already know this game
+      // Check if we already know this game (try exact path first)
       let game = this.knownGames.get(execPath);
+
+      // If not found by exact path, try fuzzy matching by executable name
+      if (!game) {
+        const executableName = execPath.split(/[\\\/]/).pop()?.toLowerCase();
+        for (const [knownPath, knownGame] of this.knownGames.entries()) {
+          const knownExeName = knownPath.split(/[\\\/]/).pop()?.toLowerCase();
+          if (executableName && knownExeName && executableName === knownExeName) {
+            game = knownGame;
+            this._log('info', `Fuzzy matched ${game.name} - updating path from ${knownPath} to ${execPath}`);
+            
+            // Update the path in database to the new location
+            try {
+              await GameRepository.updateGameLocation(game.id, execPath);
+              this.knownGames.delete(knownPath);
+              this.knownGames.set(execPath, { ...game, location: execPath });
+              game = this.knownGames.get(execPath);
+            } catch (error) {
+              console.error(`${proctracker}[GameTracker]${err} Error updating game path:${reset}`, error);
+            }
+            break;
+          }
+        }
+      }
 
       if (!game) {
         // New game detected - add to database

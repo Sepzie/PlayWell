@@ -14,6 +14,7 @@ const GameRepository = {
     deleteAllGames: async () => {return {}},
     enableGame: async (gid) => {return {}},
     disableGame: async (gid) => {return {}},
+    updateGameLocation: async (gid, location) => {return {}},
 
     // FUNCTIONS UNDER HERE REQUIRE A USER TO BE LOADED. See UserRepository.loadNewOrReturningUser
     createGame: async (name, location, platform) => {return {}},
@@ -264,6 +265,28 @@ GameRepository.disableGame = async (gid) => {
             data: { enabled: false }
         });
         console.info(`${repo}[GameRepository]${reset} Disabled game: ${res.name}`);
+    } catch (error) {
+        console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
+        return {};
+    }
+    return res;
+}
+
+/**
+ * Updates the location path of a game.
+ * Useful when an app moves to a new versioned subdirectory.
+ * 
+ * @param {String} gid the game ID
+ * @param {String} location the new executable path
+ * @returns the updated game object
+ */
+GameRepository.updateGameLocation = async (gid, location) => {
+    try {
+        res = await getPrisma().game.update({
+            where: { id: gid },
+            data: { location: location }
+        });
+        console.info(`${repo}[GameRepository]${reset} Updated game location: ${res.name} -> ${location}`);
     } catch (error) {
         console.error(`${repo}[GameRepository]${err} ${error}${reset}`);
         return {};
