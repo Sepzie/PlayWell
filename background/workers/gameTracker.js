@@ -287,12 +287,24 @@ class GameTracker extends BackgroundService {
   }
 
   /**
-   * Tracks active gaming sessions for enabled games that are currently focused.
+   * Tracks active gaming sessions for enabled games.
    *
    * @param {Array} detectedGames - Array of detected game objects with processId
    */
   async trackActiveSessions(detectedGames) {
     const enabledGames = detectedGames.filter(g => g.enabled !== false);
+    
+    // Check user preference for stopping on unfocus
+    const user = UserRepository.getCurrentUser();
+    let stopOnUnfocus = true; // default behavior
+    if (user) {
+      try {
+        const prefs = await NotificationPreferencesRepository.getPreferences(user.id);
+        stopOnUnfocus = prefs.stopTrackingOnUnfocus !== false;
+      } catch (error) {
+        // Use default if can't load preferences
+      }
+    }
     
     // Register all enabled games with focus tracker
     this.focusTracker.clearGameProcesses();
@@ -321,24 +333,27 @@ class GameTracker extends BackgroundService {
     const promises = [];
     const nextActiveGamingSessions = {};
 
-    // Process the currently focused game
-    if (focusedGameId) {
-      const game = enabledGames.find(g => g.id === focusedGameId);
-      
-      if (Object.hasOwn(this.activeGamingSessions, focusedGameId)) {
+    // Decide which games to track based on focus setting
+    const gamesToTrack = stopOnUnfocus 
+      ? (focusedGameId ? [enabledGames.find(g => g.id === focusedGameId)] : [])
+      : enabledGames;
+
+    // Process games that should be tracked
+    for (const game of gamesToTrack.filter(g => g)) {
+      if (Object.hasOwn(this.activeGamingSessions, game.id)) {
         // Continuing session - update duration
-        nextActiveGamingSessions[focusedGameId] = this.activeGamingSessions[focusedGameId];
-        nextActiveGamingSessions[focusedGameId].durationSeconds += INTERVAL_SECONDS;
+        nextActiveGamingSessions[game.id] = this.activeGamingSessions[game.id];
+        nextActiveGamingSessions[game.id].durationSeconds += INTERVAL_SECONDS;
 
         const updateP = GamingSessionRepository.updateGamingSession(
-          nextActiveGamingSessions[focusedGameId].id,
-          nextActiveGamingSessions[focusedGameId].durationSeconds
+          nextActiveGamingSessions[game.id].id,
+          nextActiveGamingSessions[game.id].durationSeconds
         );
         promises.push(updateP);
       } else {
         // New session starting
         const startP = GamingSessionRepository.startGamingSession(game.id, 0).then((gs) => {
-          nextActiveGamingSessions[focusedGameId] = {
+          nextActiveGamingSessions[game.id] = {
             ...gs,
             gameName: game.windowTitle || game.name
           };
@@ -349,34 +364,50 @@ class GameTracker extends BackgroundService {
         });
         promises.push(startP);
       }
+    }
 
-      // Update currently playing for tray
-      const gameName = game.windowTitle || game.name;
-      if (!this.currentlyPlayingGame || this.currentlyPlayingGame.gameId !== focusedGameId) {
-        this.currentlyPlayingGame = { gameName, gameId: focusedGameId };
-        this.emit('currently-playing-changed', this.currentlyPlayingGame);
+    // Update currently playing for tray based on focus setting
+    if (stopOnUnfocus) {
+      // Only show focused game
+      if (focusedGameId) {
+        const game = enabledGames.find(g => g.id === focusedGameId);
+        const gameName = game.windowTitle || game.name;
+        if (!this.currentlyPlayingGame || this.currentlyPlayingGame.gameId !== focusedGameId) {
+          this.currentlyPlayingGame = { gameName, gameId: focusedGameId };
+          this.emit('currently-playing-changed', this.currentlyPlayingGame);
+        }
+      } else if (this.currentlyPlayingGame) {
+        this.currentlyPlayingGame = null;
+        this.emit('currently-playing-changed', null);
       }
     } else {
-      // No game is focused
-      if (this.currentlyPlayingGame) {
+      // Show any running game (prefer focused, otherwise show first active)
+      let gameToShow = null;
+      if (focusedGameId) {
+        gameToShow = enabledGames.find(g => g.id === focusedGameId);
+      } else if (enabledGames.length > 0) {
+        // Show the first enabled game (or first active session)
+        const activeGameIds = Object.keys(nextActiveGamingSessions);
+        if (activeGameIds.length > 0) {
+          gameToShow = enabledGames.find(g => g.id === activeGameIds[0]);
+        } else if (enabledGames.length > 0) {
+          gameToShow = enabledGames[0];
+        }
+      }
+
+      if (gameToShow) {
+        const gameName = gameToShow.windowTitle || gameToShow.name;
+        if (!this.currentlyPlayingGame || this.currentlyPlayingGame.gameId !== gameToShow.id) {
+          this.currentlyPlayingGame = { gameName, gameId: gameToShow.id };
+          this.emit('currently-playing-changed', this.currentlyPlayingGame);
+        }
+      } else if (this.currentlyPlayingGame) {
         this.currentlyPlayingGame = null;
         this.emit('currently-playing-changed', null);
       }
     }
 
-    // End sessions that lost focus for more than 30 seconds (if enabled)
-    // Check user preference for stopping on unfocus
-    const user = UserRepository.getCurrentUser();
-    let stopOnUnfocus = true; // default behavior
-    if (user) {
-      try {
-        const prefs = await NotificationPreferencesRepository.getPreferences(user.id);
-        stopOnUnfocus = prefs.stopTrackingOnUnfocus !== false;
-      } catch (error) {
-        // Use default if can't load preferences
-      }
-    }
-
+    // End sessions that are no longer active
     const now = Date.now();
     for (const [gid, gs] of Object.entries(this.activeGamingSessions)) {
       const shouldContinue = Object.hasOwn(nextActiveGamingSessions, gid);
