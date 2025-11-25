@@ -1,7 +1,7 @@
 // Load environment variables first
 require('dotenv').config();
 
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const TrayManager = require('./electron.tray.js');
 const { startBackground, stopBackground } = require('./background/index.js');
@@ -279,6 +279,32 @@ ipcMain.handle('add-manual-game', async (event, { name, location }) => {
   } catch (error) {
     console.error('[IPC] Error adding manual game:', error);
     return {};
+  }
+});
+
+// File picker dialog for selecting game executable
+ipcMain.handle('select-game-file', async () => {
+  try {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: 'Select Game Executable',
+      filters: [
+        { name: 'Executables', extensions: ['exe'] },
+        { name: 'All Files', extensions: ['*'] }
+      ],
+      properties: ['openFile']
+    });
+    
+    if (result.canceled) {
+      return { canceled: true };
+    }
+    
+    return { 
+      canceled: false, 
+      filePath: result.filePaths[0] 
+    };
+  } catch (error) {
+    console.error('[IPC] Error selecting game file:', error);
+    return { canceled: true, error: error.message };
   }
 });
 

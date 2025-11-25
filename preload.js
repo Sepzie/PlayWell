@@ -50,6 +50,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   disableGame: (gameId) => ipcRenderer.invoke('disable-game', { gameId }),
   deleteGame: (gameId) => ipcRenderer.invoke('delete-game', { gameId }),
   addManualGame: (name, location) => ipcRenderer.invoke('add-manual-game', { name, location }),
+  selectGameFile: () => ipcRenderer.invoke('select-game-file'),
 
   // Notification preferences APIs
   getNotificationPreferences: () => ipcRenderer.invoke('get-notification-preferences'),

@@ -50,6 +50,25 @@ function GameManagerModal({ isOpen, onClose }) {
     }
   };
 
+  const handleBrowseFile = async () => {
+    try {
+      const result = await window.electronAPI.selectGameFile();
+      if (!result.canceled && result.filePath) {
+        setNewGamePath(result.filePath);
+        
+        // Extract game name from file path if name is empty
+        if (!newGameName.trim()) {
+          const fileName = result.filePath.split(/[\\\/]/).pop();
+          const nameWithoutExt = fileName.replace(/\.[^/.]+$/, '');
+          setNewGameName(nameWithoutExt);
+        }
+      }
+    } catch (error) {
+      console.error('Error browsing for file:', error);
+      alert('Failed to open file browser');
+    }
+  };
+
   const handleAddGame = async () => {
     if (!newGameName.trim() || !newGamePath.trim()) {
       alert('Please enter both game name and executable path');
@@ -141,13 +160,23 @@ function GameManagerModal({ isOpen, onClose }) {
                     onChange={(e) => setNewGameName(e.target.value)}
                     className="game-input"
                   />
-                  <input
-                    type="text"
-                    placeholder="Executable Path (e.g., C:\Games\mygame.exe)"
-                    value={newGamePath}
-                    onChange={(e) => setNewGamePath(e.target.value)}
-                    className="game-input"
-                  />
+                  <div className="file-input-container">
+                    <input
+                      type="text"
+                      placeholder="Executable Path (e.g., C:\Games\mygame.exe)"
+                      value={newGamePath}
+                      onChange={(e) => setNewGamePath(e.target.value)}
+                      className="game-input file-path-input"
+                      readOnly
+                    />
+                    <button 
+                      type="button"
+                      className="browse-button" 
+                      onClick={handleBrowseFile}
+                    >
+                      Browse
+                    </button>
+                  </div>
                   <div className="form-buttons">
                     <button className="cancel-button" onClick={() => {
                       setShowAddGame(false);

@@ -208,6 +208,41 @@ input:checked + .toggle-slider:before {
   border-color: #2196F3;
 }
 
+.file-input-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.file-path-input {
+  flex: 1;
+  margin-bottom: 0;
+  background-color: #f5f5f5;
+  cursor: default;
+}
+
+.browse-button {
+  padding: 10px 20px;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.browse-button:hover {
+  background-color: #1976D2;
+}
+
+.browse-button:active {
+  transform: translateY(1px);
+}
+
 .form-buttons {
   display: flex;
   gap: 12px;
