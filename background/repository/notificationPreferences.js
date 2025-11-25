@@ -58,7 +58,7 @@ NotificationPreferencesRepository.updatePreferences = async (userId, prefs) => {
         newGameDetected: prefs.newGameDetected !== undefined ? prefs.newGameDetected : true,
         gameStarted: prefs.gameStarted !== undefined ? prefs.gameStarted : true,
         gameStopped: prefs.gameStopped !== undefined ? prefs.gameStopped : true,
-        stopTrackingOnUnfocus: prefs.stopTrackingOnUnfocus !== undefined ? prefs.stopTrackingOnUnfocus : true
+        stopTrackingOnUnfocus: prefs.stopTrackingOnUnfocus !== undefined ? prefs.stopTrackingOnUnfocus : false
       }
     });
 
@@ -84,7 +84,7 @@ NotificationPreferencesRepository.createDefaultPreferences = async (userId) => {
         newGameDetected: true,
         gameStarted: true,
         gameStopped: true,
-        stopTrackingOnUnfocus: true
+        stopTrackingOnUnfocus: false
       }
     });
 
@@ -96,7 +96,7 @@ NotificationPreferencesRepository.createDefaultPreferences = async (userId) => {
       newGameDetected: true,
       gameStarted: true,
       gameStopped: true,
-      stopTrackingOnUnfocus: true
+      stopTrackingOnUnfocus: false
     };
   }
 };

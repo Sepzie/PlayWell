@@ -123,7 +123,7 @@ async function main() {
       newGameDetected: true,
       gameStarted: true,
       gameStopped: true,
-      stopTrackingOnUnfocus: true
+      stopTrackingOnUnfocus: false
     }
   });
   console.log('Notification preferences created');

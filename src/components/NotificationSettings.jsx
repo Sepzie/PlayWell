@@ -6,7 +6,7 @@ function NotificationSettings() {
     newGameDetected: true,
     gameStarted: true,
     gameStopped: true,
-    stopTrackingOnUnfocus: true
+    stopTrackingOnUnfocus: false
   });
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -24,7 +24,7 @@ function NotificationSettings() {
         newGameDetected: prefs.newGameDetected !== undefined ? prefs.newGameDetected : true,
         gameStarted: prefs.gameStarted !== undefined ? prefs.gameStarted : true,
         gameStopped: prefs.gameStopped !== undefined ? prefs.gameStopped : true,
-        stopTrackingOnUnfocus: prefs.stopTrackingOnUnfocus !== undefined ? prefs.stopTrackingOnUnfocus : true
+        stopTrackingOnUnfocus: prefs.stopTrackingOnUnfocus !== undefined ? prefs.stopTrackingOnUnfocus : false
       });
     } catch (error) {
       console.error('Error loading notification preferences:', error);

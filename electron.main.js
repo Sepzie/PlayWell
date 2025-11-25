@@ -314,12 +314,12 @@ ipcMain.handle('get-notification-preferences', async () => {
     const user = UserRepository.getCurrentUser();
     if (!user) {
       console.error('[IPC] No user loaded for get-notification-preferences');
-      return { newGameDetected: true, gameStarted: true, gameStopped: true };
+      return { newGameDetected: true, gameStarted: true, gameStopped: true, stopTrackingOnUnfocus: false };
     }
     return await NotificationPreferencesRepository.getPreferences(user.id);
   } catch (error) {
     console.error('[IPC] Error getting notification preferences:', error);
-    return { newGameDetected: true, gameStarted: true, gameStopped: true };
+    return { newGameDetected: true, gameStarted: true, gameStopped: true, stopTrackingOnUnfocus: false };
   }
 });
 

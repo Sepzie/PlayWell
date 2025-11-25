@@ -89,6 +89,6 @@ model NotificationPreferences {
   newGameDetected Boolean @default(true)
   gameStarted     Boolean @default(true)
   gameStopped     Boolean @default(true)
-  stopTrackingOnUnfocus Boolean @default(true)
+  stopTrackingOnUnfocus Boolean @default(false)
 }
 
