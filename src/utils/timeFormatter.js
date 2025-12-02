@@ -3,7 +3,7 @@
  * @param {number} minutes - Total minutes
  * @returns {string} Formatted string like "2h 30m" or "0h 45m"
  */
-export function formatMinutesToHoursMinutes(minutes) {
+function formatMinutesToHoursMinutes(minutes) {
   if (minutes === null || minutes === undefined || minutes < 0) {
     return "0h 0m";
   }
@@ -19,7 +19,7 @@ export function formatMinutesToHoursMinutes(minutes) {
  * @param {number} minutes - Total minutes
  * @returns {string} Formatted string like "2.5 Hours"
  */
-export function formatMinutesToDecimalHours(minutes) {
+function formatMinutesToDecimalHours(minutes) {
   if (minutes === null || minutes === undefined || minutes < 0) {
     return "0 Hours";
   }
@@ -27,3 +27,5 @@ export function formatMinutesToDecimalHours(minutes) {
   const hours = (minutes / 60).toFixed(1);
   return `${hours} Hours`;
 }
+
+module.exports = { formatMinutesToDecimalHours, formatMinutesToHoursMinutes };
