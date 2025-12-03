@@ -1,3 +1,11 @@
+.page h1 {
+    text-align: center;
+    font-family: 'system-ui';
+    font-size: 2rem;
+    margin: 20px 0;
+    font-weight: 600;
+}
+
 #history-bar-chart-root {
     margin-bottom: 3%;
     height: 75vh;
@@ -9,7 +17,7 @@
     height: 100%;
 }
 
-button {
+#history-bar-chart-root button {
     font-family: 'system-ui';
     font-weight: 500;
     font-size: 4vw;
@@ -17,13 +25,14 @@ button {
     background-color: transparent;
     transition: background-color 0.15s ease-in-out;
     border-radius: 5px;
+    cursor: pointer;
 }
 
-button:hover {
+#history-bar-chart-root button:hover {
     background-color: #cdcdcd;
 }
 
-button:active {
+#history-bar-chart-root button:active {
     background-color: #9E9E9E;
 }
 

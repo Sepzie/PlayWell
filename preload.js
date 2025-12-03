@@ -33,17 +33,35 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // History APIs
   getHistoryData: (options) => ipcRenderer.invoke('get-history-data', options),
-
+  getOldestAndNewestSessionDates: () => ipcRenderer.invoke('get-oldest-and-newest-session-dates'),
+  
   // Limits APIs
   getLimits: () => ipcRenderer.invoke('get-limits'),
   setLimit: (type, limitMinutes) => ipcRenderer.invoke('set-limit', { type, limitMinutes }),
   deleteLimit: (type) => ipcRenderer.invoke('delete-limit', { type }),
-  getLimitStatus: () => ipcRenderer.invoke('get-limit-status')
+  getLimitStatus: () => ipcRenderer.invoke('get-limit-status'),
 
-  // TODO: Add more IPC methods as needed
-  // Example:
-  // getGameSessions: () => ipcRenderer.invoke('get-game-sessions'),
-  // saveGameSession: (session) => ipcRenderer.invoke('save-game-session', session)
+  // Settings APIs
+  exitApp: () => ipcRenderer.send('quit-app'),
+
+  // Game management APIs
+  getAllGames: () => ipcRenderer.invoke('get-all-games'),
+  enableGame: (gameId) => ipcRenderer.invoke('enable-game', { gameId }),
+  disableGame: (gameId) => ipcRenderer.invoke('disable-game', { gameId }),
+  deleteGame: (gameId) => ipcRenderer.invoke('delete-game', { gameId }),
+  addManualGame: (name, location) => ipcRenderer.invoke('add-manual-game', { name, location }),
+  selectGameFile: () => ipcRenderer.invoke('select-game-file'),
+
+  // Notification preferences APIs
+  getNotificationPreferences: () => ipcRenderer.invoke('get-notification-preferences'),
+  updateNotificationPreferences: (prefs) => ipcRenderer.invoke('update-notification-preferences', prefs),
+
+  // Currently playing game listener
+  onCurrentlyPlayingChanged: (callback) => {
+    const listener = (event, gameName) => callback(gameName);
+    ipcRenderer.on('currently-playing-changed', listener);
+    return () => ipcRenderer.removeListener('currently-playing-changed', listener);
+  }
 });
 
 

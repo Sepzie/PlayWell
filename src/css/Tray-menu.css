@@ -32,6 +32,11 @@ body {
     color: #9E9E9E;
 }
 
+.text.currently-playing {
+    color: #4CAF50;
+    font-weight: 600;
+}
+
 footer {
     position: fixed;
     height: 25px;
@@ -58,4 +63,13 @@ footer {
     border-radius: 20px;
     padding: 10px 20px;
     cursor: pointer;  
+}
+
+.circle-timer-container {
+    width: 100%;
+    height: 100%;
+}
+
+.circle-timer-text {
+    font-size: 7vw;
 }

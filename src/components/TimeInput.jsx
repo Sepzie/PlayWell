@@ -83,7 +83,7 @@ function TimeInput({ hours: propHours = 0, minutes: propMinutes = 0, onChange })
           </div>
         </div>
       </label>
-      <p>Daily Limit</p>
+      <p className='daily-limit-label'>Daily Limit</p>
     </div>
   );
 }

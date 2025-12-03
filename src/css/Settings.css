@@ -1,0 +1,141 @@
+.settings-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.settings-header {
+  padding: 24px 32px 0;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.settings-page h1 {
+  margin: 20px 0;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.settings-page .subtitle {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 32px 24px;
+  min-height: 0;
+}
+
+.settings-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 20px;
+}
+
+.settings-section {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.settings-section.game-management {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.game-management-content {
+  flex: 1;
+  min-width: 250px;
+}
+
+.settings-section h2 {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.section-description {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.manage-games-button {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.manage-games-button:hover {
+  background-color: #45a049;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.exit-button-container {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0 10px;
+  border-top: 1px solid #e0e0e0;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.exit-button {
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  min-width: 120px;
+  padding: 10px 24px;
+  background-color: #d32f2f;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.exit-button:hover {
+  background-color: #c62828;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.3);
+}
+
+@media (max-width: 768px) {
+  .settings-header,
+  .settings-content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  .settings-section.game-management {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .manage-games-button {
+    width: 100%;
+  }
+}
+

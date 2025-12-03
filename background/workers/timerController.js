@@ -3,7 +3,8 @@ const { LimitsService } = require('../services/limitsService.js');
 const { UserRepository } = require('../repository/user.js');
 
 // How often to resync with database (in seconds)
-const DB_SYNC_INTERVAL_SECONDS = 30;
+// Now that we calculate active sessions in real-time, we can sync less frequently
+const DB_SYNC_INTERVAL_SECONDS = 10;
 
 class TimerController extends BackgroundService {
     constructor() {

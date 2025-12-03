@@ -98,6 +98,9 @@ LimitsService.getTodayLimit = async (userId) => {
 /**
  * Gets comprehensive limit status including time remaining and over-limit state.
  * This is the main method used by the timer and UI.
+ * 
+ * For active sessions, calculates elapsed time in real-time from session start time,
+ * eliminating race conditions with DB updates.
  *
  * @param {number} userId - The user's ID
  * @returns {Object} Status object with:
@@ -113,10 +116,8 @@ LimitsService.getLimitStatus = async (userId) => {
         // Get today's limit
         const todayLimit = await LimitsService.getTodayLimit(userId);
 
-        // Get today's playtime from stats (returns minutes, convert to seconds)
-        const stats = await StatsService.getGameStats({ period: 'today' });
-        const playedMinutes = stats.reduce((sum, game) => sum + game.playTime, 0);
-        const playedSeconds = Math.round(playedMinutes * 60);
+        // Get today's playtime - uses real-time calculation for active sessions
+        const playedSeconds = await LimitsService.getTodayPlaytimeInSeconds(userId);
 
         const today = new Date();
         const dayOfWeek = DAY_OF_WEEK_MAP[today.getDay()];
@@ -155,6 +156,61 @@ LimitsService.getLimitStatus = async (userId) => {
             isOverLimit: false,
             dayOfWeek: 'UNKNOWN'
         };
+    }
+};
+
+/**
+ * Gets today's total playtime in seconds with real-time accuracy.
+ * For active sessions, calculates elapsed time from startTime to NOW.
+ * For completed sessions, uses stored durationSeconds.
+ *
+ * @param {number} userId - The user's ID
+ * @returns {number} Total playtime in seconds for today
+ */
+LimitsService.getTodayPlaytimeInSeconds = async (userId) => {
+    try {
+        const { GamingSessionRepository } = require('../repository/gamingSession.js');
+        const { gameTracker } = require('../index.js');
+        
+        // Get today's date range
+        const now = new Date();
+        const startOfToday = new Date(now);
+        startOfToday.setHours(0, 0, 0, 0);
+        const endOfToday = new Date(now);
+        endOfToday.setHours(23, 59, 59, 999);
+
+        // Get all sessions from database
+        const allSessions = await GamingSessionRepository.getAllGamingSessions();
+        
+        // Filter to today's sessions
+        const todaySessions = allSessions.filter(session => {
+            const sessionStart = new Date(session.startTime);
+            return sessionStart >= startOfToday && sessionStart <= endOfToday;
+        });
+
+        // Get currently active session IDs from GameTracker
+        const activeSessions = gameTracker.getActiveGamingSessions();
+        const activeSessionIds = Object.values(activeSessions).map(s => s.id);
+
+        let totalSeconds = 0;
+
+        for (const session of todaySessions) {
+            if (activeSessionIds.includes(session.id)) {
+                // Active session: calculate real-time elapsed time
+                const sessionStart = new Date(session.startTime);
+                const elapsedMs = now - sessionStart;
+                const elapsedSeconds = Math.floor(elapsedMs / 1000);
+                totalSeconds += elapsedSeconds;
+            } else {
+                // Completed session: use stored duration
+                totalSeconds += (session.durationSeconds || 0);
+            }
+        }
+
+        return totalSeconds;
+    } catch (error) {
+        console.error(`${service}[LimitsService]${err} Error calculating today's playtime:${reset}`, error);
+        return 0;
     }
 };
 
