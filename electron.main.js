@@ -1,5 +1,5 @@
 // Load environment variables first
-require('dotenv').config();
+// require('dotenv').config();
 
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
