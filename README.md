@@ -86,12 +86,12 @@ npm run dev
 - `npm run build` - Build for production
 - `npm run start` - Run built application
 
-## 🔧 Development Notes
+## Development Notes
 
 - The app uses a background process architecture to prevent UI blocking
 - All database operations are handled through Prisma ORM
 - Electron security best practices implemented (context isolation, preload scripts)
 
-## 📝 License
+## License
 
 MIT License - see LICENSE file for details
