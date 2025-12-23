@@ -2,7 +2,7 @@
 
 A desktop application built with Electron and React that helps you track and manage your gaming time. Set limits, view statistics, and maintain a healthy gaming balance.
 
-## 🚀 Technologies Used
+## Technologies Used
 
 ### **Electron** - Desktop Application Framework
 - **Why**: Provides native desktop app capabilities with web technologies
@@ -14,9 +14,9 @@ A desktop application built with Electron and React that helps you track and man
 - **How**: Handles all user interactions, routing between different app sections
 - **Features**: Component reusability, state management, responsive design
 
-### **Prisma + PostgreSQL** - Database & ORM
+### **Prisma + SQLite** - Database & ORM
 - **Why**: Type-safe database operations with excellent developer experience
-- **How**: Prisma provides the ORM layer, PostgreSQL stores game sessions and limits
+- **How**: Prisma provides the ORM layer, SQLite stores game sessions and limits
 - **Features**: Type safety, migrations, query optimization
 
 ### **Vite** - Build Tool
@@ -29,13 +29,13 @@ A desktop application built with Electron and React that helps you track and man
 - **How**: Node.js worker processes handle game detection and database operations
 - **Features**: Non-blocking operations, system resource monitoring
 
-## 📋 Prerequisites
+## Prerequisites
 
 - **Node.js** (v18 or higher)
 - **PostgreSQL** database
 - **npm** or **yarn** package manager
 
-## 🛠️ Setup Instructions
+## Setup Instructions
 
 ### 1. Clone and Install Dependencies
 ```bash
@@ -44,8 +44,8 @@ cd PlayWell
 npm install
 ```
 
-### 2. Database Setup (CAN BE SKIPPED FOR NOW)
-1. Install and start PostgreSQL
+### 2. Database Setup 
+1. Install and start SQLite
 2. Create a database for the project
 3. Copy environment file:
    ```bash
@@ -53,10 +53,10 @@ npm install
    ```
 4. Update `.env` with your database credentials:
    ```env
-   DATABASE_URL="postgresql://username:password@localhost:5432/playwell"
+   DATABASE_URL="sqlite://username:password@localhost:5432/playwell"
    ```
 
-### 3. Initialize Database (CAN BE SKIPPED FOR NOW)
+### 3. Initialize Database
 ```bash
 # Generate Prisma client
 npm run prisma:generate
@@ -70,7 +70,7 @@ npm run prisma:migrate
 npm run dev
 ```
 
-## 📜 Available Scripts
+## Available Scripts
 
 ### **Development**
 - `npm run dev` - Start development server with hot reload
@@ -86,40 +86,12 @@ npm run dev
 - `npm run build` - Build for production
 - `npm run start` - Run built application
 
-## 🏗️ Project Structure
-
-```
-PlayWell/
-├── electron.main.js          # Electron main process
-├── electron.tray.js           # System tray functionality
-├── background/               # Background services
-│   ├── index.js             # Background process entry
-│   ├── gameTracker.js        # Game detection logic
-│   ├── dbService.js          # Database operations
-│   └── prismaClient.js       # Prisma client singleton
-├── src/                      # React application
-│   ├── pages/               # App pages (Home, Limits, Stats, etc.)
-│   ├── components/          # Reusable components
-│   └── theme/               # Design system
-├── prisma/                  # Database schema
-└── public/                  # Static assets
-```
-
-## 🎯 Features (Planned)
-
-- **Game Time Tracking** - Automatic detection and logging of gaming sessions
-- **Time Limits** - Set daily/weekly limits for different games
-- **Statistics Dashboard** - Visualize your gaming patterns
-- **Session History** - Review past gaming sessions
-- **System Integration** - Tray icon, notifications, auto-start
-
-## 🔧 Development Notes
+## Development Notes
 
 - The app uses a background process architecture to prevent UI blocking
 - All database operations are handled through Prisma ORM
-- Theme system provides consistent styling across components
 - Electron security best practices implemented (context isolation, preload scripts)
 
-## 📝 License
+## License
 
 MIT License - see LICENSE file for details

@@ -27,3 +27,5 @@ export function formatMinutesToDecimalHours(minutes) {
   const hours = (minutes / 60).toFixed(1);
   return `${hours} Hours`;
 }
+
+// module.exports = { formatMinutesToDecimalHours, formatMinutesToHoursMinutes };
