@@ -26,6 +26,11 @@ process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
   const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
   if (!isDev) {
+    try {
+      stopBackground();
+    } catch (e) {
+      console.error('Error stopping background processes:', e);
+    }
     dialog.showErrorBoxSync('Application Error', `An unexpected error occurred: ${error.message}`);
     app.quit();
     process.exit(1);
@@ -34,8 +39,13 @@ process.on('uncaughtException', (error) => {
 
 process.on('unhandledRejection', (reason) => {
   console.error('Unhandled Promise Rejection:', reason);
-  const isDev = process.env.NODE_ENV || !app.isPackaged;
+  const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
   if (!isDev) {
+    try {
+      stopBackground();
+    } catch (e) {
+      console.error('Error stopping background processes:', e);
+    }
     dialog.showErrorBoxSync('Application Error', `An unexpected error occurred: ${reason}`);
     app.quit();
     process.exit(1);
@@ -106,6 +116,11 @@ function createWindow() {
     // If we fail to load in production, show error and quit
     const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
     if (!isDev && errorCode !== -3) { // -3 is ERR_ABORTED, which is normal for redirects
+      try {
+        stopBackground();
+      } catch (e) {
+        console.error('Error stopping background processes:', e);
+      }
       dialog.showErrorBoxSync('Load Error', `Failed to load application: ${errorDescription}`);
       app.quit();
       process.exit(1);
@@ -134,6 +149,11 @@ app.whenReady().then(() => {
     startBackground();
   } catch (error) {
     console.error('Fatal error during app initialization:', error);
+    try {
+      stopBackground();
+    } catch (e) {
+      console.error('Error stopping background processes:', e);
+    }
     dialog.showErrorBoxSync('Initialization Error', `Failed to start PlayWell: ${error.message}`);
     app.quit();
     process.exit(1);
