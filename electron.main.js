@@ -19,6 +19,28 @@ const { NotificationPreferencesRepository } = require('./background/repository/n
 
 // Keep a global reference of the window object
 let mainWindow;
+let trayManager;
+
+// Handle uncaught exceptions and unhandled rejections
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+  if (!isDev) {
+    dialog.showErrorBoxSync('Application Error', `An unexpected error occurred: ${error.message}`);
+    app.quit();
+    process.exit(1);
+  }
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Promise Rejection:', reason);
+  const isDev = process.env.NODE_ENV || !app.isPackaged;
+  if (!isDev) {
+    dialog.showErrorBoxSync('Application Error', `An unexpected error occurred: ${reason}`);
+    app.quit();
+    process.exit(1);
+  }
+});
 
 // Initialize database for packaged app
 function initializeDatabase() {
@@ -79,7 +101,15 @@ function createWindow() {
   });
 
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
-    console.log('Failed to load page:', errorCode, errorDescription, validatedURL);
+    console.error('Failed to load page:', errorCode, errorDescription, validatedURL);
+
+    // If we fail to load in production, show error and quit
+    const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+    if (!isDev && errorCode !== -3) { // -3 is ERR_ABORTED, which is normal for redirects
+      dialog.showErrorBoxSync('Load Error', `Failed to load application: ${errorDescription}`);
+      app.quit();
+      process.exit(1);
+    }
   });
 
   // Emitted when the window is closed
@@ -90,17 +120,24 @@ function createWindow() {
 
 // This method will be called when Electron has finished initialization
 app.whenReady().then(() => {
-  // Initialize database for production
-  initializeDatabase();
-  
-  createWindow();
+  try {
+    // Initialize database for production
+    initializeDatabase();
 
-  // Initialize TrayManager and make the tray
-  trayManager = new TrayManager('src/public/icon.png', OpenMainWindow);
-  trayManager.createTray();
+    createWindow();
 
-  // Start background process
-  startBackground();
+    // Initialize TrayManager and make the tray
+    trayManager = new TrayManager('src/public/icon.png', OpenMainWindow);
+    trayManager.createTray();
+
+    // Start background process
+    startBackground();
+  } catch (error) {
+    console.error('Fatal error during app initialization:', error);
+    dialog.showErrorBoxSync('Initialization Error', `Failed to start PlayWell: ${error.message}`);
+    app.quit();
+    process.exit(1);
+  }
 
   // Listen for currently playing game changes and update tray
   const { gameTracker } = require('./background/index.js');
