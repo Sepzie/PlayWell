@@ -4,7 +4,7 @@ const { UserRepository } = require('./repository/user.js');
 const { GameRepository } = require('./repository/game.js');
 const timer = require('./workers/timerController.js');
 const { NotificationService } = require('./services/notificationService.js');
-const { debug_colors } = require('../src/theme/colors.js');
+const { debug_colors } = require('./debugColors.js');
 const { server, reset, err } = debug_colors;
 
 // Instantiate GameTracker (no dependencies)

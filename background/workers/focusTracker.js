@@ -1,6 +1,6 @@
 const csv = require('csvtojson');
 const BackgroundService = require('./BackgroundService.js');
-const { debug_colors } = require('../../src/theme/colors.js');
+const { debug_colors } = require('../debugColors.js');
 const { proctracker, reset, err } = debug_colors;
 const util = require('node:util');
 const execFile = util.promisify(require('node:child_process').execFile);

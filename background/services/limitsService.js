@@ -1,6 +1,6 @@
 const { LimitRepository } = require('../repository/limit.js');
 const { StatsService } = require('./statsService.js');
-const { debug_colors } = require('../../src/theme/colors.js');
+const { debug_colors } = require('../debugColors.js');
 const { service, reset, err } = debug_colors;
 
 /**

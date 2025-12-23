@@ -1,5 +1,5 @@
 const { GamingSessionRepository } = require('../repository/gamingSession.js');
-const { debug_colors } = require('../../src/theme/colors.js');
+const { debug_colors } = require('../debugColors.js');
 const { session } = require('electron');
 const { service, reset, err } = debug_colors;
 

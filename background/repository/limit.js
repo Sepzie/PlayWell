@@ -1,6 +1,6 @@
 const { getPrisma } = require('../prismaClient.js');
 const { UserRepository } = require('./user.js');
-const { debug_colors } = require('../../src/theme/colors.js');
+const { debug_colors } = require('../debugColors.js');
 const { repo, reset, err } = debug_colors;
 
 const LimitRepository = {
