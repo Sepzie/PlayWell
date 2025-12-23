@@ -1,10 +1,54 @@
-const { PrismaClient } = require('@prisma/client');
+const path = require('path');
+const { app } = require('electron');
+const fs = require('fs');
 
 let prisma;
 
 function getPrisma() {
   if (!prisma) {
-    prisma = new PrismaClient();
+    // In production (packaged app), we need to specify the database location and query engine
+    const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+    
+    let datasourceUrl;
+    
+    if (isDev) {
+      // In development, use the default location
+      datasourceUrl = `file:${path.join(__dirname, '..', 'prisma', 'main.db')}`;
+    } else {
+      // In production, store database in userData directory
+      const userDataPath = app.getPath('userData');
+      datasourceUrl = `file:${path.join(userDataPath, 'main.db')}`;
+      
+      // Set the Prisma query engine path for packaged app
+      // When unpacked from ASAR, files are in app.asar.unpacked
+      let basePath = __dirname;
+      if (basePath.includes('app.asar')) {
+        basePath = basePath.replace('app.asar', 'app.asar.unpacked');
+      }
+      
+      const prismaPath = path.join(basePath, '..', 'node_modules', '.prisma', 'client');
+      const queryEnginePath = path.join(prismaPath, 'query_engine-windows.dll.node');
+      
+      console.log('[Prisma] Base path:', basePath);
+      console.log('[Prisma] Query engine path:', queryEnginePath);
+      console.log('[Prisma] Query engine exists:', fs.existsSync(queryEnginePath));
+      
+      // Set environment variable for query engine location
+      process.env.PRISMA_QUERY_ENGINE_LIBRARY = queryEnginePath;
+    }
+    
+    const { PrismaClient } = require('@prisma/client');
+    
+    prisma = new PrismaClient({
+      datasources: {
+        db: {
+          url: datasourceUrl
+        }
+      },
+      log: ['error', 'warn']
+    });
+    
+    console.log('[Prisma] Initialized with database URL:', datasourceUrl);
   }
   return prisma;
 }

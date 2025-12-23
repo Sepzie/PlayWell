@@ -64,8 +64,15 @@
       "tray-menu.html",
       "src/public/**/*",
       "prisma/**/*",
+      "node_modules/.prisma/**/*",
+      "node_modules/@prisma/client/**/*",
       "node_modules/**/*",
       "package.json"
+    ],
+    "asarUnpack": [
+      "node_modules/.prisma/**/*",
+      "node_modules/@prisma/client/**/*",
+      "prisma/**/*"
     ],
     "win": {
       "target": [

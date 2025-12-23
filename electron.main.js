@@ -1,8 +1,13 @@
-// Load environment variables first
-require('dotenv').config();
+// Load environment variables first (optional in production)
+try {
+  require('dotenv').config();
+} catch (e) {
+  // dotenv not available in production build, which is fine
+}
 
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const TrayManager = require('./electron.tray.js');
 const { startBackground, stopBackground } = require('./background/index.js');
 const timer = require('./background/workers/timerController.js');
@@ -14,6 +19,31 @@ const { NotificationPreferencesRepository } = require('./background/repository/n
 
 // Keep a global reference of the window object
 let mainWindow;
+
+// Initialize database for packaged app
+function initializeDatabase() {
+  const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+  
+  if (!isDev) {
+    const userDataPath = app.getPath('userData');
+    const dbPath = path.join(userDataPath, 'main.db');
+    
+    // If database doesn't exist in userData, copy from resources
+    if (!fs.existsSync(dbPath)) {
+      const sourceDbPath = path.join(__dirname, 'prisma', 'main.db');
+      console.log('Copying database from', sourceDbPath, 'to', dbPath);
+      
+      try {
+        fs.copyFileSync(sourceDbPath, dbPath);
+        console.log('Database initialized successfully');
+      } catch (error) {
+        console.error('Failed to initialize database:', error);
+      }
+    } else {
+      console.log('Database already exists at', dbPath);
+    }
+  }
+}
 
 function createWindow() {
   // Create the browser window
@@ -60,6 +90,9 @@ function createWindow() {
 
 // This method will be called when Electron has finished initialization
 app.whenReady().then(() => {
+  // Initialize database for production
+  initializeDatabase();
+  
   createWindow();
 
   // Initialize TrayManager and make the tray
