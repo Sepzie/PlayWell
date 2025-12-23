@@ -22,12 +22,12 @@ let mainWindow;
 let trayManager;
 
 // Handle uncaught exceptions and unhandled rejections
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', async (error) => {
   console.error('Uncaught Exception:', error);
   const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
   if (!isDev) {
     try {
-      stopBackground();
+      await stopBackground();
     } catch (e) {
       console.error('Error stopping background processes:', e);
     }
@@ -37,12 +37,12 @@ process.on('uncaughtException', (error) => {
   }
 });
 
-process.on('unhandledRejection', (reason) => {
+process.on('unhandledRejection', async (reason) => {
   console.error('Unhandled Promise Rejection:', reason);
   const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
   if (!isDev) {
     try {
-      stopBackground();
+      await stopBackground();
     } catch (e) {
       console.error('Error stopping background processes:', e);
     }
@@ -101,8 +101,9 @@ function createWindow() {
     mainWindow.webContents.openDevTools();
   } else {
     // In production, load the built files
-    console.log('Loading from built files');
-    mainWindow.loadFile(path.join(__dirname, 'dist/index.html'));
+    const indexPath = path.join(app.getAppPath(), 'dist', 'index.html');
+    console.log('Loading from built files:', indexPath);
+    mainWindow.loadFile(indexPath);
   }
 
   // Handle page load events
@@ -110,14 +111,14 @@ function createWindow() {
     console.log('Page finished loading');
   });
 
-  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+  mainWindow.webContents.on('did-fail-load', async (event, errorCode, errorDescription, validatedURL) => {
     console.error('Failed to load page:', errorCode, errorDescription, validatedURL);
 
     // If we fail to load in production, show error and quit
     const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
     if (!isDev && errorCode !== -3) { // -3 is ERR_ABORTED, which is normal for redirects
       try {
-        stopBackground();
+        await stopBackground();
       } catch (e) {
         console.error('Error stopping background processes:', e);
       }
@@ -134,7 +135,7 @@ function createWindow() {
 }
 
 // This method will be called when Electron has finished initialization
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   try {
     // Initialize database for production
     initializeDatabase();
@@ -142,18 +143,20 @@ app.whenReady().then(() => {
     createWindow();
 
     // Initialize TrayManager and make the tray
-    trayManager = new TrayManager('src/public/icon.png', OpenMainWindow);
+    const iconPath = path.join(app.getAppPath(), 'src', 'public', 'icon.png');
+    trayManager = new TrayManager(iconPath, OpenMainWindow);
     trayManager.createTray();
 
     // Start background process
     startBackground();
   } catch (error) {
     console.error('Fatal error during app initialization:', error);
-    try {
-      stopBackground();
-    } catch (e) {
+
+    // Stop background processes before quitting
+    await stopBackground().catch(e => {
       console.error('Error stopping background processes:', e);
-    }
+    });
+
     dialog.showErrorBoxSync('Initialization Error', `Failed to start PlayWell: ${error.message}`);
     app.quit();
     process.exit(1);

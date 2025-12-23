@@ -53,5 +53,17 @@ function getPrisma() {
   return prisma;
 }
 
-module.exports = { getPrisma };
+async function disconnectPrisma() {
+  if (prisma) {
+    try {
+      await prisma.$disconnect();
+      console.log('[Prisma] Disconnected successfully');
+      prisma = null;
+    } catch (error) {
+      console.error('[Prisma] Error during disconnect:', error);
+    }
+  }
+}
+
+module.exports = { getPrisma, disconnectPrisma };
 

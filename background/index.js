@@ -54,20 +54,17 @@ async function startBackground() {
   console.info(`${server}[index.js]${reset} Background processes started`);
 }
 
-function stopBackground() {
+async function stopBackground() {
   console.info(`${server}[index.js]${reset} Stopping background processes...`);
 
-  gameTracker.stopTracking();
-  let disconnectPromise = disconnectDb()
-
-  // Add promises here to sync after all asynchronous calls
-  Promise.all([disconnectPromise])
-    .then(() => {
-        console.info(`${server}[index.js]${reset} Background process stopped`);
-    })
-    .catch((error) => {
-        console.error(`${server}[index.js]${err} ${error}${reset}`)
-    });
+  try {
+    gameTracker.stopTracking();
+    timer.stop();
+    await disconnectDb();
+    console.info(`${server}[index.js]${reset} Background process stopped`);
+  } catch (error) {
+    console.error(`${server}[index.js]${err} Error stopping background:${reset}`, error);
+  }
 }
 
 module.exports = { startBackground, stopBackground, gameTracker };

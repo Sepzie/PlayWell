@@ -1,4 +1,4 @@
-const { getPrisma } = require('./prismaClient.js');
+const { getPrisma, disconnectPrisma } = require('./prismaClient.js');
 const { UserRepository } = require('./repository/user.js');
 const { debug_colors } = require('./debugColors.js');
 const { repo, reset, err } = debug_colors;
@@ -6,7 +6,7 @@ const { repo, reset, err } = debug_colors;
 
 async function connectDb() {
   console.log(`${repo}[DBService]${reset} Database connection started...`);
-  
+
   try {
     await getPrisma().$connect();
   } catch (error) {
@@ -17,9 +17,14 @@ async function connectDb() {
 }
 
 async function disconnectDb() {
-  UserRepository.unloadUser();
-  await getPrisma().$disconnect();
-  console.info(`${repo}[DBService]${reset} Disconnected from DB!`);
+  console.log(`${repo}[DBService]${reset} Disconnecting from DB...`);
+  try {
+    UserRepository.unloadUser();
+    await disconnectPrisma();
+    console.info(`${repo}[DBService]${reset} Disconnected from DB!`);
+  } catch (error) {
+    console.error(`${repo}[DBService]${err} Error disconnecting:${reset}`, error);
+  }
 }
 
 function saveGameSession(sessionData) {
