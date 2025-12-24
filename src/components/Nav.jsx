@@ -2,13 +2,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import "/src/css/Nav.css"
+import logoUrl from '../public/temp-playwell-logo.png';
 
 function Nav() {
   const location = useLocation().pathname;
   return (
     <nav className="nav">
       <div className="nav-brand">
-        <img src="/src/public/temp-playwell-logo.png" id="logo"></img>
+        <img src={logoUrl} id="logo" alt="PlayWell"></img>
       </div>
       <div>
         <ul className="nav-links">
