@@ -5,9 +5,10 @@ try {
   // dotenv not available in production build, which is fine
 }
 
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, protocol, net } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const url = require('url');
 
 // Setup file logging for debugging
 const logFile = path.join(app.getPath('userData'), 'debug.log');
@@ -107,6 +108,7 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       enableRemoteModule: false,
+      webSecurity: false, // Required for ES modules to load from file:// protocol in ASAR
       preload: path.join(__dirname, 'preload.js')
     }
   });
@@ -121,9 +123,10 @@ function createWindow() {
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
   } else {
-    // In production, load the built files
+    // In production, load the built index.html directly
     const indexPath = path.join(app.getAppPath(), 'dist', 'index.html');
     console.log('Loading from built files:', indexPath);
+
     mainWindow.loadFile(indexPath);
     // Temporarily enable dev tools in production to debug
     mainWindow.webContents.openDevTools();
@@ -133,11 +136,42 @@ function createWindow() {
   mainWindow.webContents.on('did-finish-load', () => {
     console.log('Page finished loading');
     console.log('Current URL:', mainWindow.webContents.getURL());
+
+    // Execute some debug code in the renderer to see if JS is working
+    mainWindow.webContents.executeJavaScript(`
+      console.log('=== RENDERER DEBUG ===');
+      console.log('Document ready state:', document.readyState);
+      console.log('Root element exists:', !!document.getElementById('root'));
+      console.log('Scripts in page:', document.scripts.length);
+      Array.from(document.scripts).forEach((s, i) => {
+        console.log(\`Script \${i}: type=\${s.type}, src=\${s.src}\`);
+      });
+    `).catch(e => console.error('Failed to execute debug JS:', e));
   });
 
   // Log all console messages from the renderer
-  mainWindow.webContents.on('console-message', (_event, _level, message) => {
-    console.log(`[Renderer Console] ${message}`);
+  mainWindow.webContents.on('console-message', (_event, level, message, line, sourceId) => {
+    const levelText = ['LOG', 'WARNING', 'ERROR'][level] || 'INFO';
+    const logMsg = `[Renderer ${levelText}] ${message} (${sourceId}:${line})`;
+    console.log(logMsg);
+    logToFile(logMsg);
+  });
+
+  // Log when scripts start loading
+  mainWindow.webContents.session.webRequest.onBeforeRequest((details, callback) => {
+    if (details.url.includes('.js') || details.url.includes('.css')) {
+      console.log('[Loading]', details.url);
+      logToFile(`[Loading] ${details.url}`);
+    }
+    callback({});
+  });
+
+  // Log when scripts finish loading
+  mainWindow.webContents.session.webRequest.onCompleted((details) => {
+    if (details.url.includes('.js') || details.url.includes('.css')) {
+      console.log('[Loaded]', details.statusCode, details.url);
+      logToFile(`[Loaded] ${details.statusCode} ${details.url}`);
+    }
   });
 
   mainWindow.webContents.on('did-fail-load', async (event, errorCode, errorDescription, validatedURL) => {
@@ -165,7 +199,7 @@ function createWindow() {
 
 // This method will be called when Electron has finished initialization
 app.whenReady().then(async () => {
-  try {
+  try{
     // Initialize database for production
     initializeDatabase();
 
