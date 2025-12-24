@@ -18,6 +18,9 @@ release/
 *.rpm
 *.AppImage
 
+# Prisma generated client (regenerated on postinstall)
+prisma-client/
+
 # IDE and editor files
 .vscode/
 .idea/

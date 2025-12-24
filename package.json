@@ -9,6 +9,7 @@
     "dev": "concurrently -k \"npm run dev:renderer\" \"wait-on http://localhost:5173 && npm run dev:electron\"",
     "build:renderer": "vite build",
     "build": "npm run build:renderer && electron-builder",
+    "postinstall": "prisma generate",
     "start": "electron .",
     "test": "npx jest",
     "prisma:generate": "prisma generate",
@@ -66,13 +67,13 @@
       "tray-menu.html",
       "src/public/**/*",
       "prisma/**/*",
-      "node_modules/.prisma/**/*",
+      "prisma-client/**/*",
       "node_modules/@prisma/client/**/*",
       "node_modules/**/*",
       "package.json"
     ],
     "asarUnpack": [
-      "node_modules/.prisma/**/*",
+      "prisma-client/**/*",
       "node_modules/@prisma/client/**/*",
       "prisma/**/*"
     ],

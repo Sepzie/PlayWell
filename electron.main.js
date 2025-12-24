@@ -8,6 +8,27 @@ try {
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
+
+// Setup file logging for debugging
+const logFile = path.join(app.getPath('userData'), 'debug.log');
+function logToFile(message) {
+  const timestamp = new Date().toISOString();
+  fs.appendFileSync(logFile, `[${timestamp}] ${message}\n`);
+}
+
+// Override console methods to also write to file
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+console.log = (...args) => {
+  originalConsoleLog(...args);
+  logToFile('LOG: ' + args.join(' '));
+};
+console.error = (...args) => {
+  originalConsoleError(...args);
+  logToFile('ERROR: ' + args.join(' '));
+};
+
+logToFile('=== App Starting ===');
 const TrayManager = require('./electron.tray.js');
 const { startBackground, stopBackground } = require('./background/index.js');
 const timer = require('./background/workers/timerController.js');
@@ -104,11 +125,19 @@ function createWindow() {
     const indexPath = path.join(app.getAppPath(), 'dist', 'index.html');
     console.log('Loading from built files:', indexPath);
     mainWindow.loadFile(indexPath);
+    // Temporarily enable dev tools in production to debug
+    mainWindow.webContents.openDevTools();
   }
 
   // Handle page load events
   mainWindow.webContents.on('did-finish-load', () => {
     console.log('Page finished loading');
+    console.log('Current URL:', mainWindow.webContents.getURL());
+  });
+
+  // Log all console messages from the renderer
+  mainWindow.webContents.on('console-message', (_event, _level, message) => {
+    console.log(`[Renderer Console] ${message}`);
   });
 
   mainWindow.webContents.on('did-fail-load', async (event, errorCode, errorDescription, validatedURL) => {
