@@ -1,0 +1,368 @@
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap");
+
+:root {
+  --primary: #2e7d32;
+  --primary-accent: #81c784;
+  --surface: #0f1a13;
+  --surface-alt: #1e2a22;
+  --text: #e8f5e9;
+  --muted: #9e9e9e;
+  --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  --radius: 20px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Work Sans", "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top, #153620 0%, #0b140f 45%, #070c0a 100%);
+  color: var(--text);
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.glow {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  filter: blur(120px);
+  opacity: 0.6;
+  z-index: 0;
+}
+
+.glow-a {
+  background: #1c5d2c;
+  top: -180px;
+  left: -120px;
+}
+
+.glow-b {
+  background: #3c9a55;
+  bottom: -220px;
+  right: -140px;
+}
+
+.nav {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 8vw 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-mark {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(140deg, #1f4c2a, #2e7d32);
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.brand-mark img {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.35));
+}
+
+.brand-name {
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.brand-sub {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.nav-actions .ghost {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(129, 199, 132, 0.35);
+  color: var(--text);
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.nav-actions .ghost:hover {
+  background: rgba(129, 199, 132, 0.12);
+}
+
+.page {
+  position: relative;
+  z-index: 1;
+  padding: 60px 8vw 24px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 48px;
+  align-items: center;
+}
+
+.hero-copy h1 {
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-size: clamp(2.4rem, 4vw, 3.6rem);
+  margin: 12px 0 16px;
+  line-height: 1.1;
+}
+
+.eyebrow {
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--primary-accent);
+  margin: 0;
+}
+
+.lead {
+  font-size: 1.1rem;
+  color: rgba(232, 245, 233, 0.85);
+  max-width: 520px;
+}
+
+.download-meta {
+  display: inline-flex;
+  gap: 12px;
+  align-items: baseline;
+  margin: 20px 0 28px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(30, 42, 34, 0.7);
+  border: 1px solid rgba(129, 199, 132, 0.2);
+}
+
+.meta-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.meta-value {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.cta {
+  padding: 14px 20px;
+  border-radius: 14px;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cta.primary {
+  background: linear-gradient(140deg, #2e7d32, #81c784);
+  color: #08140d;
+  box-shadow: var(--shadow);
+}
+
+.cta.secondary {
+  background: rgba(15, 26, 19, 0.7);
+  border: 1px solid rgba(129, 199, 132, 0.3);
+}
+
+.cta:hover {
+  transform: translateY(-2px);
+}
+
+.small-note {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.hero-card {
+  background: linear-gradient(160deg, rgba(30, 42, 34, 0.95), rgba(13, 20, 16, 0.95));
+  border-radius: var(--radius);
+  padding: 28px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(129, 199, 132, 0.15);
+  animation: float 6s ease-in-out infinite;
+}
+
+.hero-card.screenshots {
+  display: grid;
+  gap: 18px;
+}
+
+.hero-card.screenshots img {
+  width: 100%;
+  border-radius: 14px;
+  border: 1px solid rgba(129, 199, 132, 0.2);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
+}
+
+.card-top,
+.card-bottom {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.card-chart {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin: 24px 0;
+  align-items: end;
+  height: 120px;
+}
+
+.bar {
+  background: rgba(129, 199, 132, 0.3);
+  border-radius: 12px 12px 4px 4px;
+}
+
+.bar.highlight {
+  background: rgba(129, 199, 132, 0.8);
+}
+
+.card-label {
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+}
+
+.card-value {
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+.features {
+  margin-top: 80px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.feature {
+  padding: 24px;
+  background: rgba(15, 26, 19, 0.6);
+  border-radius: 16px;
+  border: 1px solid rgba(129, 199, 132, 0.15);
+}
+
+.feature h3 {
+  margin-top: 0;
+  font-family: "Sora", "Segoe UI", sans-serif;
+}
+
+.feature p {
+  color: rgba(232, 245, 233, 0.7);
+}
+
+.verify {
+  margin-top: 64px;
+}
+
+.verify-card {
+  padding: 28px;
+  border-radius: var(--radius);
+  background: rgba(30, 42, 34, 0.7);
+  border: 1px solid rgba(129, 199, 132, 0.2);
+}
+
+.verify-card h2 {
+  margin-top: 0;
+  font-family: "Sora", "Segoe UI", sans-serif;
+}
+
+.verify-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 16px 0 20px;
+}
+
+.verify-links a {
+  color: var(--primary-accent);
+}
+
+.code {
+  margin: 0;
+  padding: 16px;
+  background: rgba(8, 12, 10, 0.85);
+  border-radius: 12px;
+  font-family: "Courier New", monospace;
+  font-size: 0.85rem;
+  overflow-x: auto;
+  color: var(--text);
+}
+
+.footer {
+  padding: 16px 8vw 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  border-top: 1px solid rgba(129, 199, 132, 0.1);
+}
+
+.credits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.credits span {
+  color: var(--muted);
+}
+
+.credits a {
+  color: rgba(232, 245, 233, 0.85);
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@media (max-width: 720px) {
+  .nav {
+    flex-direction: column;
+    gap: 18px;
+    align-items: flex-start;
+  }
+
+  .footer {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
