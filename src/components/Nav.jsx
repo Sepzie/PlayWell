@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import "/src/css/Nav.css"
 import logoUrl from '../public/temp-playwell-logo.png';
+import packageJson from '../../package.json';
 
 function Nav() {
   const location = useLocation().pathname;
@@ -10,6 +11,7 @@ function Nav() {
     <nav className="nav">
       <div className="nav-brand">
         <img src={logoUrl} id="logo" alt="PlayWell"></img>
+        <div className="nav-version">v{packageJson.version}</div>
       </div>
       <div>
         <ul className="nav-links">
