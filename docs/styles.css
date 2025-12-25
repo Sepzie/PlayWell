@@ -25,6 +25,8 @@ body {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 a {
@@ -33,12 +35,13 @@ a {
 }
 
 .glow {
-  position: absolute;
+  position: fixed;
   width: 520px;
   height: 520px;
   filter: blur(120px);
   opacity: 0.6;
   z-index: 0;
+  pointer-events: none;
 }
 
 .glow-a {
@@ -115,6 +118,8 @@ a {
   position: relative;
   z-index: 1;
   padding: 60px 8vw 24px;
+  flex: 1;
+  width: 100%;
 }
 
 .hero {
