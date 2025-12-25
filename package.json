@@ -1,6 +1,6 @@
 {
   "name": "playwell",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Game time tracking application",
   "main": "electron.main.js",
   "scripts": {
@@ -83,11 +83,15 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "src/public/icon.png"
