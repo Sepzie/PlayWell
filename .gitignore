@@ -4,6 +4,9 @@ node_modules/
 # Environment variables
 .env
 
+# Local signing keys
+app-signing.key
+
 # Build outputs
 dist/
 build/
