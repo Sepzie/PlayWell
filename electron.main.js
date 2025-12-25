@@ -79,12 +79,14 @@ function initializeDatabase() {
   const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
   
   if (!isDev) {
+    const bundledDbName = 'main.db';
+    const userDbName = 'main.db';
     const userDataPath = app.getPath('userData');
-    const dbPath = path.join(userDataPath, 'main.db');
+    const dbPath = path.join(userDataPath, userDbName);
     
     // If database doesn't exist in userData, copy from resources
     if (!fs.existsSync(dbPath)) {
-      const sourceDbPath = path.join(__dirname, 'prisma', 'main.db');
+      const sourceDbPath = path.join(__dirname, 'prisma', bundledDbName);
       console.log('Copying database from', sourceDbPath, 'to', dbPath);
       
       try {

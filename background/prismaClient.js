@@ -17,7 +17,8 @@ function getPrisma() {
     } else {
       // In production, store database in userData directory
       const userDataPath = app.getPath('userData');
-      datasourceUrl = `file:${path.join(userDataPath, 'main.db')}`;
+      const userDbName = 'main.db';
+      datasourceUrl = `file:${path.join(userDataPath, userDbName)}`;
 
       // Set the Prisma query engine path for packaged app
       // When unpacked from ASAR, files are in app.asar.unpacked

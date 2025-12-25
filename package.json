@@ -8,7 +8,8 @@
     "dev:electron": "cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
     "dev": "concurrently -k \"npm run dev:renderer\" \"wait-on http://localhost:5173 && npm run dev:electron\"",
     "build:renderer": "vite build",
-    "build": "npm run build:renderer && electron-builder",
+    "build:release": "npm run build:renderer && cross-env PLAYWELL_BUILD_TAG=release electron-builder",
+    "build": "npm run build:release",
     "postinstall": "prisma generate",
     "start": "electron .",
     "test": "npx jest",
@@ -55,6 +56,7 @@
   "build": {
     "appId": "com.playwell.app",
     "productName": "PlayWell",
+    "artifactName": "PlayWell-${version}-${env.PLAYWELL_BUILD_TAG}.${ext}",
     "directories": {
       "output": "release"
     },
