@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="PlayWell is a game time tracker for Windows that helps you balance play and focus with clean stats and gentle limits."
+    />
+    <title>PlayWell - Game Time Tracker</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="glow glow-a"></div>
+    <div class="glow glow-b"></div>
+
+    <header class="nav">
+      <div class="brand">
+        <div class="brand-mark">
+          <img src="./assets/icon.png" alt="PlayWell logo" />
+        </div>
+        <div>
+          <div class="brand-name">PlayWell</div>
+          <div class="brand-sub">Game time tracker</div>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <a class="ghost" href="https://github.com/Sepzie/PlayWell" target="_blank" rel="noreferrer">
+          View on GitHub
+        </a>
+      </div>
+    </header>
+
+    <main class="page">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Focus, without the friction</p>
+          <h1>Track your game time with clarity and calm.</h1>
+          <p class="lead">
+            PlayWell keeps a quiet ledger of your sessions, shows trends at a glance,
+            and helps you set gentle limits without breaking your flow.
+          </p>
+          <div class="download-meta">
+            <span class="meta-label">Total downloads</span>
+            <span id="download-count" class="meta-value">Loading...</span>
+          </div>
+          <div class="cta-row">
+            <a
+              class="cta primary"
+              href="https://github.com/Sepzie/PlayWell/releases/latest/download/PlayWell-1.0.0-release-setup.exe"
+            >
+              Download Installer (Windows)
+            </a>
+            <a
+              class="cta secondary"
+              href="https://github.com/Sepzie/PlayWell/releases/latest/download/PlayWell-1.0.0-release-portable.exe"
+            >
+              Download Portable (Windows)
+            </a>
+          </div>
+          <p class="small-note">
+            Windows x64 only. Portable keeps everything in its folder.
+          </p>
+        </div>
+        <div class="hero-card screenshots">
+          <img
+            src="./assets/playwell_limits_screenshot.png"
+            alt="PlayWell limits screen"
+          />
+          <img
+            src="./assets/playwell_history_screenshot.png"
+            alt="PlayWell history screen"
+          />
+        </div>
+      </section>
+
+      <section class="features">
+        <div class="feature">
+          <h3>Session insights</h3>
+          <p>Review clean timelines with daily, weekly, and historical views.</p>
+        </div>
+        <div class="feature">
+          <h3>Gentle limits</h3>
+          <p>Set time goals that nudge you, without locking you out.</p>
+        </div>
+        <div class="feature">
+          <h3>Local-first</h3>
+          <p>Your data stays on your machine, fast and private.</p>
+        </div>
+      </section>
+
+      <section class="verify">
+        <div class="verify-card">
+          <h2>Verify your download</h2>
+          <p>
+            Signatures are provided for each asset. You can verify with the public
+            certificate below.
+          </p>
+          <div class="verify-links">
+            <a href="https://github.com/Sepzie/PlayWell/releases/latest/download/PlayWell-1.0.0-release-setup.exe.sig">
+              Setup signature (.sig)
+            </a>
+            <a href="https://github.com/Sepzie/PlayWell/releases/latest/download/PlayWell-1.0.0-release-portable.exe.sig">
+              Portable signature (.sig)
+            </a>
+            <a href="https://raw.githubusercontent.com/Sepzie/PlayWell/main/app-signing.crt">
+              app-signing.crt
+            </a>
+          </div>
+          <pre class="code">
+openssl dgst -sha256 -verify app-signing.crt ^
+  -signature PlayWell-1.0.0-release-setup.exe.sig ^
+  PlayWell-1.0.0-release-setup.exe
+          </pre>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>PlayWell is a BCIT COMP7082 project.</span>
+      <div class="credits">
+        <span>Credits:</span>
+        <a href="https://github.com/Sepzie/PlayWell">Sepehr Zohoori Rad</a>
+        <a href="https://github.com/FonseLULW">Fonse Clarito</a>
+        <a href="https://github.com/PatrickNg995">Patrick Ng</a>
+        <a href="https://github.com/AnthonyQR">Anthony Raymundo</a>
+      </div>
+    </footer>
+
+    <script src="./main.js"></script>
+  </body>
+</html>
