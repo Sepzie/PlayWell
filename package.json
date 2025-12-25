@@ -67,7 +67,6 @@
       "electron.main.js",
       "electron.tray.js",
       "preload.js",
-      "tray-menu.html",
       "src/public/**/*",
       "prisma/**/*",
       "prisma-client/**/*",

@@ -56,7 +56,7 @@ class TrayManager {
       this.trayWindow.loadURL(devUrl);
     } else {
       // In production or when running without Vite, load the local file
-      const filePath = path.join(app.getAppPath(), 'tray-menu.html');
+      const filePath = path.join(app.getAppPath(), 'dist', 'tray-menu.html');
       this.trayWindow.loadFile(filePath);
     }
     this.trayWindow.on('blur', () => {
