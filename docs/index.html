@@ -48,13 +48,15 @@
           <div class="cta-row">
             <a
               class="cta primary"
-              href="https://github.com/Sepzie/PlayWell/releases/latest/download/PlayWell-1.0.0-release-setup.exe"
+              id="download-setup"
+              href="https://github.com/Sepzie/PlayWell/releases/latest"
             >
               Download Installer (Windows)
             </a>
             <a
               class="cta secondary"
-              href="https://github.com/Sepzie/PlayWell/releases/latest/download/PlayWell-1.0.0-release-portable.exe"
+              id="download-portable"
+              href="https://github.com/Sepzie/PlayWell/releases/latest"
             >
               Download Portable (Windows)
             </a>
@@ -98,10 +100,10 @@
             certificate below.
           </p>
           <div class="verify-links">
-            <a href="https://github.com/Sepzie/PlayWell/releases/latest/download/PlayWell-1.0.0-release-setup.exe.sig">
+            <a id="download-setup-sig" href="https://github.com/Sepzie/PlayWell/releases/latest">
               Setup signature (.sig)
             </a>
-            <a href="https://github.com/Sepzie/PlayWell/releases/latest/download/PlayWell-1.0.0-release-portable.exe.sig">
+            <a id="download-portable-sig" href="https://github.com/Sepzie/PlayWell/releases/latest">
               Portable signature (.sig)
             </a>
             <a href="https://raw.githubusercontent.com/Sepzie/PlayWell/main/app-signing.crt">
@@ -110,8 +112,8 @@
           </div>
           <pre class="code">
 openssl dgst -sha256 -verify app-signing.crt ^
-  -signature PlayWell-1.0.0-release-setup.exe.sig ^
-  PlayWell-1.0.0-release-setup.exe
+  -signature PlayWell-<version>-release-setup.exe.sig ^
+  PlayWell-<version>-release-setup.exe
           </pre>
         </div>
       </section>
