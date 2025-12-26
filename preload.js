@@ -43,6 +43,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Settings APIs
   exitApp: () => ipcRenderer.send('quit-app'),
+  resetAllData: () => ipcRenderer.invoke('reset-all-data'),
 
   // Game management APIs
   getAllGames: () => ipcRenderer.invoke('get-all-games'),

@@ -379,6 +379,51 @@ ipcMain.handle('get-limit-status', async () => {
 // Exit handler (via "Exit App" button on Settings page)
 ipcMain.on('quit-app', () => {app.quit();})
 
+ipcMain.handle('reset-all-data', async () => {
+  let backgroundStopped = false;
+
+  try {
+    const { stopBackground, startBackground, gameTracker } = require('./background/index.js');
+    const { getPrisma } = require('./background/prismaClient.js');
+    const { UserRepository } = require('./background/repository/user.js');
+
+    await stopBackground();
+    backgroundStopped = true;
+
+    const prisma = getPrisma();
+    await prisma.$transaction([
+      prisma.gamingSession.deleteMany(),
+      prisma.limit.deleteMany(),
+      prisma.notificationPreferences.deleteMany(),
+      prisma.game.deleteMany(),
+      prisma.user.deleteMany()
+    ]);
+
+    UserRepository.unloadUser();
+
+    await startBackground();
+    if (gameTracker) {
+      await gameTracker.refreshGameCache();
+    }
+
+    return { ok: true };
+  } catch (error) {
+    console.error('[IPC] Error resetting data:', error);
+    if (backgroundStopped) {
+      try {
+        const { startBackground, gameTracker } = require('./background/index.js');
+        await startBackground();
+        if (gameTracker) {
+          await gameTracker.refreshGameCache();
+        }
+      } catch (restartError) {
+        console.error('[IPC] Error restarting background after reset failure:', restartError);
+      }
+    }
+    return { ok: false, error: error.message };
+  }
+});
+
 // Game management IPC handlers
 ipcMain.handle('get-all-games', async () => {
   try {
